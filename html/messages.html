@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Updates</title>
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid lightgray;
+            padding: 0.15rem;
+        }
+        thead {
+            font-weight: bold;
+        }
+        td.oneline {
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+    {% for chat in chats %}
+        <div>
+            <h2><span style="color: gray;">{{ chat.id }}</span></h2>
+            <p>messages: {{ chat.messages | length }}</p>
+            <table>
+                <thead>
+                <tr>
+                    <td>update_id</td>
+                    <td>tg_id</td>
+                    <td class="oneline">date</td>
+                    <td class="oneline">user</td>
+                    <td>text</td>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for message in chat.messages %}
+                        <tr>
+                            <td>{{ message.update_id }}</td>
+                            <td>{{ message.tg_id }}</td>
+                            <td class="oneline">{{ message.date }}</td>
+                            <td class="oneline">{{ message.user_id }} {{ message.user_name }}</td>
+                            <td>{{ message.text | safe }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+</body>
+</html>
