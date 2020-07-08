@@ -8,7 +8,9 @@ import telegram
 from src.helpers import is_admin
 from src.handlers import database
 from src.handlers.commands.anecdote import AnecdoteCommand
+from src.handlers.commands.chats import ChatsCommand
 from src.handlers.commands.dump import DumpCommand
+from src.handlers.commands.send import SendCommand
 from src.handlers.commands.stat import StatCommand
 from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, MentionHandler
 
@@ -34,6 +36,8 @@ commands = (
     Command('dump', DumpCommand(), True),
     Command('stat', StatCommand(), False),
     Command('joke', AnecdoteCommand(), False),
+    Command('send', SendCommand(), True),
+    Command('chats', ChatsCommand(), True),
 )
 
 
@@ -44,7 +48,7 @@ def handle_command(message: telegram.Message) -> bool:
         if args[0] != command.name:
             continue
 
-        if command.admins_only and is_admin(message.from_user.id):
+        if command.admins_only and not is_admin(message.from_user.id):
             break
 
         command.handler.handle(message, args)
