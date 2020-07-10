@@ -2,6 +2,7 @@ import gzip
 import json
 import logging
 import traceback
+from typing import List
 
 import telegram
 import yaml
@@ -10,7 +11,7 @@ from src import db
 
 
 class DumpCommand:
-    def handle(self, message: telegram.Message, args):
+    def handle(self, message: telegram.Message, args: List[str]):
         if len(args) != 2:
             message.reply_text(f'Нужно писать так: /{args[0]} UPDATE_ID')
             return

@@ -1,3 +1,5 @@
+from typing import List
+
 import telegram
 
 from src import db
@@ -23,10 +25,23 @@ class StatCommand:
 
             return response
 
-    def handle(self, message: telegram.Message, args):
+    def _parse_args_and_send(self, message: telegram.Message, args: List[str]):
+        try:
+            chat_id = int(args[1])
+        except ValueError:
+            message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID')
+            return
+
+        response = self._get_response(chat_id)
+        message.reply_text(response)
+
+    def handle(self, message: telegram.Message, args: List[str]):
         if message.chat_id < 0:
-            response = self._get_response(message.chat_id)
-            message.reply_text(response)
+            if len(args) == 1:
+                response = self._get_response(message.chat_id)
+                message.reply_text(response)
+            elif len(args) == 2:
+                self._parse_args_and_send(message, args)
             return
 
         if not is_admin(message.from_user.id):
@@ -37,11 +52,4 @@ class StatCommand:
             message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
-        try:
-            chat_id = int(args[1])
-        except ValueError:
-            message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID')
-            return
-
-        response = self._get_response(chat_id)
-        message.reply_text(response)
+        self._parse_args_and_send(message, args)

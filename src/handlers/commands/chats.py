@@ -1,10 +1,12 @@
+from typing import List
+
 import telegram
 
 from src import db
 
 
 class ChatsCommand:
-    def handle(self, message: telegram.Message, args):
+    def handle(self, message: telegram.Message, args: List[str]):
         with db.conn, db.conn.cursor() as cur:
             response = []
 

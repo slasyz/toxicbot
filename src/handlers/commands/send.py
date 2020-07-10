@@ -1,4 +1,5 @@
 import re
+from typing import List
 
 import telegram
 
@@ -6,7 +7,7 @@ from src import db, helpers
 
 
 class SendCommand:
-    def handle(self, message: telegram.Message, args):
+    def handle(self, message: telegram.Message, args: List[str]):
         if len(args) < 3:
             message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE')
             return

@@ -21,4 +21,4 @@ def non_empty(func):
 def is_admin(user_id: int) -> bool:
     with db.conn, db.conn.cursor() as cur:
         cur.execute('SELECT true FROM users WHERE tg_id=%s AND admin', (user_id,))
-        return cur.fetchone()
+        return cur.fetchone() is not None

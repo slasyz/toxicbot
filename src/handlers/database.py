@@ -59,7 +59,8 @@ def handle_chat(cur: psycopg2._psycopg.cursor, chat: telegram.Chat):
             SET title = %s
             WHERE tg_id=%s
         ''', (
-            chat.title
+            chat.title,
+            chat.id
         ))
 
 
