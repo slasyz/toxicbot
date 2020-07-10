@@ -35,9 +35,9 @@ def worker():
         time.sleep(seconds)
 
         with db.conn, db.conn.cursor() as cur:
-            cur.execute('SELECT tg_id FROM chats;')
+            cur.execute('SELECT tg_id FROM chats WHERE tg_id < 0;')
             for record in cur:
-                logging.info('sending anek')
+                logging.info(f'sending anek to {record[0]}')
                 anek = get_random_adecdote()
                 helpers.bot.send_message(record[0], anek)
 
