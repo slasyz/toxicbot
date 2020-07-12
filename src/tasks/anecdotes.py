@@ -1,5 +1,6 @@
 import logging
 import math
+import re
 import threading
 import time
 from urllib.request import urlopen
@@ -23,6 +24,7 @@ def get_random_adecdote() -> str:
         print('!!!!!!! /кривой анекдот !!!!!!!')
         return 'Я обосрался.'
 
+    text = re.sub(r'^Анек #\d+\s+', '', text)
     return text
 
 
