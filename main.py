@@ -7,8 +7,7 @@ import logging as pylogging
 import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from src import config, db, helpers, logging
-from src.handling import handle_update
+from src import config, db, helpers, logging, handling
 from src.server import server
 from src.tasks import anecdotes
 
@@ -22,6 +21,7 @@ def __main__():
     db.connect()
     server.listen()
     anecdotes.start_worker()
+    handling.init()
 
     helpers.bot = telegram.Bot(config.c['telegram']['token'])
 
@@ -29,7 +29,7 @@ def __main__():
     while True:
         try:
             for update in helpers.bot.get_updates(offset=update_id, timeout=10):
-                handle_update(update)
+                handling.handle_update(update)
                 update_id = update.update_id + 1
         except NetworkError:
             time.sleep(1)

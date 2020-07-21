@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import telegram
 
+from src.handlers.chain import ChainHandler
 from src.helpers import is_admin
 from src.handlers import database
 from src.handlers.commands.anecdote import AnecdoteCommand
@@ -12,33 +13,16 @@ from src.handlers.commands.chats import ChatsCommand
 from src.handlers.commands.dump import DumpCommand
 from src.handlers.commands.send import SendCommand
 from src.handlers.commands.stat import StatCommand
-from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, MentionHandler
+from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler
 
 
 class Command(namedtuple('Command', ['name', 'handler', 'admins_only'])):
     pass
 
 
-handlers_private = (
-    PrivateHandler(),
-)
-
-
-handlers_chats = (
-    VoiceHandler(),
-    NahuyHandler(),
-    PidorHandler(),
-    MentionHandler(),
-)
-
-
-commands = (
-    Command('dump', DumpCommand(), True),
-    Command('stat', StatCommand(), False),
-    Command('joke', AnecdoteCommand(), False),
-    Command('send', SendCommand(), True),
-    Command('chats', ChatsCommand(), True),
-)
+handlers_private = ()
+handlers_chats = ()
+commands = ()
 
 
 def handle_command(message: telegram.Message) -> bool:
@@ -79,8 +63,36 @@ def handle_update(update: telegram.Update):
 
     for handler in handlers:
         try:
+            if 'pre_handle' in dir(handler):
+                handler.pre_handle(update.message)
+
             if handler.match(update.message):
                 handler.handle(update.message)
                 return
         except Exception as e:
             logging.error(str(e) + '\n\n' + traceback.format_exc())
+
+
+def init():
+    global handlers_private
+    global handlers_chats
+    global commands
+
+    handlers_private = (
+        PrivateHandler(),
+    )
+
+    handlers_chats = (
+        VoiceHandler(),
+        NahuyHandler(),
+        PidorHandler(),
+        ChainHandler(),
+    )
+
+    commands = (
+        Command('dump', DumpCommand(), True),
+        Command('stat', StatCommand(), False),
+        Command('joke', AnecdoteCommand(), False),
+        Command('send', SendCommand(), True),
+        Command('chats', ChatsCommand(), True),
+    )

@@ -3,7 +3,6 @@ import re
 
 import telegram
 
-from src import helpers
 from src.helpers import non_empty, is_admin
 
 NAHUY_REGEXP = r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)'
@@ -60,15 +59,3 @@ class VoiceHandler:
 
     def handle(self, message: telegram.Message):
         message.reply_text(random.choice(VOICE_ANSWERS))
-
-
-class MentionHandler:
-    def match(self, message: telegram.Message) -> bool:
-        for entity in message.entities:
-            if entity.type == 'mention' and message.text[entity.offset:entity.offset+entity.length] == '@' + helpers.bot.username:
-                return True
-
-        return False
-
-    def handle(self, message: telegram.Message):
-        message.reply_text('Чё?')

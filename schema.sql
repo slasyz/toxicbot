@@ -10,8 +10,9 @@ CREATE TABLE users (
 -- VALUES (59352582, 'Вячеслав', TRUE);
 
 CREATE TABLE chats (
-    tg_id int4 PRIMARY KEY,
-    title text
+    tg_id        int4 PRIMARY KEY,
+    title        text,
+    chain_period int DEFAULT 30
 );
 
 CREATE TABLE updates (
