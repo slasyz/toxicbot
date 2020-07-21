@@ -3,7 +3,7 @@ import random
 import re
 import time
 from datetime import datetime
-from typing import Union
+from typing import Union, List
 
 import telegram
 
@@ -20,6 +20,19 @@ class Chain:
         self.current = ()
 
         self.teach_word(BREAK)
+
+    @staticmethod
+    def split_words(message: str) -> List[str]:
+        return re.split(r'[^\w]+', message)
+        # return re.findall(r"[\w'-]+|\s+|[^\w\s'-]+", message)
+
+    @staticmethod
+    def pick(stat: dict) -> str:
+        res = []
+        for key, value in stat.items():
+            res += [key] * value
+
+        return random.choice(res)
 
     def teach_word(self, word: str):
         if len(self.current) == self.window and (self.current[-1] != BREAK or word != BREAK):
@@ -39,18 +52,11 @@ class Chain:
 
         regex = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
         message = re.sub(regex, '', message)
-        words = re.split(r'[^\w]+', message)
+        words = self.split_words(message)
         for word in words:
             if word != '':  # TODO: [картинка]
                 self.teach_word(word.lower())
         self.teach_word(BREAK)
-
-    def _pick(self, stat: dict) -> str:
-        res = []
-        for key, value in stat.items():
-            res += [key] * value
-
-        return random.choice(res)
 
     def predict(self, message: str) -> str:
         if self.window == 1:
@@ -66,7 +72,7 @@ class Chain:
             except KeyError:
                 break
 
-            word = self._pick(stat)
+            word = self.pick(stat)
             current = (word,)
 
             if current == (BREAK,):
@@ -151,3 +157,26 @@ class ChainHandler:
 
     def handle(self, message: telegram.Message):
         pass
+
+
+def __main__():
+    from src import config, logging
+
+    logging.init()
+    os.environ['TZ'] = 'Europe/Moscow'
+    time.tzset()
+
+    config.load('../../config.json')
+    db.connect()
+
+    handler = ChainHandler()
+
+    print(Chain.split_words("Hello, I'm a string!!! слово ещё,,, а-за-за"))
+    print(handler.chats[-362750796].data)
+
+    for x in range(20):
+        print(handler.chats[-362750796].predict(''))
+
+
+if __name__ == '__main__':
+    __main__()
