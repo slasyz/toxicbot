@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import telegram
 
+from src import helpers
 from src.handlers.chain import ChainHandler
 from src.helpers import is_admin
 from src.handlers import database
@@ -26,10 +27,32 @@ commands = ()
 
 
 def handle_command(message: telegram.Message) -> bool:
+    command_name = ''
+
+    # Проходимся по всем сущностям, если на первом месте в сообщении есть сущность типа 'bot_command', то записываем
+    # название команды.
+    for entity in message.entities:
+        if entity['offset'] != 0:
+            continue
+
+        if entity['type'] != telegram.MessageEntity.BOT_COMMAND:
+            continue
+
+        command_name = message.text[1:entity['length']]
+        if '@' in command_name:
+            command_name, command_target = command_name.split('@', 2)
+            if command_target != helpers.bot.username:
+                continue
+
+        break
+
+    if command_name == '':
+        return False
+
     args = re.split(r'\s+', message.text[1:])
 
     for command in commands:
-        if args[0] != command.name:
+        if command_name != command.name:
             continue
 
         if command.admins_only and not is_admin(message.from_user.id):
@@ -50,7 +73,7 @@ def handle_update(update: telegram.Update):
         return
 
     # Обрабатываем команду
-    if update.message.text is not None and update.message.text.startswith('/'):
+    if update.message.text is not None:
         if handle_command(update.message):
             return
 
