@@ -1,5 +1,6 @@
 import gzip
 import logging
+from typing import Union
 
 import psycopg2
 import telegram
@@ -64,6 +65,37 @@ def handle_chat(cur: psycopg2._psycopg.cursor, chat: telegram.Chat):
         ))
 
 
+def handle_message(message: telegram.Message, update_id: Union[int, type(None)] = None):
+    with db.conn, db.conn.cursor() as cur:
+        if message.from_user is not None:
+            handle_user(cur, message.from_user)
+        if message.chat is not None:
+            handle_chat(cur, message.chat)
+
+        cur.execute('SELECT true FROM messages WHERE chat_id=%s AND tg_id=%s AND update_id=%s',
+                    (
+                        message.chat_id,
+                        message.message_id,
+                        update_id
+                    ))
+        if cur.fetchone() is not None:
+            return
+
+        cur.execute('''
+            INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date)
+            VALUES(%s, %s, %s, %s, %s, %s)
+        ''', (
+            message.chat_id,
+            message.message_id,
+            message.from_user.id,
+            update_id,
+            message.text,
+            message.date,
+        ))
+
+        # TODO: otherwise, log
+
+
 def handle(update: telegram.Update):
     with db.conn, db.conn.cursor() as cur:
         cur.execute('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
@@ -90,33 +122,7 @@ def handle(update: telegram.Update):
             dump
         ))
 
-        if message is None:
-            return
+    if message is None:
+        return
 
-        if message.from_user is not None:
-            handle_user(cur, message.from_user)
-        if message.chat is not None:
-            handle_chat(cur, message.chat)
-
-        cur.execute('SELECT true FROM messages WHERE chat_id=%s AND tg_id=%s AND update_id=%s',
-                    (
-                        message.chat_id,
-                        message.message_id,
-                        update.update_id
-                    ))
-        if cur.fetchone() is not None:
-            return
-
-        cur.execute('''
-            INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date)
-            VALUES(%s, %s, %s, %s, %s, %s)
-        ''', (
-            message.chat_id,
-            message.message_id,
-            message.from_user.id,
-            update.update_id,
-            message.text,
-            message.date,
-        ))
-
-        # TODO: otherwise, log
+    handle_message(message, update.update_id)

@@ -2,7 +2,7 @@ from typing import List
 
 import telegram
 
-from src import db
+from src import db, helpers
 from src.helpers import is_admin
 
 
@@ -29,27 +29,27 @@ class StatCommand:
         try:
             chat_id = int(args[1])
         except ValueError:
-            message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID')
+            helpers.reply_text(message, f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
         response = self._get_response(chat_id)
-        message.reply_text(response)
+        helpers.reply_text(message, response)
 
     def handle(self, message: telegram.Message, args: List[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
-                message.reply_text(response)
+                helpers.reply_text(message, response)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
             return
 
         if not is_admin(message.from_user.id):
-            message.reply_text('Это нужно делать в общем чате, дурачок.')
+            helpers.reply_text(message, 'Это нужно делать в общем чате, дурачок.')
             return
 
         if len(args) != 2:
-            message.reply_text(f'Нужно писать так: /{args[0]} CHAT_ID')
+            helpers.reply_text(message, f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
         self._parse_args_and_send(message, args)

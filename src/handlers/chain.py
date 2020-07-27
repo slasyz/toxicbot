@@ -98,7 +98,12 @@ class ChainHandler:
                 self.chats[record[0]] = Chain(self.window, record[0])
 
             # TODO: игнорировать изменения сообщений
-            cur.execute('''SELECT chat_id, text FROM messages WHERE chat_id < 0 ORDER BY tg_id''')
+            cur.execute('''
+                SELECT chat_id, text 
+                FROM messages 
+                WHERE chat_id < 0 AND update_id IS NOT NULL 
+                ORDER BY tg_id
+            ''')
             for record in cur:
                 try:
                     chain = self.chats[record[0]]
@@ -131,13 +136,13 @@ class ChainHandler:
 
         if message.reply_to_message is not None and message.reply_to_message.from_user.id == helpers.bot.id:
             text = self.chats[message.chat_id].predict(message.text)
-            message.reply_text(text)
+            helpers.reply_text(message, text)
             return True
 
         for entity in message.entities:
             if entity.type == 'mention' and message.text[entity.offset:entity.offset+entity.length] == '@' + helpers.bot.username:
                 text = 'Чё? ' + self.chats[message.chat_id].predict(message.text)
-                message.reply_text(text)
+                helpers.reply_text(message, text)
                 return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -150,7 +155,7 @@ class ChainHandler:
 
             if count % self._get_period(message.chat_id) == 0:
                 text = self.chats[message.chat_id].predict(message.text)
-                helpers.bot.send_message(message.chat_id, text)
+                helpers.send_message(message.chat_id, text)
                 return True
 
         return False

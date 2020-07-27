@@ -41,7 +41,7 @@ def worker():
             for record in cur:
                 logging.info(f'sending anek to {record[0]}')
                 anek = get_random_adecdote()
-                helpers.bot.send_message(record[0], anek)
+                helpers.send_message(record[0], anek)
 
         time.sleep(2)
 
