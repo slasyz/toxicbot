@@ -7,6 +7,7 @@ from urllib.request import urlopen
 from lxml import html
 
 from src import helpers, db
+from src.logging import print_sleep
 
 URL = 'https://baneks.ru/random'
 
@@ -33,7 +34,7 @@ def worker():
         t = time.localtime()
         t = time.mktime(t[:3] + (0, 0, 0) + t[6:])        # отбрасываем часы-минуты-секунды
         seconds = math.ceil(t + 24 * 3600 - time.time())  # прибавляем 24 часа, смотрим сколько осталось
-        logging.info(f'sleeping {seconds} seconds before next anecdote')
+        print_sleep(seconds, 'next anecdote')
         time.sleep(seconds)
 
         with db.conn, db.conn.cursor() as cur:

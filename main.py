@@ -9,7 +9,7 @@ from telegram.error import NetworkError, Unauthorized, Conflict
 
 from src import config, db, helpers, logging, handling
 from src.server import server
-from src.tasks import anecdotes
+from src.tasks import anecdotes, reminders
 
 
 def __main__():
@@ -21,6 +21,7 @@ def __main__():
     db.connect()
     server.listen()
     anecdotes.start_worker()
+    reminders.start_worker()
     handling.init()
 
     helpers.bot = telegram.Bot(config.c['telegram']['token'])

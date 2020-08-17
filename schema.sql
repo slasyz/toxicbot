@@ -33,3 +33,12 @@ CREATE TABLE messages (
 
     PRIMARY KEY (chat_id, tg_id)
 );
+
+CREATE TABLE reminders (
+    id       serial4     PRIMARY KEY,
+    chat_id  int4        REFERENCES chats(tg_id),
+    datetime timestamptz NOT NULL,
+    text     text        NOT NULL,
+    isactive bool        NOT NULL
+);
+CREATE INDEX ON reminders(datetime);
