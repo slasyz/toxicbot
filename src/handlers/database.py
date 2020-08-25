@@ -93,8 +93,6 @@ def handle_message(message: telegram.Message, update_id: Union[int, type(None)] 
             message.date,
         ))
 
-        # TODO: otherwise, log
-
 
 def handle(update: telegram.Update):
     with db.conn, db.conn.cursor() as cur:

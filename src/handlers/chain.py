@@ -134,16 +134,10 @@ class ChainHandler:
         if message.chat_id > 0:
             return False
 
-        if message.reply_to_message is not None and message.reply_to_message.from_user.id == helpers.bot.id:
+        if helpers.is_reply_or_mention(message):
             text = self.chats[message.chat_id].predict(message.text)
             helpers.reply_text(message, text)
             return True
-
-        for entity in message.entities:
-            if entity.type == 'mention' and message.text[entity.offset:entity.offset+entity.length] == '@' + helpers.bot.username:
-                text = 'Чё? ' + self.chats[message.chat_id].predict(message.text)
-                helpers.reply_text(message, text)
-                return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
             return False

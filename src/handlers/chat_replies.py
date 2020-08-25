@@ -59,3 +59,27 @@ class VoiceHandler:
 
     def handle(self, message: telegram.Message):
         helpers.reply_text(message, random.choice(VOICE_ANSWERS))
+
+
+SORRY_REGEXP = r'бот,\s+извинись'
+
+
+class SorryHandler:
+    @helpers.non_empty
+    def match(self, message: telegram.Message) -> bool:
+        if message.chat_id > 0:
+            helpers.send_message(message.chat_id, 'Отсоси, потом проси.')
+            return True
+
+        if re.search(SORRY_REGEXP, message.text.lower()) is not None:
+            helpers.send_message(message.chat_id, 'Извините.')
+            return True
+
+        if helpers.is_reply_or_mention(message) and 'извинись' in message.text.lower():
+            helpers.send_message(message.chat_id, 'Извините.')
+            return True
+
+        return False
+
+    def handle(self, message: telegram.Message):
+        pass

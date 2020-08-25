@@ -35,3 +35,14 @@ def send_message(chat_id: int, text: str) -> telegram.Message:
     message = bot.send_message(chat_id, text)
     handle_message(message)
     return message
+
+
+def is_reply_or_mention(message: telegram.Message) -> bool:
+    if message.reply_to_message is not None and message.reply_to_message.from_user.id == bot.id:
+        return True
+
+    for entity in message.entities:
+        if entity.type == 'mention' and message.text[entity.offset:entity.offset + entity.length] == '@' + bot.username:
+            return True
+
+    return False

@@ -1,3 +1,4 @@
+import re
 from typing import List
 
 import telegram
@@ -6,24 +7,31 @@ from src import db, helpers
 from src.helpers import is_admin
 
 
+def get_stat(chat_id) -> str:
+    with db.conn, db.conn.cursor() as cur:
+        cur.execute('''
+            SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.tg_id) as c
+            FROM messages m
+                JOIN users u on m.user_id = u.tg_id
+            WHERE chat_id=%s
+            GROUP BY user_id, u.first_name, u.last_name
+            ORDER BY c DESC
+            LIMIT 10;
+        ''', (chat_id,))
+
+        response = ''
+
+        for record in cur:
+            response += f'\n{record[0]} — {record[1]} сообщ.'
+
+        return response
+
+
 class StatCommand:
     def _get_response(self, chat_id) -> str:
-        with db.conn, db.conn.cursor() as cur:
-            cur.execute('''
-                SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.tg_id) as c
-                FROM messages m
-                    JOIN users u on m.user_id = u.tg_id
-                WHERE chat_id=%s
-                GROUP BY user_id, u.first_name, u.last_name
-                ORDER BY c DESC
-                LIMIT 10;
-            ''', (chat_id,))
-
-            response = 'Кто сколько написал с момента запуска бота:\n'
-            for record in cur:
-                response += f'\n{record[0]} — {record[1]} сообщ.'
-
-            return response
+        response = 'Кто сколько написал с момента запуска бота:\n'
+        response += get_stat(chat_id)
+        return response
 
     def _parse_args_and_send(self, message: telegram.Message, args: List[str]):
         try:
@@ -49,7 +57,21 @@ class StatCommand:
             return
 
         if len(args) != 2:
-            helpers.reply_text(message, f'Нужно писать так: /{args[0]} CHAT_ID')
+            helpers.reply_text(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
             return
 
         self._parse_args_and_send(message, args)
+
+
+PIZDIT_REGEXP = r'кто\s+больше\s+всех\s+пиздит'
+
+
+class PizditHandler:
+    @helpers.non_empty
+    def match(self, message: telegram.Message) -> bool:
+        return re.search(PIZDIT_REGEXP, message.text.lower()) is not None
+
+    def handle(self, message: telegram.Message):
+        response = 'Больше всех пиздят в этом чате:\n'
+        response += get_stat(message.chat_id)
+        helpers.reply_text(message, response)

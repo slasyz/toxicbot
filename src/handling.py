@@ -13,8 +13,8 @@ from src.handlers.commands.anecdote import AnecdoteCommand
 from src.handlers.commands.chats import ChatsCommand
 from src.handlers.commands.dump import DumpCommand
 from src.handlers.commands.send import SendCommand
-from src.handlers.commands.stat import StatCommand
-from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler
+from src.handlers.commands.stat import StatCommand, PizditHandler
+from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
 
 
 class Command(namedtuple('Command', ['name', 'handler', 'admins_only'])):
@@ -109,6 +109,8 @@ def init():
         VoiceHandler(),
         NahuyHandler(),
         PidorHandler(),
+        SorryHandler(),
+        PizditHandler(),
         ChainHandler(),
     )
 
