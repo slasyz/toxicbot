@@ -78,9 +78,7 @@ def handler_messages():
         for row in cur:
             chat_id, update_id, tg_id, user_id, user_name, date, text = row
 
-            if text:
-                text = jinja2.Markup(jinja2.escape(text).replace('\n', '<br>'))  # TODO: не работает
-            else:
+            if not text:
                 text = ''
 
             date = date.astimezone(tz=None)
@@ -98,9 +96,7 @@ def handler_messages():
         for row in cur:
             user_id, update_id, tg_id, date, text = row
 
-            if text:
-                text = jinja2.Markup(jinja2.escape(text).replace('\n', '<br>'))  # TODO: не работает
-            else:
+            if not text:
                 text = ''
 
             date = date.astimezone(tz=None)
