@@ -11,20 +11,22 @@ NAHUY_ANSWER = 'Что за токсичность...'
 
 class NahuyHandler:
     @helpers.non_empty
-    def match(self, message: telegram.Message) -> bool:
-        return re.search(NAHUY_REGEXP, message.text.lower()) is not None
+    def handle(self, message: telegram.Message) -> bool:
+        if re.search(NAHUY_REGEXP, message.text.lower()) is None:
+            return False
 
-    def handle(self, message: telegram.Message):
         helpers.reply_text(message, NAHUY_ANSWER)
+        return True
 
 
 class PidorHandler:
     @helpers.non_empty
-    def match(self, message: telegram.Message) -> bool:
-        return 'пидор' in message.text.lower()
+    def handle(self, message: telegram.Message) -> bool:
+        if 'пидор' not in message.text.lower():
+            return False
 
-    def handle(self, message: telegram.Message):
         helpers.reply_text(message, 'Пошёл нахуй.')
+        return True
 
 
 PRIVATE_ANSWERS = [
@@ -35,14 +37,12 @@ PRIVATE_ANSWERS = [
 
 
 class PrivateHandler:
-    def match(self, message: telegram.Message) -> bool:
-        return True
-
     def handle(self, message: telegram.Message):
         if helpers.is_admin(message.chat_id):
             helpers.reply_text(message, 'Я запущен')
         else:
             helpers.reply_text(message, random.choice(PRIVATE_ANSWERS))
+        return True
 
 
 VOICE_ANSWERS = [
@@ -54,11 +54,12 @@ VOICE_ANSWERS = [
 
 
 class VoiceHandler:
-    def match(self, message: telegram.Message) -> bool:
-        return message.voice is not None or message.video_note is not None
+    def handle(self, message: telegram.Message) -> bool:
+        if message.voice is None and message.video_note is None:
+            return False
 
-    def handle(self, message: telegram.Message):
         helpers.reply_text(message, random.choice(VOICE_ANSWERS))
+        return True
 
 
 SORRY_REGEXP = r'бот,\s+извинись'
@@ -66,7 +67,7 @@ SORRY_REGEXP = r'бот,\s+извинись'
 
 class SorryHandler:
     @helpers.non_empty
-    def match(self, message: telegram.Message) -> bool:
+    def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
             helpers.send_message(message.chat_id, 'Отсоси, потом проси.')
             return True
@@ -80,6 +81,3 @@ class SorryHandler:
             return True
 
         return False
-
-    def handle(self, message: telegram.Message):
-        pass

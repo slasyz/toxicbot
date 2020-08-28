@@ -22,6 +22,7 @@ class SendCommand:
             cur.execute('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
             if cur.fetchone() is None:
                 helpers.reply_text(message, f'Не могу найти такой чат ({chat_id}).')
+                return
 
-        text = re.split(r'\s+', message.text, 3)[2]
+        text = re.sub(r'^/' + args[0] + r'\s+' + args[1] + r'\s+', '', message.text)
         helpers.send_message(chat_id, text)

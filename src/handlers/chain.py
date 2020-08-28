@@ -130,7 +130,7 @@ class ChainHandler:
 
         chain.teach_message(message.text)
 
-    def match(self, message: telegram.Message) -> bool:
+    def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
             return False
 
@@ -153,9 +153,6 @@ class ChainHandler:
                 return True
 
         return False
-
-    def handle(self, message: telegram.Message):
-        pass
 
 
 def __main__():

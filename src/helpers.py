@@ -10,6 +10,10 @@ bot: Union[telegram.Bot, type(None)] = None
 
 
 def non_empty(func):
+    """
+    Checks if message contains text before calling wrapping function.  If it does not contain, returns False.
+    """
+
     def wrapper(self, message: telegram.Message):
         if message.text is None:
             return False

@@ -89,8 +89,7 @@ def handle_update(update: telegram.Update):
             if 'pre_handle' in dir(handler):
                 handler.pre_handle(update.message)
 
-            if handler.match(update.message):
-                handler.handle(update.message)
+            if handler.handle(update.message):
                 return
         except Exception as e:
             logging.error(str(e) + '\n\n' + traceback.format_exc())
