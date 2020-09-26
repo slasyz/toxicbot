@@ -1,47 +1,14 @@
 import sys
-import threading
 
-import jinja2
 from flask import Flask, render_template
 
 from src import config, db
+from src.workers.worker import Worker
+from src.workers.server.models import Chat, User, ChatMessage, UserMessage
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None
-app = Flask(__name__, template_folder='../../html')
-
-
-class Chat:
-    def __init__(self, id, title):
-        self.id = id
-        self.title = title
-        self.messages = []
-
-
-class User:
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-        self.messages = []
-
-
-class ChatMessage:
-    def __init__(self, update_id, tg_id, user_id, user_name, date, text):
-        self.update_id = update_id
-        self.tg_id = tg_id
-        self.user_id = user_id
-        self.user_name = user_name
-        self.date = date
-        self.text = text
-
-
-class UserMessage:
-    def __init__(self, update_id, tg_id, user_id, date, text):
-        self.update_id = update_id
-        self.tg_id = tg_id
-        self.user_id = user_id
-        self.date = date
-        self.text = text
+app = Flask(__name__, template_folder='../../../html')
 
 
 @app.route('/messages')
@@ -117,9 +84,8 @@ def handler_messages():
         })
 
 
-def listen():
-    server_config = config.c['server']
-    if server_config is not None:
-        threading.Thread(target=app.run, kwargs={
-            'port': server_config['port'],
-        }).start()
+class ServerWorker(Worker):
+    def work(self):
+        server_config = config.c['server']
+        if server_config is not None:
+            app.run(port=server_config['port'])
