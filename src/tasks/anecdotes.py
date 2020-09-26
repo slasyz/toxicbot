@@ -3,8 +3,10 @@ import math
 import re
 import threading
 import time
-from urllib.request import urlopen
+import traceback
 from lxml import html
+
+import requests
 
 from src import helpers, db
 from src.logging import print_sleep
@@ -13,11 +15,16 @@ URL = 'https://baneks.ru/random'
 
 
 def get_random_adecdote() -> str:
-    with urlopen(URL) as f:
-        data = f.read()
-        parser = html.HTMLParser(encoding='utf-8')
-        document = html.document_fromstring(data, parser=parser)
-        text = document.find('.//*[@class="anek-view"]//article').text_content().strip().replace('            ', '')
+    try:
+        with requests.get(URL) as r:
+            data = r.content.decode('utf-8', 'ignore')
+            parser = html.HTMLParser(encoding='utf-8')
+            document = html.document_fromstring(data, parser=parser)
+            text = document.find('.//*[@class="anek-view"]//article').text_content().strip().replace('            ', '')
+    except requests.HTTPError as e:  # обрабатывать нормально
+        traceback.print_stack()
+        print(e)
+        return 'Хуйня какая-то.'
 
     if not text.startswith('Анек #'):
         print('!!!!!!!  кривой анекдот !!!!!!!')
@@ -49,3 +56,7 @@ def worker():
 
 def start_worker():
     threading.Thread(target=worker).start()
+
+
+if __name__ == '__main__':
+    print(get_random_adecdote())

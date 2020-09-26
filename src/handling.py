@@ -7,7 +7,7 @@ import telegram
 
 from src import helpers
 from src.handlers.chain import ChainHandler
-from src.helpers import is_admin
+from src.helpers import is_admin, reply_text
 from src.handlers import database
 from src.handlers.commands.anecdote import AnecdoteCommand
 from src.handlers.commands.chats import ChatsCommand
@@ -92,6 +92,7 @@ def handle_update(update: telegram.Update):
             if handler.handle(update.message):
                 return
         except Exception as e:
+            reply_text(update.message, 'Ошибка.')
             logging.error(str(e) + '\n\n' + traceback.format_exc())
 
 
