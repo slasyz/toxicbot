@@ -98,7 +98,7 @@ def handle(update: telegram.Update):
     with db.conn, db.conn.cursor() as cur:
         cur.execute('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
         if cur.fetchone() is not None:
-            logging.info(f'ignoring {update.update_id}')
+            logging.info('ignoring %d', update.update_id)
             return
 
         print(update)

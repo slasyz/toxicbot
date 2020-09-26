@@ -13,10 +13,10 @@ def interval(seconds: float) -> str:
 
 def print_sleep(seconds: float, until: str):
     f = interval(seconds)
-    logging.info(f'sleeping {f} seconds until {until}')
+    logging.info('sleeping %s seconds until %s', f, until)
 
 
-class Logger(object):
+class Logger:
     def __init__(self, terminal, logfile):
         self.terminal = terminal
         self.log = logfile

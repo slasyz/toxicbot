@@ -78,14 +78,14 @@ class Chain:
 
             if current == (BREAK,):
                 break
-            else:
-                result.append(word)
+
+            result.append(word)
 
         res = ' '.join(result)
         if res != '':
             return res[0].upper() + res[1:]
-        else:
-            return ''
+
+        return ''
 
 
 class ChainHandler:
@@ -157,8 +157,8 @@ class ChainHandler:
 
 
 def __main__():
-    from src import config
-    from src.helpers import logging
+    from src import config  # pylint: disable=import-outside-toplevel
+    from src.helpers import logging  # pylint: disable=import-outside-toplevel
 
     logging.init()
     os.environ['TZ'] = 'Europe/Moscow'
@@ -172,7 +172,7 @@ def __main__():
     print(Chain.split_words("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     print(handler.chats[-362750796].data)
 
-    for x in range(20):
+    for x in range(20):    # pylint: disable=unused-variable
         print(handler.chats[-362750796].predict(''))
 
 

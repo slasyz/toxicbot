@@ -72,10 +72,10 @@ def handler_messages():
             users_dict[user_id].messages.append(message)
 
         chats_list = []
-        for key, val in chats_dict.items():
+        for val in chats_dict.values():
             chats_list.append(val)
         users_list = []
-        for key, val in users_dict.items():
+        for val in users_dict.values():
             users_list.append(val)
 
         return render_template('messages.html', **{

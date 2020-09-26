@@ -1,9 +1,10 @@
-psycopg2~=2.8.5
+psycopg2~=2.8.6
 Jinja2~=2.11.2
 Flask~=1.1.2
 PyYAML~=5.3.1
 sshtunnel~=0.1.5
 python-telegram-bot~=12.8
-lxml~=4.5.1
+lxml~=4.5.2
 requests~=2.24.0
 translate~=3.5.0
+pylint~=2.6.0

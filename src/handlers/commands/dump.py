@@ -36,7 +36,7 @@ class DumpCommand:
                 try:
                     general.reply_text(message, json.dumps(json.loads(dump_clean), indent=2, ensure_ascii=False))
                 except json.decoder.JSONDecodeError as e:
-                    logging.error(str(e) + '\n\n' + traceback.format_exc())
+                    logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
                     general.reply_text(message, dump_clean)
             else:
                 general.reply_text(message, 'В базе нет такого апдейта.')

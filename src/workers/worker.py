@@ -17,7 +17,7 @@ class Worker:
     def _clean_counter(self):
         now = datetime.now()
         is_last_min = lambda x: (now - x).total_seconds() <= 60
-        self.counter = set([x for x in self.counter if is_last_min(x)])
+        self.counter = {x for x in self.counter if is_last_min(x)}
 
     def work(self):
         raise Exception('method work() must be implemented')
@@ -33,7 +33,7 @@ class Worker:
                 self._clean_counter()
                 self.counter.add(datetime.now())
                 if len(self.counter) >= MAX_ERRORS_PER_MINUTE:
-                    logging.error(f'{len(self.counter)} errors in worker {self.__class__.__name__} in last minute, stopping')
+                    logging.error('%d errors in worker %s in last minute, stopping', len(self.counter), self.__class__.__name__)
                     try:
                         general.send_to_admins(f'Воркер {self.__class__.__name__} бросил исключение {len(self.counter)} раз. Выход.')
                     except AttributeError:

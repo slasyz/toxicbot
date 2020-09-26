@@ -6,6 +6,7 @@ from collections import namedtuple
 import telegram
 
 from src.handlers.chain import ChainHandler
+from src.helpers import general
 from src.helpers.general import is_admin, reply_text
 from src.handlers import database
 from src.handlers.commands.anecdote import AnecdoteCommand
@@ -92,7 +93,7 @@ def handle_update(update: telegram.Update):
                 return
         except Exception as e:
             reply_text(update.message, 'Ошибка.')
-            logging.error(str(e) + '\n\n' + traceback.format_exc())
+            logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
 
 
 def init():

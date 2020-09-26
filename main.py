@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import time
 import logging as pylogging
 
@@ -35,9 +36,9 @@ def __main__():
                 update_id = update.update_id
                 handling.handle_update(update)
                 update_id = update.update_id + 1
-        except NetworkError as e:
-            pylogging.error(f'network error: {e}')
-            if isinstance(e, telegram.error.BadRequest):
+        except NetworkError as ex:
+            pylogging.error('network error: %s', ex)
+            if isinstance(ex, telegram.error.BadRequest):
                 update_id += 1
             time.sleep(1)
         except Unauthorized:  # The user has removed or blocked the bot.
@@ -45,9 +46,9 @@ def __main__():
             update_id += 1
         except Conflict:
             pylogging.error("bot is already running somewhere, stopping it")
-            exit(1)
+            sys.exit(1)
         except KeyboardInterrupt:
-            exit(0)
+            sys.exit(0)
 
 
 if __name__ == '__main__':
