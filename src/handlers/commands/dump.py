@@ -7,19 +7,20 @@ from typing import List
 import telegram
 import yaml
 
-from src import db, helpers
+from src import db
+from src.helpers import general
 
 
 class DumpCommand:
     def handle(self, message: telegram.Message, args: List[str]):
         if len(args) != 2:
-            helpers.reply_text(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
+            general.reply_text(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return
 
         try:
             update_id = int(args[1])
         except ValueError:
-            helpers.reply_text(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
+            general.reply_text(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return
 
         with db.conn, db.conn.cursor() as cur:
@@ -33,9 +34,9 @@ class DumpCommand:
                                                                                                         'false')
 
                 try:
-                    helpers.reply_text(message, json.dumps(json.loads(dump_clean), indent=2, ensure_ascii=False))
+                    general.reply_text(message, json.dumps(json.loads(dump_clean), indent=2, ensure_ascii=False))
                 except json.decoder.JSONDecodeError as e:
                     logging.error(str(e) + '\n\n' + traceback.format_exc())
-                    helpers.reply_text(message, dump_clean)
+                    general.reply_text(message, dump_clean)
             else:
-                helpers.reply_text(message, 'В базе нет такого апдейта.')
+                general.reply_text(message, 'В базе нет такого апдейта.')

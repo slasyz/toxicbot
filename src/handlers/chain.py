@@ -7,7 +7,8 @@ from typing import Union, List
 
 import telegram
 
-from src import db, helpers
+from src import db
+from src.helpers import general
 
 BREAK = '[BREAK]'
 
@@ -134,9 +135,9 @@ class ChainHandler:
         if message.chat_id > 0:
             return False
 
-        if helpers.is_reply_or_mention(message):
+        if general.is_reply_or_mention(message):
             text = self.chats[message.chat_id].predict(message.text)
-            helpers.reply_text(message, text)
+            general.reply_text(message, text)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -149,14 +150,15 @@ class ChainHandler:
 
             if count % self._get_period(message.chat_id) == 0:
                 text = self.chats[message.chat_id].predict(message.text)
-                helpers.send_message(message.chat_id, text)
+                general.send_message(message.chat_id, text)
                 return True
 
         return False
 
 
 def __main__():
-    from src import config, logging
+    from src import config
+    from src.helpers import logging
 
     logging.init()
     os.environ['TZ'] = 'Europe/Moscow'

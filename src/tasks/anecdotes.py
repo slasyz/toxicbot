@@ -8,8 +8,9 @@ from lxml import html
 
 import requests
 
-from src import helpers, db
-from src.logging import print_sleep
+from src import db
+from src.helpers import general
+from src.helpers.logging import print_sleep
 
 URL = 'https://baneks.ru/random'
 
@@ -49,7 +50,7 @@ def worker():
             for record in cur:
                 logging.info(f'sending anek to {record[0]}')
                 anek = get_random_adecdote()
-                helpers.send_message(record[0], anek)
+                general.send_message(record[0], anek)
 
         time.sleep(2)
 

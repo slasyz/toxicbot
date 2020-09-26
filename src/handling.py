@@ -5,9 +5,8 @@ from collections import namedtuple
 
 import telegram
 
-from src import helpers
 from src.handlers.chain import ChainHandler
-from src.helpers import is_admin, reply_text
+from src.helpers.general import is_admin, reply_text
 from src.handlers import database
 from src.handlers.commands.anecdote import AnecdoteCommand
 from src.handlers.commands.chats import ChatsCommand
@@ -41,7 +40,7 @@ def handle_command(message: telegram.Message) -> bool:
         command_name = message.text[1:entity['length']]
         if '@' in command_name:
             command_name, command_target = command_name.split('@', 2)
-            if command_target != helpers.bot.username:
+            if command_target != general.bot.username:
                 continue
 
         break

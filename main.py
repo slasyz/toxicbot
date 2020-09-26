@@ -7,7 +7,8 @@ import logging as pylogging
 import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from src import config, db, helpers, logging, handling
+from src import config, db, handling
+from src.helpers import logging, general
 from src.server import server
 from src.tasks import anecdotes, reminders
 
@@ -24,13 +25,13 @@ def __main__():
     reminders.start_worker()
     handling.init()
 
-    helpers.bot = telegram.Bot(config.c['telegram']['token'])
+    general.bot = telegram.Bot(config.c['telegram']['token'])
 
     # TODO: распутать это всё
     update_id = None
     while True:
         try:
-            for update in helpers.bot.get_updates(offset=update_id, timeout=10):
+            for update in general.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
                 handling.handle_update(update)
                 update_id = update.update_id + 1

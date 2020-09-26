@@ -2,7 +2,8 @@ from typing import List
 
 import telegram
 
-from src import db, helpers
+from src import db
+from src.helpers import general
 
 
 class ChatsCommand:
@@ -21,4 +22,4 @@ class ChatsCommand:
             for record in cur:
                 response.append(f'{record[1]} — {record[0]}')
 
-            helpers.reply_text(message, '\n'.join(response))
+            general.reply_text(message, '\n'.join(response))

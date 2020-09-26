@@ -3,8 +3,8 @@ from typing import List
 
 import telegram
 
-from src import db, helpers
-from src.helpers import is_admin
+from src import db
+from src.helpers import general
 
 
 def get_stat(chat_id) -> str:
@@ -37,27 +37,27 @@ class StatCommand:
         try:
             chat_id = int(args[1])
         except ValueError:
-            helpers.reply_text(message, f'Нужно писать так: /{args[0]} CHAT_ID')
+            general.reply_text(message, f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
         response = self._get_response(chat_id)
-        helpers.reply_text(message, response)
+        general.reply_text(message, response)
 
     def handle(self, message: telegram.Message, args: List[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
-                helpers.reply_text(message, response)
+                general.reply_text(message, response)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
             return
 
-        if not is_admin(message.from_user.id):
-            helpers.reply_text(message, 'Это нужно делать в общем чате, дурачок.')
+        if not general.is_admin(message.from_user.id):
+            general.reply_text(message, 'Это нужно делать в общем чате, дурачок.')
             return
 
         if len(args) != 2:
-            helpers.reply_text(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
+            general.reply_text(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
             return
 
         self._parse_args_and_send(message, args)
@@ -67,12 +67,12 @@ PIZDIT_REGEXP = r'кто\s+больше\s+всех\s+пиздит'
 
 
 class PizditHandler:
-    @helpers.non_empty
+    @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if re.search(PIZDIT_REGEXP, message.text.lower()) is None:
             return False
 
         response = 'Больше всех пиздят в этом чате:\n'
         response += get_stat(message.chat_id)
-        helpers.reply_text(message, response)
+        general.reply_text(message, response)
         return True
