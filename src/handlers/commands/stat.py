@@ -68,7 +68,7 @@ PIZDIT_REGEXP = r'кто\s+больше\s+всех\s+пиздит'
 
 class PizditHandler:
     @helpers.non_empty
-    def match(self, message: telegram.Message) -> bool:
+    def handle(self, message: telegram.Message) -> bool:
         if re.search(PIZDIT_REGEXP, message.text.lower()) is None:
             return False
 
