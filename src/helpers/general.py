@@ -41,6 +41,13 @@ def send_message(chat_id: int, text: str) -> telegram.Message:
     return message
 
 
+def send_to_admins(text: str):
+    with db.conn, db.conn.cursor() as cur:
+        cur.execute('SELECT tg_id FROM users WHERE admin')
+        for record in cur:
+            send_message(record[0], text)
+
+
 def is_reply_or_mention(message: telegram.Message) -> bool:
     if message.reply_to_message is not None and message.reply_to_message.from_user.id == bot.id:
         return True
