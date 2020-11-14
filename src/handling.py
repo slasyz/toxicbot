@@ -111,7 +111,7 @@ def init():
         PidorHandler(),
         SorryHandler(),
         PizditHandler(),
-        ChainHandler(),
+        ChainHandler(window=1),
     )
 
     commands = (
