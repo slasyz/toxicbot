@@ -59,7 +59,7 @@ class Chain:
             else:
                 arr = self.splitter.split(message)
                 if len(arr) < self.window - 1:
-                    current = random.choice(self.data.keys())
+                    current = random.choice(list(self.data.keys()))
                 else:
                     current = tuple(arr[-self.window+1:]) + (BREAK,)
 
