@@ -4,7 +4,7 @@ import time
 
 from src import db
 from src.helpers import general
-from src.helpers.anecdote import get_random_adecdote
+from src.services.anecdote import get_random_adecdote
 from src.helpers.logging import print_sleep
 from src.workers.worker import Worker
 
