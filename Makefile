@@ -43,7 +43,7 @@ port:       ## run port forwarding to open Flask server locally
 
 
 .PHONY: pylint
-pylint:     ## run pylint with
+pylint:     ## run pylint (with disabled checks specified in $DISABLE variable)
 	# TODO: run Linux version of pylint here
 	cd ..; ./ToxicTgBot/venv/Scripts/pylint.exe ./ToxicTgBot --ignore=venv --disable="$(DISABLE)" --extension-pkg-whitelist=psycopg2._psycopg
 
