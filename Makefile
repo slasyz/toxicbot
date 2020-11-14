@@ -1,10 +1,10 @@
 # TODO: check platform amd run virtualenv accordingly
 
 
-  ## *********************
-  ## * Makefile commands *
-  ## *********************
-  ##
+## *********************
+## * Makefile commands *
+## *********************
+##
 
 
 DISABLE_STRICT=no-self-use,missing-module-docstring,missing-class-docstring,missing-function-docstring,line-too-long,global-statement,too-few-public-methods,broad-except,redefined-builtin,protected-access,too-many-arguments,too-many-locals,fixme
@@ -21,7 +21,7 @@ backup:       ## create remote database backup in local directory
 
 .PHONY: help
 help:         ## show this help
-	@sed -ne '/@sed/!s/  ##\s\?//p' $(MAKEFILE_LIST)
+	@sed -ne '/@sed/!s/##\s\?//p' $(MAKEFILE_LIST)
 
 
 .PHONY: lint
