@@ -7,7 +7,7 @@ import telegram
 from src import db
 from src.helpers import general
 from src.services.chain.chain import Chain
-from src.services.chain.splitters import Splitter, NoPunctuationSplitter
+from src.services.chain.splitters import Splitter, PunctuationSplitter
 
 
 class ChainHandler:
@@ -59,7 +59,7 @@ class ChainHandler:
             return False
 
         if general.is_reply_or_mention(message):
-            text = self.chats[message.chat_id].predict(message.text)
+            text = self.chats[message.chat_id].predict_not_empty(message.text)
             general.reply_text(message, text)
             return True
 
@@ -72,7 +72,7 @@ class ChainHandler:
             count = record[0]
 
             if count % self._get_period(message.chat_id) == 0:
-                text = self.chats[message.chat_id].predict(message.text)
+                text = self.chats[message.chat_id].predict_not_empty(message.text)
                 general.send_message(message.chat_id, text)
                 return True
 
@@ -90,14 +90,15 @@ def __main__():
     config.load('../../config.json')
     db.connect()
 
-    splitter = NoPunctuationSplitter()
-    handler = ChainHandler(window=1, splitter=splitter)
+    # splitter = NoPunctuationSplitter()
+    splitter = PunctuationSplitter()
+    handler = ChainHandler(window=3, splitter=splitter)
 
-    print(splitter.split_tokens("Hello, I'm a string!!! слово ещё,,, а-за-за"))
+    print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
     for x in range(20):    # pylint: disable=unused-variable
-        print(handler.chats[-362750796].predict(''))
+        print('[' + handler.chats[-362750796].predict_not_empty() + ']')
 
 
 if __name__ == '__main__':

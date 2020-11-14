@@ -15,7 +15,7 @@ from src.handlers.commands.dump import DumpCommand
 from src.handlers.commands.send import SendCommand
 from src.handlers.commands.stat import StatCommand, PizditHandler
 from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
-from src.services.chain.splitters import NoPunctuationSplitter
+from src.services.chain.splitters import PunctuationSplitter
 
 
 class Command(namedtuple('Command', ['name', 'handler', 'admins_only'])):
@@ -112,7 +112,7 @@ def init():
         PidorHandler(),
         SorryHandler(),
         PizditHandler(),
-        ChainHandler(window=1, splitter=NoPunctuationSplitter()),
+        ChainHandler(window=3, splitter=PunctuationSplitter()),
     )
 
     commands = (
