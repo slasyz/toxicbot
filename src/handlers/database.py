@@ -81,6 +81,12 @@ def handle_message(message: telegram.Message, update_id: Union[int, type(None)] 
         if cur.fetchone() is not None:
             return
 
+        text = ''
+        if message.text is not None:
+            text = message.text
+        elif message.caption is not None:
+            text = message.caption
+
         cur.execute('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date)
             VALUES(%s, %s, %s, %s, %s, %s)
@@ -89,7 +95,7 @@ def handle_message(message: telegram.Message, update_id: Union[int, type(None)] 
             message.message_id,
             message.from_user.id,
             update_id,
-            message.text,
+            text,
             message.date,
         ))
 
