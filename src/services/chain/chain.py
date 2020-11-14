@@ -1,23 +1,20 @@
 import re
-from random import random
-from typing import List, Union
+import random
+from typing import Union
+
+from src.services.chain.splitters import Splitter
 
 BREAK = '[BREAK]'
 
 
 class Chain:
-    def __init__(self, window: int, chat_id: int):
+    def __init__(self, window: int, splitter: Splitter):
         self.window = window
-        self.chat_id = chat_id
+        self.splitter = splitter
         self.data = {}
         self.current = ()
 
         self.teach_word(BREAK)
-
-    @staticmethod
-    def split_words(message: str) -> List[str]:
-        return re.split(r"[^\w'-]+", message)
-        # return re.findall(r"[\w'-]+|\s+|[^\w\s'-]+", message)
 
     @staticmethod
     def pick(stat: dict) -> str:
@@ -45,7 +42,7 @@ class Chain:
 
         regex = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
         message = re.sub(regex, '', message)
-        words = self.split_words(message)
+        words = self.splitter.split_tokens(message)
         for word in words:
             if word != '':  # TODO: [картинка]
                 self.teach_word(word.lower())

@@ -7,17 +7,19 @@ import telegram
 from src import db
 from src.helpers import general
 from src.services.chain.chain import Chain
+from src.services.chain.splitters import Splitter, NoPunctuationSplitter
 
 
 class ChainHandler:
-    def __init__(self, window: int):
+    def __init__(self, window: int, splitter: Splitter):
         self.chats = {}
         self.window = window
+        self.splitter = splitter
 
         with db.conn, db.conn.cursor() as cur:
             cur.execute('''SELECT tg_id, chain_period FROM chats''')
             for record in cur:
-                self.chats[record[0]] = Chain(self.window, record[0])
+                self.chats[record[0]] = Chain(self.window, self.splitter)
 
             # TODO: игнорировать изменения сообщений
             cur.execute('''
@@ -30,7 +32,7 @@ class ChainHandler:
                 try:
                     chain = self.chats[record[0]]
                 except KeyError:
-                    chain = Chain(self.window, record[0])
+                    chain = Chain(self.window, self.splitter)
                     self.chats[record[0]] = chain
                 chain.teach_message(record[1])
 
@@ -47,7 +49,7 @@ class ChainHandler:
         try:
             chain = self.chats[message.chat_id]
         except KeyError:
-            chain = Chain(self.window, message.chat_id)
+            chain = Chain(self.window, self.splitter)
             self.chats[message.chat_id] = chain
 
         chain.teach_message(message.text)
@@ -88,9 +90,10 @@ def __main__():
     config.load('../../config.json')
     db.connect()
 
-    handler = ChainHandler(window=1)
+    splitter = NoPunctuationSplitter()
+    handler = ChainHandler(window=1, splitter=splitter)
 
-    print(Chain.split_words("Hello, I'm a string!!! слово ещё,,, а-за-за"))
+    print(splitter.split_tokens("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
     for x in range(20):    # pylint: disable=unused-variable
