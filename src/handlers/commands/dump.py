@@ -24,19 +24,14 @@ class DumpCommand:
             return
 
         with db.conn, db.conn.cursor() as cur:
-            cur.execute('SELECT dump FROM updates WHERE tg_id=%s', (update_id,))
+            cur.execute('SELECT json FROM updates WHERE tg_id=%s', (update_id,))
             res = cur.fetchone()
-            if res is not None:
-                dump = bytes(res[0])
-                dump = gzip.decompress(dump)
-                dump = str(yaml.load(dump, Loader=yaml.Loader))
-                dump_clean = dump.replace('"', '\\"').replace("'", '"').replace('True', 'true').replace('False',
-                                                                                                        'false')
-
-                try:
-                    general.reply_text(message, json.dumps(json.loads(dump_clean), indent=2, ensure_ascii=False))
-                except json.decoder.JSONDecodeError as e:
-                    logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
-                    general.reply_text(message, dump_clean)
-            else:
+            if res is None:
                 general.reply_text(message, 'В базе нет такого апдейта.')
+                return
+
+            try:
+                general.reply_text(message, json.dumps(json.loads(res[0]), indent=2, ensure_ascii=False))
+            except json.decoder.JSONDecodeError as e:
+                logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
+                general.reply_text(message, res[0])

@@ -1,10 +1,8 @@
-import gzip
 import logging
 from typing import Union
 
 import psycopg2
 import telegram
-import yaml
 
 from src import db
 
@@ -114,16 +112,13 @@ def handle(update: telegram.Update):
         if message is not None:
             chat_id = message.chat_id
 
-        dump = yaml.dump(update).encode('utf-8')
-        dump = gzip.compress(dump)
-
         cur.execute('''
-            INSERT INTO updates(tg_id, chat_id, dump)
+            INSERT INTO updates(tg_id, chat_id, json)
             VALUES(%s, %s, %s)
         ''', (
             update.update_id,
             chat_id,
-            dump
+            update.to_json(),
         ))
 
     if message is None:

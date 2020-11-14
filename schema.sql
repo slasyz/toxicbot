@@ -19,7 +19,7 @@ CREATE TABLE updates (
     tg_id   int4 PRIMARY KEY,
     chat_id bigint,
     created timestamptz DEFAULT now(),
-    dump    bytea
+    json    jsonb       DEFAULT NULL
 );
 
 CREATE TABLE messages (

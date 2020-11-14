@@ -74,6 +74,6 @@ tmux.start:   ## start tmux session
 .PHONY: tmux.stop
 tmux.stop:    ## stop tmux session
 	( \
-		tmux send-keys -t ToxicTgBot C-c \
+		tmux send-keys -t ToxicTgBot C-c; \
 		tmux send-keys -t ToxicTgBot C-c \
     ) || true
