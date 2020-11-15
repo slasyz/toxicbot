@@ -4,10 +4,10 @@ import telegram
 
 from src.handlers.commands.command import Command
 from src.helpers import general
-from src.features.anecdote import get_random_adecdote
+from src.features.joke import get_random_joke
 
 
-class AnecdoteCommand(Command):
+class JokeCommand(Command):
     def handle(self, message: telegram.Message, args: List[str]):
-        text = get_random_adecdote()
+        text = get_random_joke()
         general.reply(message, text)

@@ -12,7 +12,7 @@ from src.handlers.handler import Handler
 from src.helpers import general
 from src.helpers.general import is_admin, reply
 from src.handlers import database
-from src.handlers.commands.anecdote import AnecdoteCommand
+from src.handlers.commands.joke import JokeCommand
 from src.handlers.commands.chats import ChatsCommand
 from src.handlers.commands.dump import DumpCommand
 from src.handlers.commands.send import SendCommand
@@ -126,7 +126,7 @@ def init():
     commands = (
         CommandDefinition('dump', DumpCommand(), True),
         CommandDefinition('stat', StatCommand(), False),
-        CommandDefinition('joke', AnecdoteCommand(), False),
+        CommandDefinition('joke', JokeCommand(), False),
         CommandDefinition('send', SendCommand(), True),
         CommandDefinition('chats', ChatsCommand(), True),
     )

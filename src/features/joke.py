@@ -8,7 +8,7 @@ URL = 'https://baneks.ru/random'
 PREFIX_REGEXP = re.compile(r'^Анек #\d+\s+')
 
 
-def get_random_adecdote() -> str:
+def get_random_joke() -> str:
     try:
         with requests.get(URL) as r:
             data = r.content.decode('utf-8', 'ignore')
