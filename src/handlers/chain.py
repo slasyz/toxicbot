@@ -1,9 +1,8 @@
-import os
-import time
 from datetime import datetime
 
 import telegram
 
+import main
 from src import db
 from src.handlers.handler import Handler
 from src.helpers import general
@@ -81,15 +80,7 @@ class ChainHandler(Handler):
 
 
 def __main__():
-    from src import config  # pylint: disable=import-outside-toplevel
-    from src.helpers import log  # pylint: disable=import-outside-toplevel
-
-    log.init()
-    os.environ['TZ'] = 'Europe/Moscow'
-    time.tzset()
-
-    config.load('../../config.json')
-    db.connect()
+    main.init()
 
     # splitter = NoPunctuationSplitter()
     splitter = PunctuationSplitter()

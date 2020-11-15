@@ -3,6 +3,7 @@ import traceback
 
 import telegram
 
+import main
 from src.features.voice import NextUpService
 
 
@@ -26,26 +27,14 @@ class VoiceMessage(Message):
 
 
 def __main__():
-    import os  # pylint: disable=import-outside-toplevel
-    import time  # pylint: disable=import-outside-toplevel
-
-    import telegram  # pylint: disable=import-outside-toplevel
-
-    from src import db  # pylint: disable=import-outside-toplevel
     from src.helpers import general  # pylint: disable=import-outside-toplevel
     from src import config  # pylint: disable=import-outside-toplevel
-    from src.helpers import log  # pylint: disable=import-outside-toplevel
 
-    log.init()
-    os.environ['TZ'] = 'Europe/Moscow'
-    time.tzset()
-
-    config.load('../../config.json')
-    db.connect()
+    main.init()
 
     general.bot = telegram.Bot(config.c['telegram']['token'])
 
-    general.send(-328967401, VoiceMessage('приветик, чикуля-красотка, чем занимаешься?'))
+    general.send(-362750796, VoiceMessage('бля, не в тот чат'))
 
 
 if __name__ == '__main__':

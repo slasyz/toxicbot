@@ -1,10 +1,9 @@
 import gzip
-import os
-import time
 from typing import List
 
 import yaml
 
+import main
 from src import db
 
 
@@ -35,15 +34,7 @@ def save(src: List):
 
 
 def __main__():
-    from src import config  # pylint: disable=import-outside-toplevel
-    from src.helpers import log  # pylint: disable=import-outside-toplevel
-
-    log.init()
-    os.environ['TZ'] = 'Europe/Moscow'
-    time.tzset()
-
-    config.load('../config.json')
-    db.connect()
+    main.init()
 
     total = get_total()
 

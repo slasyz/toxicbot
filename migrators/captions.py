@@ -5,11 +5,10 @@ Script to run just once to set messages.text using updates.dump.caption.
 
 import gzip
 import json
-import os
-import time
 
 import yaml
 
+import main
 from src import db
 
 
@@ -55,15 +54,7 @@ def save():
 
 
 def __main__():
-    from src import config  # pylint: disable=import-outside-toplevel
-    from src.helpers import log  # pylint: disable=import-outside-toplevel
-
-    log.init()
-    os.environ['TZ'] = 'Europe/Moscow'
-    time.tzset()
-
-    config.load('../config.json')
-    db.connect()
+    main.init()
 
     load()
     save()

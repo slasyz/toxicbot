@@ -6,10 +6,6 @@
 
 PYTHON_INTERPRETER=$(shell ls ./venv/Scripts/python.exe ./venv/bin/python 2> /dev/null)
 
-
-DISABLE_STRICT=no-self-use,missing-module-docstring,missing-class-docstring,missing-function-docstring,line-too-long,global-statement,too-few-public-methods,broad-except,redefined-builtin,protected-access,too-many-arguments,too-many-locals,fixme
-DISABLE_NON_STRICT=$(DISABLE_STRICT),invalid-name,unused-argument
-
 BACKUP_FILENAME := ./backups/backup-$(shell date +'%Y%m%d-%H%M%S').sql.gz
 
 
@@ -37,13 +33,12 @@ init:         ## create virtual environment
 
 .PHONY: lint
 lint:         ## run linter with less strict checks
-lint: DISABLE=$(DISABLE_NON_STRICT)
+lint: DISABLE=invalid-name,unused-argument
 lint: pylint
 
 
 .PHONY: lint.all
 lint.all:     ## run linter with all usable checks
-lint.all: DISABLE=$(DISABLE_STRICT)
 lint.all: pylint
 
 
@@ -55,8 +50,7 @@ port:         ## run port forwarding to open Flask server locally
 
 .PHONY: pylint
 pylint:       ## run pylint (with disabled checks specified in $DISABLE variable)
-	# TODO: run Linux version of pylint here
-	cd ..; ./ToxicTgBot/$(PYTHON_INTERPRETER) -m pylint ./ToxicTgBot --ignore=venv --disable="$(DISABLE)" --extension-pkg-whitelist=psycopg2._psycopg
+	cd ..; ./ToxicTgBot/$(PYTHON_INTERPRETER) -m pylint ./ToxicTgBot --rcfile="./ToxicTgBot/pylintrc" --disable="$(DISABLE)"
 
 
 .PHONY: run

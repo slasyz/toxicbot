@@ -84,12 +84,12 @@ class Chain:
         return ''
 
     def predict_not_empty(self, message: str = None):
-        for i in range(10):
+        for _ in range(10):
             res = self._predict(message)
             if res != '':
                 return res
 
-        for i in range(100):
+        for _ in range(100):
             res = self._predict()
             if res != '':
                 return res
