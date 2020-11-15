@@ -16,21 +16,22 @@ from src.workers.reminders import ReminderWorker
 from src.workers.server.server import ServerWorker
 
 
-def init():
+def init(config_file):
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()  # pylint: disable=no-member
 
-    config.load('./config.json')
+    config.load(config_file)
     db.connect()
-    worker.start_workers([ServerWorker(), JokesWorker(), ReminderWorker()])
-    handling.init()
 
 
 def __main__():
-    init()
+    init('./config.json')
 
     general.bot = telegram.Bot(config.c['telegram']['token'])
+
+    worker.start_workers([ServerWorker(), JokesWorker(), ReminderWorker()])
+    handling.init()
 
     # TODO: распутать это всё
     update_id = None

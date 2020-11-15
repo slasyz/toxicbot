@@ -30,7 +30,7 @@ def __main__():
     from src import config  # pylint: disable=import-outside-toplevel
     import main  # pylint: disable=import-outside-toplevel
 
-    main.init()
+    main.init('../../config.json')
 
     general.bot = telegram.Bot(config.c['telegram']['token'])
 

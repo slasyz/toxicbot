@@ -25,7 +25,7 @@ def handle_user(cur: psycopg2._psycopg.cursor, user: telegram.User):
             user.last_name,
             user.username
         ))
-    elif res[0] != user.first_name or res[1] != user.last_name != user.username:
+    elif res[0] != user.first_name or res[1] != user.last_name or res[2] != user.username:
         cur.execute('''
             UPDATE users
             SET first_name = %s,
@@ -82,14 +82,18 @@ def handle_message(message: telegram.Message, update_id: Union[int, type(None)] 
             return
 
         text = ''
+        sticker = None
         if message.text is not None:
             text = message.text
         elif message.caption is not None:
             text = message.caption
+        elif message.sticker is not None:
+            text = message.sticker.emoji
+            sticker = message.sticker.file_id
 
         cur.execute('''
-            INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date)
-            VALUES(%s, %s, %s, %s, %s, %s)
+            INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
+            VALUES(%s, %s, %s, %s, %s, %s, %s)
         ''', (
             message.chat_id,
             message.message_id,
@@ -97,6 +101,7 @@ def handle_message(message: telegram.Message, update_id: Union[int, type(None)] 
             update_id,
             text,
             message.date,
+            sticker
         ))
 
 
