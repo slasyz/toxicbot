@@ -1,10 +1,10 @@
-# TODO: check platform amd run virtualenv accordingly
-
-
 ## *********************
 ## * Makefile commands *
 ## *********************
 ##
+
+
+PYTHON_INTERPRETER=$(shell ls ./venv/Scripts/python.exe ./venv/bin/python 2> /dev/null)
 
 
 DISABLE_STRICT=no-self-use,missing-module-docstring,missing-class-docstring,missing-function-docstring,line-too-long,global-statement,too-few-public-methods,broad-except,redefined-builtin,protected-access,too-many-arguments,too-many-locals,fixme
@@ -19,9 +19,20 @@ backup:       ## create remote database backup in local directory
 	du -sh ./backups/*
 
 
+.PHONY: deps
+deps:         ## install all dependencies from requirements.txt
+	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+
+
 .PHONY: help
 help:         ## show this help
 	@sed -ne '/@sed/!s/##\s\?//p' $(MAKEFILE_LIST)
+
+
+.PHONY: init
+init:         ## create virtual environment
+	virtualenv venv -p /usr/bin/python3
+	$(MAKE) deps
 
 
 .PHONY: lint
@@ -45,17 +56,17 @@ port:         ## run port forwarding to open Flask server locally
 .PHONY: pylint
 pylint:       ## run pylint (with disabled checks specified in $DISABLE variable)
 	# TODO: run Linux version of pylint here
-	cd ..; ./ToxicTgBot/venv/Scripts/pylint.exe ./ToxicTgBot --ignore=venv --disable="$(DISABLE)" --extension-pkg-whitelist=psycopg2._psycopg
+	cd ..; ./ToxicTgBot/$(PYTHON_INTERPRETER) -m pylint ./ToxicTgBot --ignore=venv --disable="$(DISABLE)" --extension-pkg-whitelist=psycopg2._psycopg
 
 
 .PHONY: run
 run:          ## start bot in foreground
-	./venv/bin/python3 ./main.py
+	$(PYTHON_INTERPRETER) ./main.py
 
 
 .PHONY: test
 test:         ## run unit tests
-	./venv/Scripts/python.exe -m pytest
+	$(PYTHON_INTERPRETER) -m pytest
 
 
 .PHONY: tmux.restart
@@ -76,4 +87,4 @@ tmux.stop:    ## stop tmux session
 	( \
 		tmux send-keys -t ToxicTgBot C-c; \
 		tmux send-keys -t ToxicTgBot C-c \
-    ) || true
+	) || true
