@@ -8,14 +8,14 @@ from src.helpers import general
 from src.helpers.message import VoiceMessage
 
 
-NAHUY_REGEXP = r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)'
+NAHUY_REGEXP = re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)')
 NAHUY_ANSWER = 'Что за токсичность...'
 
 
 class NahuyHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
-        if re.search(NAHUY_REGEXP, message.text.lower()) is None:
+        if NAHUY_REGEXP.search(message.text.lower()) is None:
             return False
 
         general.reply(message, NAHUY_ANSWER)
@@ -65,7 +65,7 @@ class VoiceHandler(Handler):
         return True
 
 
-SORRY_REGEXP = r'бот,\s+извинись'
+SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
 
 class SorryHandler(Handler):
@@ -75,7 +75,7 @@ class SorryHandler(Handler):
             general.send(message.chat_id, 'Отсоси, потом проси.')
             return True
 
-        if re.search(SORRY_REGEXP, message.text.lower()) is not None:
+        if SORRY_REGEXP.search(message.text.lower()) is not None:
             general.send(message.chat_id, 'Извините.')
             return True
 

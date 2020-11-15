@@ -21,6 +21,9 @@ from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler
 from src.features.chain.splitters import PunctuationSplitter
 
 
+ARGS_SPLIT_REGEXP = re.compile(r'\s+')
+
+
 @dataclass
 class CommandDefinition:
     name: str
@@ -56,7 +59,7 @@ def handle_command(message: telegram.Message) -> bool:
     if command_name == '':
         return False
 
-    args = re.split(r'\s+', message.text[1:])
+    args = ARGS_SPLIT_REGEXP.split(message.text[1:])
 
     for command in commands:
         if command_name != command.name:

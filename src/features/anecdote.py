@@ -5,6 +5,7 @@ import requests
 from lxml import html
 
 URL = 'https://baneks.ru/random'
+PREFIX_REGEXP = re.compile(r'^Анек #\d+\s+')
 
 
 def get_random_adecdote() -> str:
@@ -25,5 +26,5 @@ def get_random_adecdote() -> str:
         print('!!!!!!! /кривой анекдот !!!!!!!')
         return 'Я обосрался.'
 
-    text = re.sub(r'^Анек #\d+\s+', '', text)
+    text = PREFIX_REGEXP.sub('', text)
     return text

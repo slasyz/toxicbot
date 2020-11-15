@@ -26,5 +26,6 @@ class SendCommand(Command):
                 general.reply(message, f'Не могу найти такой чат ({chat_id}).')
                 return
 
-        text = re.sub(r'^/' + args[0] + r'\s+' + args[1] + r'\s+', '', message.text)
+        prefix_regexp = re.compile(r'^/' + args[0] + r'\s+' + args[1] + r'\s+')
+        text = prefix_regexp.sub('', message.text)
         general.send(chat_id, text)

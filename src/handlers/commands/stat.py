@@ -65,13 +65,13 @@ class StatCommand(Command):
         self._parse_args_and_send(message, args)
 
 
-PIZDIT_REGEXP = r'кто\s+больше\s+всех\s+пиздит'
+PIZDIT_REGEXP = re.compile(r'кто\s+больше\s+всех\s+пиздит')
 
 
 class PizditHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
-        if re.search(PIZDIT_REGEXP, message.text.lower()) is None:
+        if PIZDIT_REGEXP.search(message.text.lower()) is None:
             return False
 
         response = 'Больше всех пиздят в этом чате:\n'

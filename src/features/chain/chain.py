@@ -5,6 +5,7 @@ from typing import Union
 from src.features.chain.splitters import Splitter
 
 BREAK = '[BREAK]'
+LINK_REGEXP = re.compile(r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
 
 
 class Chain:
@@ -42,8 +43,7 @@ class Chain:
         if message is None or message == '':
             return
 
-        regex = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
-        message = re.sub(regex, '', message)
+        message = LINK_REGEXP.sub('', message)
         words = self.splitter.split(message)
         for word in words:
             if word != '':  # TODO: [картинка]
