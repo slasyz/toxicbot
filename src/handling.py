@@ -15,7 +15,7 @@ from src.handlers.commands.dump import DumpCommand
 from src.handlers.commands.send import SendCommand
 from src.handlers.commands.stat import StatCommand, PizditHandler
 from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
-from src.services.chain.splitters import PunctuationSplitter
+from src.features.chain.splitters import PunctuationSplitter
 
 
 class Command(namedtuple('Command', ['name', 'handler', 'admins_only'])):

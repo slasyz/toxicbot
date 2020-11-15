@@ -6,8 +6,8 @@ import telegram
 
 from src import db
 from src.helpers import general
-from src.services.chain.chain import Chain
-from src.services.chain.splitters import Splitter, PunctuationSplitter
+from src.features.chain.chain import Chain
+from src.features.chain.splitters import Splitter, PunctuationSplitter
 
 
 class ChainHandler:

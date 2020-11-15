@@ -4,7 +4,7 @@ import telegram
 
 from src import db
 from src.handlers.database import handle_message
-
+from src.helpers.message import Message
 
 bot: Union[telegram.Bot, type(None)] = None
 
@@ -29,14 +29,16 @@ def is_admin(user_id: int) -> bool:
         return cur.fetchone() is not None
 
 
-def reply_text(to: telegram.Message, text: str) -> telegram.Message:
-    message = to.reply_text(text)
-    handle_message(message)
-    return message
+def reply_text(to: telegram.Message, msg: Union[str, Message]) -> telegram.Message:
+    return send_message(to.chat_id, msg, to.message_id)
 
 
-def send_message(chat_id: int, text: str) -> telegram.Message:
-    message = bot.send_message(chat_id, text)
+def send_message(chat_id: int, msg: Union[str, Message], reply_to: int = None) -> telegram.Message:
+    if type(msg) == str:
+        message = bot.send_message(chat_id, msg, reply_to_message_id=reply_to)
+    else:
+        message = msg.send(bot, chat_id, reply_to)
+
     handle_message(message)
     return message
 

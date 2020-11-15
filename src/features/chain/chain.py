@@ -2,7 +2,7 @@ import re
 import random
 from typing import Union
 
-from src.services.chain.splitters import Splitter
+from src.features.chain.splitters import Splitter
 
 BREAK = '[BREAK]'
 

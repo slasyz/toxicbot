@@ -3,7 +3,7 @@ from typing import List
 import telegram
 
 from src.helpers import general
-from src.services.anecdote import get_random_adecdote
+from src.features.anecdote import get_random_adecdote
 
 
 class AnecdoteCommand:

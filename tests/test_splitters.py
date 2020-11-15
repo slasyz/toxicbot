@@ -1,6 +1,6 @@
 import pytest
 
-from src.services.chain.splitters import NoPunctuationSplitter, PunctuationSplitter
+from src.features.chain.splitters import NoPunctuationSplitter, PunctuationSplitter
 
 
 @pytest.mark.parametrize(
