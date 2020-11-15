@@ -36,9 +36,9 @@ def save(src: List):
 
 def __main__():
     from src import config  # pylint: disable=import-outside-toplevel
-    from src.helpers import logging  # pylint: disable=import-outside-toplevel
+    from src.helpers import log  # pylint: disable=import-outside-toplevel
 
-    logging.init()
+    log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()
 

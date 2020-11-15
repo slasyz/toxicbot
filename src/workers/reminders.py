@@ -3,7 +3,7 @@ from datetime import datetime
 
 from src import db
 from src.helpers import general
-from src.helpers.logging import print_sleep
+from src.helpers.log import print_sleep
 from src.workers.worker import Worker
 
 
