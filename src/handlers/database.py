@@ -43,6 +43,8 @@ def handle_user(cur: psycopg2._psycopg.cursor, user: telegram.User):
 def handle_chat(cur: psycopg2._psycopg.cursor, chat: telegram.Chat):
     cur.execute('SELECT title FROM chats WHERE tg_id=%s', (chat.id,))
 
+    title = chat.title or (((chat.first_name or '') + ' ' + (chat.last_name or '')).strip()) or None
+
     res = cur.fetchone()
     if res is None:
         cur.execute('''
@@ -50,15 +52,15 @@ def handle_chat(cur: psycopg2._psycopg.cursor, chat: telegram.Chat):
             VALUES(%s, %s)
         ''', (
             chat.id,
-            chat.title
+            title
         ))
-    elif res[0] != chat.title:
+    elif res[0] != title:
         cur.execute('''
             UPDATE chats
             SET title = %s
             WHERE tg_id=%s
         ''', (
-            chat.title,
+            title,
             chat.id
         ))
 
