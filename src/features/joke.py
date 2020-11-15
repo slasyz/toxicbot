@@ -1,5 +1,6 @@
 import re
 import traceback
+from typing import Tuple
 
 import requests
 from lxml import html
@@ -8,7 +9,7 @@ URL = 'https://baneks.ru/random'
 PREFIX_REGEXP = re.compile(r'^Анек #\d+\s+')
 
 
-def get_random_joke() -> str:
+def get_random_joke() -> Tuple[str, bool]:
     try:
         with requests.get(URL) as r:
             data = r.content.decode('utf-8', 'ignore')
@@ -18,13 +19,13 @@ def get_random_joke() -> str:
     except requests.HTTPError as e:  # обрабатывать нормально
         traceback.print_stack()
         print(e)
-        return 'Хуйня какая-то.'
+        return 'Хуйня какая-то.', False
 
     if not text.startswith('Анек #'):
         print('!!!!!!!  кривой анекдот !!!!!!!')
         print(data)
         print('!!!!!!! /кривой анекдот !!!!!!!')
-        return 'Я обосрался.'
+        return 'Я обосрался.', False
 
     text = PREFIX_REGEXP.sub('', text)
-    return text
+    return text, True

@@ -66,7 +66,12 @@ run:          ## start bot in foreground
 
 .PHONY: test
 test:         ## run unit tests
-	$(PYTHON_INTERPRETER) -m pytest
+	$(PYTHON_INTERPRETER) -m pytest tests/unit
+
+
+.PHONY: test.all
+test.all:     ## run all tests
+	$(PYTHON_INTERPRETER) -m pytest tests
 
 
 .PHONY: tmux.restart

@@ -22,11 +22,12 @@ class JokesWorker(Worker):
                 cur.execute('SELECT tg_id FROM chats WHERE tg_id < 0;')
                 for record in cur:
                     logging.info('sending anek to %d', record[0])
-                    anek = get_random_joke()
+                    anek, _ = get_random_joke()
                     general.send(record[0], anek)
 
             time.sleep(2)
 
 
 if __name__ == '__main__':
-    print(get_random_joke())
+    text, _ = get_random_joke()
+    print(text)

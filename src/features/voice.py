@@ -14,13 +14,13 @@ class VoiceService:
 class NextUpService(VoiceService):
     def load(self, text: str) -> IO:
         # TODO: proxy
-        link = self._generate_link(text)
+        link = self.generate_link(text)
 
         with requests.get(link) as audio:
             f = BytesIO(audio.content)
             return f
 
-    def _generate_link(self, text):
+    def generate_link(self, text):
         # TODO: proxy
         req = requests.get(
             url=GENERATE_ENDPOINT,

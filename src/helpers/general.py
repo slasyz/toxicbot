@@ -1,3 +1,4 @@
+import re
 from typing import Union
 
 import telegram
@@ -5,6 +6,8 @@ import telegram
 from src import db
 from src.handlers.database import handle_message
 from src.helpers.message import Message
+
+LINK_REGEXP = re.compile(r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
 
 bot: Union[telegram.Bot, type(None)] = None
 

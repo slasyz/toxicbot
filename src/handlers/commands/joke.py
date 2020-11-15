@@ -9,5 +9,5 @@ from src.features.joke import get_random_joke
 
 class JokeCommand(Command):
     def handle(self, message: telegram.Message, args: List[str]):
-        text = get_random_joke()
+        text, _ = get_random_joke()
         general.reply(message, text)
