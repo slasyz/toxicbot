@@ -8,7 +8,6 @@ import json
 
 import yaml
 
-import main
 from src import db
 
 
@@ -54,7 +53,7 @@ def save():
 
 
 def __main__():
-    main.init()
+    import main  # pylint: disable=import-outside-toplevel
 
     load()
     save()

@@ -31,6 +31,6 @@ class DumpCommand(Command):
 
             try:
                 general.reply(message, json.dumps(json.loads(res[0]), indent=2, ensure_ascii=False))
-            except json.decoder.JSONDecodeError as e:
-                logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
+            except json.decoder.JSONDecodeError as ex:
+                logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
                 general.reply(message, res[0])

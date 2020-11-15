@@ -100,9 +100,9 @@ def handle_update(update: telegram.Update):
 
             if handler.handle(update.message):
                 return
-        except Exception as e:
+        except Exception as ex:
             reply(update.message, 'Ошибка.')
-            logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
+            logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
 
 
 def init():

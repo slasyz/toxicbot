@@ -26,9 +26,9 @@ class Worker:
         while True:
             try:
                 self.work()
-            except Exception as e:
+            except Exception as ex:
                 traceback.print_stack()
-                print(e)
+                print(ex)
 
                 self._clean_counter()
                 self.counter.add(datetime.now())

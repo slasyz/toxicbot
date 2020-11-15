@@ -3,11 +3,11 @@ import logging
 from translate import Translator
 
 
-def do(text: str) -> str:
+def do(text: str, lang_from: str = 'ru', lang_to: str = 'uk') -> str:
     try:
-        translator = Translator("uk", "ru")
+        translator = Translator(lang_to, lang_from)
         return translator.translate(text)
-    except Exception as e:
-        logging.error('translate error: %s', e)
+    except Exception as ex:
+        logging.error('translate error: %s', ex)
 
     return text

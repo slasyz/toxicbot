@@ -3,7 +3,6 @@ import traceback
 
 import telegram
 
-import main
 from src.features.voice import NextUpService
 
 
@@ -21,14 +20,15 @@ class VoiceMessage(Message):
         try:
             f = self.service.load(self.text)
             return bot.send_voice(chat_id, voice=f, reply_to_message_id=reply_to)
-        except Exception as e:
-            logging.error('caught exception %s:\n\n%s', e, traceback.format_exc())
+        except Exception as ex:
+            logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
             return bot.send_message(chat_id, f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 
 
 def __main__():
     from src.helpers import general  # pylint: disable=import-outside-toplevel
     from src import config  # pylint: disable=import-outside-toplevel
+    import main  # pylint: disable=import-outside-toplevel
 
     main.init()
 

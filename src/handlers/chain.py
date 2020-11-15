@@ -2,7 +2,6 @@ from datetime import datetime
 
 import telegram
 
-import main
 from src import db
 from src.handlers.handler import Handler
 from src.helpers import general
@@ -80,6 +79,7 @@ class ChainHandler(Handler):
 
 
 def __main__():
+    import main  # pylint: disable=import-outside-toplevel
     main.init()
 
     # splitter = NoPunctuationSplitter()

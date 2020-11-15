@@ -12,9 +12,9 @@ from src.workers.worker import Worker
 class JokesWorker(Worker):
     def work(self):
         while True:
-            t = time.localtime()
-            t = time.mktime(t[:3] + (0, 0, 0) + t[6:])  # отбрасываем часы-минуты-секунды
-            seconds = math.ceil(t + 24 * 3600 - time.time())  # прибавляем 24 часа, смотрим сколько осталось
+            now = time.localtime()
+            now = time.mktime(now[:3] + (0, 0, 0) + now[6:])  # отбрасываем часы-минуты-секунды
+            seconds = math.ceil(now + 24 * 3600 - time.time())  # прибавляем 24 часа, смотрим сколько осталось
             print_sleep(seconds, 'next midnight joke')
             time.sleep(seconds)
 

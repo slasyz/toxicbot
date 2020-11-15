@@ -3,7 +3,6 @@ from typing import List
 
 import yaml
 
-import main
 from src import db
 
 
@@ -34,6 +33,7 @@ def save(src: List):
 
 
 def __main__():
+    import main  # pylint: disable=import-outside-toplevel
     main.init()
 
     total = get_total()
