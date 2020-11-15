@@ -28,7 +28,7 @@ class ReminderWorker(Worker):
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)
 
-            general.send_message(chat_id, text)
+            general.send(chat_id, text)
 
             with db.conn, db.conn.cursor() as cur:
                 cur.execute('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))

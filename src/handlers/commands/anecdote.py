@@ -10,4 +10,4 @@ from src.features.anecdote import get_random_adecdote
 class AnecdoteCommand(Command):
     def handle(self, message: telegram.Message, args: List[str]):
         text = get_random_adecdote()
-        general.reply_text(message, text)
+        general.reply(message, text)

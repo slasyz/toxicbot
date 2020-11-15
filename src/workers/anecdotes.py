@@ -23,7 +23,7 @@ class AnecdoteWorker(Worker):
                 for record in cur:
                     logging.info('sending anek to %d', record[0])
                     anek = get_random_adecdote()
-                    general.send_message(record[0], anek)
+                    general.send(record[0], anek)
 
             time.sleep(2)
 

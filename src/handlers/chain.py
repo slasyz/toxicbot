@@ -61,7 +61,7 @@ class ChainHandler(Handler):
 
         if general.is_reply_or_mention(message):
             text = self.chats[message.chat_id].predict_not_empty(message.text)
-            general.reply_text(message, text)
+            general.reply(message, text)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -74,7 +74,7 @@ class ChainHandler(Handler):
 
             if count % self._get_period(message.chat_id) == 0:
                 text = self.chats[message.chat_id].predict_not_empty(message.text)
-                general.send_message(message.chat_id, text)
+                general.send(message.chat_id, text)
                 return True
 
         return False

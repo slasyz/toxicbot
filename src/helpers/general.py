@@ -29,11 +29,11 @@ def is_admin(user_id: int) -> bool:
         return cur.fetchone() is not None
 
 
-def reply_text(to: telegram.Message, msg: Union[str, Message]) -> telegram.Message:
-    return send_message(to.chat_id, msg, to.message_id)
+def reply(to: telegram.Message, msg: Union[str, Message]) -> telegram.Message:
+    return send(to.chat_id, msg, to.message_id)
 
 
-def send_message(chat_id: int, msg: Union[str, Message], reply_to: int = None) -> telegram.Message:
+def send(chat_id: int, msg: Union[str, Message], reply_to: int = None) -> telegram.Message:
     if isinstance(msg, str):
         message = bot.send_message(chat_id, msg, reply_to_message_id=reply_to)
     else:
@@ -43,11 +43,11 @@ def send_message(chat_id: int, msg: Union[str, Message], reply_to: int = None) -
     return message
 
 
-def send_to_admins(text: str):
+def send_to_admins(msg: Union[str, Message]):
     with db.conn, db.conn.cursor() as cur:
         cur.execute('SELECT tg_id FROM users WHERE admin')
         for record in cur:
-            send_message(record[0], text)
+            send(record[0], msg)
 
 
 def is_reply_or_mention(message: telegram.Message) -> bool:

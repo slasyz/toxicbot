@@ -23,4 +23,4 @@ class ChatsCommand(Command):
             for record in cur:
                 response.append(f'{record[1]} — {record[0]}')
 
-            general.reply_text(message, '\n'.join(response))
+            general.reply(message, '\n'.join(response))
