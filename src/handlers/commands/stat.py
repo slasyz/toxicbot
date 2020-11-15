@@ -4,6 +4,8 @@ from typing import List
 import telegram
 
 from src import db
+from src.handlers.commands.command import Command
+from src.handlers.handler import Handler
 from src.helpers import general
 
 
@@ -27,7 +29,7 @@ def get_stat(chat_id) -> str:
         return response
 
 
-class StatCommand:
+class StatCommand(Command):
     def _get_response(self, chat_id) -> str:
         response = 'Кто сколько написал с момента запуска бота:\n'
         response += get_stat(chat_id)
@@ -66,7 +68,7 @@ class StatCommand:
 PIZDIT_REGEXP = r'кто\s+больше\s+всех\s+пиздит'
 
 
-class PizditHandler:
+class PizditHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if re.search(PIZDIT_REGEXP, message.text.lower()) is None:

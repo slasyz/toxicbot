@@ -1,11 +1,14 @@
 import logging
 import traceback
 import re
-from collections import namedtuple
+from dataclasses import dataclass
+from typing import Tuple
 
 import telegram
 
 from src.handlers.chain import ChainHandler
+from src.handlers.commands.command import Command
+from src.handlers.handler import Handler
 from src.helpers import general
 from src.helpers.general import is_admin, reply_text
 from src.handlers import database
@@ -18,13 +21,16 @@ from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler
 from src.features.chain.splitters import PunctuationSplitter
 
 
-class Command(namedtuple('Command', ['name', 'handler', 'admins_only'])):
-    pass
+@dataclass
+class CommandDefinition:
+    name: str
+    handler: Command
+    admins_only: bool
 
 
-handlers_private = ()
-handlers_chats = ()
-commands = ()
+handlers_private: Tuple[Handler, ...] = ()
+handlers_chats: Tuple[Handler, ...] = ()
+commands: Tuple[CommandDefinition, ...] = ()
 
 
 def handle_command(message: telegram.Message) -> bool:
@@ -87,8 +93,7 @@ def handle_update(update: telegram.Update):
 
     for handler in handlers:
         try:
-            if 'pre_handle' in dir(handler):
-                handler.pre_handle(update.message)
+            handler.pre_handle(update.message)
 
             if handler.handle(update.message):
                 return
@@ -116,9 +121,9 @@ def init():
     )
 
     commands = (
-        Command('dump', DumpCommand(), True),
-        Command('stat', StatCommand(), False),
-        Command('joke', AnecdoteCommand(), False),
-        Command('send', SendCommand(), True),
-        Command('chats', ChatsCommand(), True),
+        CommandDefinition('dump', DumpCommand(), True),
+        CommandDefinition('stat', StatCommand(), False),
+        CommandDefinition('joke', AnecdoteCommand(), False),
+        CommandDefinition('send', SendCommand(), True),
+        CommandDefinition('chats', ChatsCommand(), True),
     )

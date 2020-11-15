@@ -5,13 +5,13 @@ import traceback
 from typing import List
 
 import telegram
-import yaml
 
 from src import db
+from src.handlers.commands.command import Command
 from src.helpers import general
 
 
-class DumpCommand:
+class DumpCommand(Command):
     def handle(self, message: telegram.Message, args: List[str]):
         if len(args) != 2:
             general.reply_text(message, f'Нужно писать так: /{args[0]} UPDATE_ID')

@@ -5,12 +5,13 @@ from datetime import datetime
 import telegram
 
 from src import db
+from src.handlers.handler import Handler
 from src.helpers import general
 from src.features.chain.chain import Chain
 from src.features.chain.splitters import Splitter, PunctuationSplitter
 
 
-class ChainHandler:
+class ChainHandler(Handler):
     def __init__(self, window: int, splitter: Splitter):
         self.chats = {}
         self.window = window

@@ -3,13 +3,14 @@ import re
 
 import telegram
 
+from src.handlers.handler import Handler
 from src.helpers import general
 
 NAHUY_REGEXP = r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)'
 NAHUY_ANSWER = 'Что за токсичность...'
 
 
-class NahuyHandler:
+class NahuyHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if re.search(NAHUY_REGEXP, message.text.lower()) is None:
@@ -19,7 +20,7 @@ class NahuyHandler:
         return True
 
 
-class PidorHandler:
+class PidorHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if 'пидор' not in message.text.lower():
@@ -36,7 +37,7 @@ PRIVATE_ANSWERS = [
 ]
 
 
-class PrivateHandler:
+class PrivateHandler(Handler):
     def handle(self, message: telegram.Message):
         if general.is_admin(message.chat_id):
             general.reply_text(message, 'Я запущен')
@@ -53,7 +54,7 @@ VOICE_ANSWERS = [
 ]
 
 
-class VoiceHandler:
+class VoiceHandler(Handler):
     def handle(self, message: telegram.Message) -> bool:
         if message.voice is None and message.video_note is None:
             return False
@@ -65,7 +66,7 @@ class VoiceHandler:
 SORRY_REGEXP = r'бот,\s+извинись'
 
 
-class SorryHandler:
+class SorryHandler(Handler):
     @general.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:

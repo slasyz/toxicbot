@@ -34,7 +34,7 @@ def reply_text(to: telegram.Message, msg: Union[str, Message]) -> telegram.Messa
 
 
 def send_message(chat_id: int, msg: Union[str, Message], reply_to: int = None) -> telegram.Message:
-    if type(msg) == str:
+    if isinstance(msg, str):
         message = bot.send_message(chat_id, msg, reply_to_message_id=reply_to)
     else:
         message = msg.send(bot, chat_id, reply_to)
