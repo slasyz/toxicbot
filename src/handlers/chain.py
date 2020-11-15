@@ -6,7 +6,7 @@ from src import db
 from src.handlers.handler import Handler
 from src.helpers import general
 from src.features.chain.chain import Chain
-from src.features.chain.splitters import Splitter, PunctuationSplitter
+from src.features.chain.splitters import Splitter, PunctuationSplitter, SpaceAdjoinSplitter
 
 
 class ChainHandler(Handler):
@@ -89,7 +89,7 @@ def __main__():
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
-    for x in range(20):    # pylint: disable=unused-variable
+    for x in range(20):  # pylint: disable=unused-variable
         print('[' + handler.chats[-362750796].predict_not_empty() + ']')
 
 
