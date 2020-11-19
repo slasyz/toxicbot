@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Optional
 
 import psycopg2
 import telegram
@@ -65,7 +65,7 @@ def handle_chat(cur: psycopg2._psycopg.cursor, chat: telegram.Chat):
         ))
 
 
-def handle_message(message: telegram.Message, update_id: Union[int, type(None)] = None):
+def handle_message(message: telegram.Message, update_id: Optional[int] = None):
     with db.conn, db.conn.cursor() as cur:
         if message.from_user is not None:
             handle_user(cur, message.from_user)

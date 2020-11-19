@@ -1,5 +1,5 @@
 import random
-from typing import Union
+from typing import Optional
 
 from src.features.chain.splitters import Splitter
 from src.helpers.general import LINK_REGEXP
@@ -38,7 +38,7 @@ class Chain:
 
             self.current = self.current[1:] + (word,)
 
-    def teach_message(self, message: Union[str, type(None)]):
+    def teach_message(self, message: Optional[str]):
         if message is None or message == '':
             return
 

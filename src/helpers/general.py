@@ -1,5 +1,5 @@
 import re
-from typing import Union
+from typing import Union, Optional
 
 import telegram
 
@@ -9,7 +9,7 @@ from src.helpers.message import Message
 
 LINK_REGEXP = re.compile(r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
 
-bot: Union[telegram.Bot, type(None)] = None
+bot: Optional[telegram.Bot] = None
 
 
 def non_empty(func):
