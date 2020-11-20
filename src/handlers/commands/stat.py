@@ -6,7 +6,7 @@ import telegram
 from src import db
 from src.handlers.commands.command import Command
 from src.handlers.handler import Handler
-from src.helpers import general
+from src.helpers import decorators, general
 
 
 def get_stat(chat_id) -> str:
@@ -69,7 +69,7 @@ PIZDIT_REGEXP = re.compile(r'кто\s+больше\s+всех\s+пиздит')
 
 
 class PizditHandler(Handler):
-    @general.non_empty
+    @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if PIZDIT_REGEXP.search(message.text.lower()) is None:
             return False

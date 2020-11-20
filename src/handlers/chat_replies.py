@@ -4,7 +4,7 @@ import re
 import telegram
 
 from src.handlers.handler import Handler
-from src.helpers import general
+from src.helpers import decorators, general
 from src.helpers.message import VoiceMessage
 
 
@@ -13,7 +13,7 @@ NAHUY_ANSWER = 'Что за токсичность...'
 
 
 class NahuyHandler(Handler):
-    @general.non_empty
+    @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if NAHUY_REGEXP.search(message.text.lower()) is None:
             return False
@@ -23,7 +23,7 @@ class NahuyHandler(Handler):
 
 
 class PidorHandler(Handler):
-    @general.non_empty
+    @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if 'пидор' not in message.text.lower():
             return False
@@ -69,7 +69,7 @@ SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
 
 class SorryHandler(Handler):
-    @general.non_empty
+    @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
             general.send(message.chat_id, 'Отсоси, потом проси.')

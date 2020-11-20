@@ -1,5 +1,5 @@
 import re
-from typing import Union, Optional
+from typing import Union, Optional, Callable, Tuple
 
 import telegram
 
@@ -10,20 +10,6 @@ from src.helpers.message import Message
 LINK_REGEXP = re.compile(r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))')
 
 bot: Optional[telegram.Bot] = None
-
-
-def non_empty(func):
-    """
-    Checks if message contains text before calling wrapping function.  If it does not contain it, returns False.
-    """
-
-    def wrapper(self, message: telegram.Message):
-        if message.text is None:
-            return False
-
-        return func(self, message)
-
-    return wrapper
 
 
 def is_admin(user_id: int) -> bool:

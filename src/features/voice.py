@@ -3,7 +3,16 @@ from typing import IO
 
 import requests
 
+from src.helpers import general, decorators
+
+MAX_ATTEMPTS = 3
+MAX_ERROR_LENGTH = 100
+
 GENERATE_ENDPOINT = 'https://nextup.com/ivona/php/nextup-polly/CreateSpeech/CreateSpeechGet3.php'
+
+
+class InvalidLinkException(Exception):
+    pass
 
 
 class VoiceService:
@@ -20,6 +29,7 @@ class NextUpService(VoiceService):
             f = BytesIO(audio.content)
             return f
 
+    @decorators.with_retry(MAX_ATTEMPTS, (InvalidLinkException,))
     def generate_link(self, text):
         # TODO: proxy
         req = requests.get(
@@ -39,4 +49,8 @@ class NextUpService(VoiceService):
             }
         )
         with req:
+            if not general.LINK_REGEXP.match(req.text):
+                result = req.text[:min(len(req.text), MAX_ERROR_LENGTH)]
+                raise InvalidLinkException(result)
+
             return req.text
