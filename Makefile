@@ -9,6 +9,9 @@ PYTHON_INTERPRETER=$(shell ls ./venv/Scripts/python.exe ./venv/bin/python 2> /de
 BACKUP_FILENAME := ./backups/backup-$(shell date +'%Y%m%d-%H%M%S').sql.gz
 
 
+.DEFAULT_GOAL := help
+
+
 .PHONY: backup
 backup:       ## create remote database backup in local directory
 	ssh sl@slasyz.ru 'pg_dump -h localhost -U toxicuser -d toxicdb | gzip' > "$(BACKUP_FILENAME)"
