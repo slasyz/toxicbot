@@ -6,7 +6,7 @@ import telegram
 from src import db
 from src.handlers.commands.command import Command
 from src.handlers.handler import Handler
-from src.helpers import decorators, general
+from src.helpers import decorators, general, messages
 
 
 def get_stat(chat_id) -> str:
@@ -39,27 +39,27 @@ class StatCommand(Command):
         try:
             chat_id = int(args[1])
         except ValueError:
-            general.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID')
+            messages.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
         response = self._get_response(chat_id)
-        general.reply(message, response)
+        messages.reply(message, response)
 
     def handle(self, message: telegram.Message, args: List[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
-                general.reply(message, response)
+                messages.reply(message, response)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
             return
 
         if not general.is_admin(message.from_user.id):
-            general.reply(message, 'Это нужно делать в общем чате, дурачок.')
+            messages.reply(message, 'Это нужно делать в общем чате, дурачок.')
             return
 
         if len(args) != 2:
-            general.reply(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
+            messages.reply(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
             return
 
         self._parse_args_and_send(message, args)
@@ -76,5 +76,5 @@ class PizditHandler(Handler):
 
         response = 'Больше всех пиздят в этом чате:\n'
         response += get_stat(message.chat_id)
-        general.reply(message, response)
+        messages.reply(message, response)
         return True

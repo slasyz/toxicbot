@@ -27,9 +27,7 @@ def load():
 
                 if caption is None or caption == '':
                     continue
-            except KeyError:
-                continue
-            except TypeError:
+            except (KeyError, TypeError):
                 continue
 
             print(update_id, '=>', caption)
@@ -53,8 +51,6 @@ def save():
 
 
 def __main__():
-    import main  # pylint: disable=import-outside-toplevel
-
     load()
     save()
 

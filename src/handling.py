@@ -10,7 +10,8 @@ from src.handlers.chain import ChainHandler
 from src.handlers.commands.command import Command
 from src.handlers.handler import Handler
 from src.helpers import general
-from src.helpers.general import is_admin, reply
+from src.helpers.general import is_admin
+from src.helpers.messages import reply
 from src.handlers import database
 from src.handlers.commands.joke import JokeCommand
 from src.handlers.commands.chats import ChatsCommand

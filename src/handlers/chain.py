@@ -4,9 +4,9 @@ import telegram
 
 from src import db
 from src.handlers.handler import Handler
-from src.helpers import general
+from src.helpers import messages
 from src.features.chain.chain import Chain
-from src.features.chain.splitters import Splitter, PunctuationSplitter, SpaceAdjoinSplitter
+from src.features.chain.splitters import Splitter, PunctuationSplitter
 
 
 class ChainHandler(Handler):
@@ -57,9 +57,9 @@ class ChainHandler(Handler):
         if message.chat_id > 0:
             return False
 
-        if general.is_reply_or_mention(message):
+        if messages.is_reply_or_mention(message):
             text = self.chats[message.chat_id].predict_not_empty(message.text)
-            general.reply(message, text)
+            messages.reply(message, text)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -72,7 +72,7 @@ class ChainHandler(Handler):
 
             if count % self._get_period(message.chat_id) == 0:
                 text = self.chats[message.chat_id].predict_not_empty(message.text)
-                general.send(message.chat_id, text)
+                messages.send(message.chat_id, text)
                 return True
 
         return False

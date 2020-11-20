@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 
 from src import db
-from src.helpers import general
+from src.helpers import messages
 from src.helpers.log import print_sleep
 from src.workers.worker import Worker
 
@@ -28,7 +28,7 @@ class ReminderWorker(Worker):
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)
 
-            general.send(chat_id, text)
+            messages.send(chat_id, text)
 
             with db.conn, db.conn.cursor() as cur:
                 cur.execute('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))

@@ -5,7 +5,7 @@ import traceback
 from datetime import datetime
 from typing import List
 
-from src.helpers import general
+from src.helpers import messages
 
 MAX_ERRORS_PER_MINUTE = 3
 
@@ -35,7 +35,7 @@ class Worker:
                 if len(self.counter) >= MAX_ERRORS_PER_MINUTE:
                     logging.error('%d errors in worker %s in last minute, stopping', len(self.counter), self.__class__.__name__)
                     try:
-                        general.send_to_admins(f'Воркер {self.__class__.__name__} бросил исключение {len(self.counter)} раз. Выход.')
+                        messages.send_to_admins(f'Воркер {self.__class__.__name__} бросил исключение {len(self.counter)} раз. Выход.')
                     except AttributeError:
                         # Скорее всего, ошибка возникла на старте, когда ещё нет подключения к телеге.
                         # Если бот не запустится, это будет заметно сразу.

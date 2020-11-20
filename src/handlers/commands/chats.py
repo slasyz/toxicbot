@@ -4,7 +4,7 @@ import telegram
 
 from src import db
 from src.handlers.commands.command import Command
-from src.helpers import general
+from src.helpers import messages
 
 
 class ChatsCommand(Command):
@@ -23,4 +23,4 @@ class ChatsCommand(Command):
             for record in cur:
                 response.append(f'{record[1]} — {record[0]}')
 
-            general.reply(message, '\n'.join(response))
+            messages.reply(message, '\n'.join(response))

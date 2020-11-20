@@ -21,13 +21,11 @@ def with_retry(max_attempts: int, exceptions: Tuple[Exception, ...]) -> Callable
     def decorator(f: Callable) -> Callable:
         def wrapper(*args, **kwargs):
             latest_exception: Optional[Exception] = None
-            for i in range(max_attempts):
+            for _ in range(max_attempts):
                 try:
                     return f(*args, *kwargs)
                 except exceptions as ex:
                     latest_exception = ex
-                except Exception:
-                    raise
 
             raise latest_exception
 

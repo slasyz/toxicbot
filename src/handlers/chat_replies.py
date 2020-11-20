@@ -4,8 +4,8 @@ import re
 import telegram
 
 from src.handlers.handler import Handler
-from src.helpers import decorators, general
-from src.helpers.message import VoiceMessage
+from src.helpers import decorators, general, messages
+from src.helpers.messages import VoiceMessage
 
 
 NAHUY_REGEXP = re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)')
@@ -18,7 +18,7 @@ class NahuyHandler(Handler):
         if NAHUY_REGEXP.search(message.text.lower()) is None:
             return False
 
-        general.reply(message, NAHUY_ANSWER)
+        messages.reply(message, NAHUY_ANSWER)
         return True
 
 
@@ -28,7 +28,7 @@ class PidorHandler(Handler):
         if 'пидор' not in message.text.lower():
             return False
 
-        general.reply(message, 'Пошёл нахуй.')
+        messages.reply(message, 'Пошёл нахуй.')
         return True
 
 
@@ -42,9 +42,9 @@ PRIVATE_ANSWERS = [
 class PrivateHandler(Handler):
     def handle(self, message: telegram.Message):
         if general.is_admin(message.chat_id):
-            general.reply(message, 'Я запущен')
+            messages.reply(message, 'Я запущен')
         else:
-            general.reply(message, random.choice(PRIVATE_ANSWERS))
+            messages.reply(message, random.choice(PRIVATE_ANSWERS))
         return True
 
 
@@ -61,7 +61,7 @@ class VoiceHandler(Handler):
         if message.voice is None and message.video_note is None:
             return False
 
-        general.reply(message, random.choice(VOICE_ANSWERS))
+        messages.reply(message, random.choice(VOICE_ANSWERS))
         return True
 
 
@@ -72,15 +72,15 @@ class SorryHandler(Handler):
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
-            general.send(message.chat_id, 'Отсоси, потом проси.')
+            messages.send(message.chat_id, 'Отсоси, потом проси.')
             return True
 
         if SORRY_REGEXP.search(message.text.lower()) is not None:
-            general.send(message.chat_id, 'Извините.')
+            messages.send(message.chat_id, 'Извините.')
             return True
 
-        if general.is_reply_or_mention(message) and 'извинись' in message.text.lower():
-            general.send(message.chat_id, 'Извините.')
+        if messages.is_reply_or_mention(message) and 'извинись' in message.text.lower():
+            messages.send(message.chat_id, 'Извините.')
             return True
 
         return False
