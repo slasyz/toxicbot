@@ -30,7 +30,7 @@ help:         ## show this help
 
 .PHONY: init
 init:         ## create virtual environment
-	virtualenv venv -p /usr/bin/python3
+	virtualenv venv -p python3
 	$(MAKE) deps
 
 
