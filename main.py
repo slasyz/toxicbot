@@ -22,13 +22,14 @@ def init(config_file):
     time.tzset()  # pylint: disable=no-member
 
     config.load(config_file)
-    db.connect()
+    db_config = config.get_database_creds()
+    db.connect(db_config.host, db_config.port, db_config.database, db_config.user, db_config.password)
 
 
 def __main__():
     init('./config.json')
 
-    general.bot = telegram.Bot(config.c['telegram']['token'])
+    general.bot = telegram.Bot(config.get_telegram_token())
 
     worker.start_workers([ServerWorker(), JokesWorker(), ReminderWorker()])
     handling.init()

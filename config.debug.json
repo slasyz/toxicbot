@@ -1,0 +1,15 @@
+{
+  "database": {
+    "host": "localhost",
+    "port": 30111,
+    "database": "toxic",
+    "user": "toxic",
+    "password": "toxic"
+  },
+  "server": {
+    "port": 8000
+  },
+  "telegram": {
+    "token": ""
+  }
+}

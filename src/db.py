@@ -1,16 +1,15 @@
 import psycopg2
 
-from src import config
-
 conn: psycopg2._psycopg.connection
 
 
-def connect():
+def connect(host: str, port: int, database: str, user: str, password: str):
     global conn
 
     conn = psycopg2.connect(
-        host=config.c['database']['host'],
-        database=config.c['database']['database'],
-        user=config.c['database']['user'],
-        password=config.c['database']['password']
+        host=host,
+        port=port,
+        database=database,
+        user=user,
+        password=password
     )

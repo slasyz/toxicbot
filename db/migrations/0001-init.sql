@@ -30,6 +30,7 @@ CREATE TABLE messages (
 
     text      text,
     date      timestamptz,
+    sticker   text,
 
     PRIMARY KEY (chat_id, tg_id)
 );

@@ -1,0 +1,39 @@
+##
+##********************************
+##* Makefile commands for Python *
+##********************************
+##
+
+
+.PHONY: deps
+deps:           ## install all dependencies from requirements.txt
+	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+
+.PHONY: venv
+venv:           ## create virtual environment and install all dependencies
+	virtualenv venv -p python3
+	$(MAKE) deps
+
+
+.PHONY: run
+run:            ## start bot in foreground
+	$(PYTHON_INTERPRETER) ./main.py
+
+
+.PHONY: tmux.restart
+tmux.restart:   ## restart tmux session
+tmux.restart:
+	$(MAKE) tmux.stop
+	sleep 2
+	$(MAKE) tmux.start
+
+.PHONY: tmux.start
+tmux.start:     ## start tmux session
+	tmux new-session -s ToxicTgBot -d "make run"
+
+.PHONY: tmux.stop
+tmux.stop:      ## stop tmux session
+	( \
+		tmux send-keys -t ToxicTgBot C-c; \
+		tmux send-keys -t ToxicTgBot C-c \
+	) || true

@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  app:
+    image: 127.0.0.1:5000/toxic/app:latest
+    depends_on:
+      - db
+    networks:
+      - main
+    secrets:
+      - postgres_username
+      - postgres_password
+      - postgres_database
+      - telegram_token
+
+  db:
+    image: 127.0.0.1:5000/toxic/db:latest
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_username
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB_FILE=/run/secrets/postgres_database
+    networks:
+      - main
+    volumes:
+      - postgres_data:/volumes/postgresql/data/
+    secrets:
+      - postgres_username
+      - postgres_password
+      - postgres_database
+
+networks:
+  main:
+
+volumes:
+  postgres_data:
+
+secrets:
+  postgres_username:
+    external: true
+  postgres_password:
+    external: true
+  postgres_database:
+    external: true
+  telegram_token:
+    external: true

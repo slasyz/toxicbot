@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  app:
+    tty: true
+
+  db:
+    ports:
+      - target: 5432
+        published: 30111
+        protocol: tcp
+        mode: host
+
+
+secrets:
+  postgres_username:
+    external: true
+    name: toxic_local_postgres_username
+  postgres_password:
+    external: true
+    name: toxic_local_postgres_password
+  postgres_database:
+    external: true
+    name: toxic_local_postgres_database
+  telegram_token:
+    external: true
+    name: toxic_local_telegram_token

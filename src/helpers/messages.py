@@ -67,7 +67,7 @@ def __main__():
 
     main.init('../../config.json')
 
-    general.bot = telegram.Bot(config.c['telegram']['token'])
+    general.bot = telegram.Bot(config.get_telegram_token())
 
     send(-362750796, VoiceMessage('приветики'))
 

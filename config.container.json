@@ -1,0 +1,23 @@
+{
+  "database": {
+    "host": "db",
+    "port": "5432",
+    "database": {
+      "file": "/run/secrets/postgres_database"
+    },
+    "user": {
+      "file": "/run/secrets/postgres_username"
+    },
+    "password": {
+      "file": "/run/secrets/postgres_password"
+    }
+  },
+  "server": {
+    "port": 8000
+  },
+  "telegram": {
+    "token": {
+      "file": "/run/secrets/telegram_token"
+    }
+  }
+}
