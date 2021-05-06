@@ -17,10 +17,8 @@ backup.container:  ## create remote database (running on host OS) backup in loca
 
 .PHONY: debug
 debug:             ## start dependencies
-	docker build -t 127.0.0.1:5000/toxic/db:latest --progress plain ./db/
-	docker push 127.0.0.1:5000/toxic/db:latest
-	docker build -t 127.0.0.1:5000/toxic/app:latest --progress plain .
-	docker push 127.0.0.1:5000/toxic/app:latest
+	docker build -t slasyz/toxicbot/db:latest --progress plain ./db/
+	docker build -t slasyz/toxicbot/app:latest --progress plain .
 	docker stack deploy \
 		--compose-file stack/base.yml \
 		--compose-file stack/debug.yml \
@@ -39,10 +37,8 @@ _deploy:
 			exit 1; \
 		fi; \
 	}
-	docker --context "$(REMOTE_NAME)" build -t 127.0.0.1:5000/toxic/db:latest --progress plain ./db/
-	docker --context "$(REMOTE_NAME)" push 127.0.0.1:5000/toxic/db:latest
-	docker --context "$(REMOTE_NAME)" build -t 127.0.0.1:5000/toxic/app:latest --progress plain .
-	docker --context "$(REMOTE_NAME)" push 127.0.0.1:5000/toxic/app:latest
+	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
+	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
 	docker --context "$(REMOTE_NAME)" stack deploy \
 		--compose-file stack/base.yml \
 		--compose-file stack/$(ENV).yml \
@@ -85,10 +81,8 @@ _init.container:
 			printf "$$telegram_token" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_telegram_token -; \
 		fi; \
 	}
-	docker --context "$(REMOTE_NAME)" build -t 127.0.0.1:5000/toxic/db:latest --progress plain ./db/
-	docker --context "$(REMOTE_NAME)" push 127.0.0.1:5000/toxic/db:latest
-	docker --context "$(REMOTE_NAME)" build -t 127.0.0.1:5000/toxic/app:latest --progress plain .
-	docker --context "$(REMOTE_NAME)" push 127.0.0.1:5000/toxic/app:latest
+	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
+	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
 
 .PHONY: init.local
 init.local:        ## initialize stuff for container locally (secrets, ...)
