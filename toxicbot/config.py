@@ -47,5 +47,6 @@ def get_telegram_token() -> str:
         return f.read()
 
 
-def get_server_port() -> int:
-    return c['server']['port']
+def get_server_config() -> dict:
+    return c['server']
+

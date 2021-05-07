@@ -24,7 +24,7 @@ lint.all: pylint
 .PHONY: port
 port:           ## run port forwarding to open Flask server locally
 	echo "http://localhost:30120/messages"
-	ssh -L 30110:localhost:30120 sl@slasyz.ru "sleep infinity"
+	ssh -L 30120:localhost:30120 sl@slasyz.ru "sleep infinity"
 
 .PHONY: pylint
 pylint:         ## run pylint (with disabled checks specified in $DISABLE variable)

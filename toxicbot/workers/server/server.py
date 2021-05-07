@@ -86,6 +86,7 @@ def handler_messages():
 
 class ServerWorker(Worker):
     def work(self):
-        server_config = config.c['server']
+        server_config = config.get_server_config()
         if server_config is not None:
-            app.run(port=server_config['port'])
+            # TODO: replace it with something production ready
+            app.run(host=server_config['host'], port=server_config['port'])
