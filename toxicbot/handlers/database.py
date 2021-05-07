@@ -4,7 +4,7 @@ from typing import Optional
 import psycopg2
 import telegram
 
-from src import db
+from toxicbot import db
 
 
 def handle_user(cur: psycopg2._psycopg.cursor, user: telegram.User):

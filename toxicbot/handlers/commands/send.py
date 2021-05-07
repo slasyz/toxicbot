@@ -3,9 +3,9 @@ from typing import List
 
 import telegram
 
-from src import db
-from src.handlers.commands.command import Command
-from src.helpers import messages
+from toxicbot import db
+from toxicbot.handlers.commands.command import Command
+from toxicbot.helpers import messages
 
 
 class SendCommand(Command):

@@ -4,10 +4,10 @@ from typing import Union
 
 import telegram
 
-from src import db
-from src.features.voice import NextUpService
-from src.helpers import general
-from src.handlers.database import handle_message
+from toxicbot import db
+from toxicbot.features.voice import NextUpService
+from toxicbot.helpers import general
+from toxicbot.handlers.database import handle_message
 
 
 class Message:
@@ -62,7 +62,7 @@ def is_reply_or_mention(message: telegram.Message) -> bool:
 
 
 def __main__():
-    from src import config  # pylint: disable=import-outside-toplevel
+    from toxicbot import config  # pylint: disable=import-outside-toplevel
     import main  # pylint: disable=import-outside-toplevel
 
     main.init('../../config.json')

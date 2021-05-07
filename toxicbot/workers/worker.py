@@ -5,7 +5,7 @@ import traceback
 from datetime import datetime
 from typing import List
 
-from src.helpers import messages
+from toxicbot.helpers import messages
 
 MAX_ERRORS_PER_MINUTE = 3
 

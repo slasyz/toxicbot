@@ -3,7 +3,7 @@ from typing import IO
 
 import requests
 
-from src.helpers import general, decorators
+from toxicbot.helpers import general, decorators
 
 MAX_ATTEMPTS = 3
 MAX_ERROR_LENGTH = 100

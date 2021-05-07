@@ -2,11 +2,11 @@ from datetime import datetime
 
 import telegram
 
-from src import db
-from src.handlers.handler import Handler
-from src.helpers import messages
-from src.features.chain.chain import Chain
-from src.features.chain.splitters import Splitter, PunctuationSplitter
+from toxicbot import db
+from toxicbot.handlers.handler import Handler
+from toxicbot.helpers import messages
+from toxicbot.features.chain.chain import Chain
+from toxicbot.features.chain.splitters import Splitter, PunctuationSplitter
 
 
 class ChainHandler(Handler):

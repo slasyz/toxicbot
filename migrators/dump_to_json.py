@@ -3,7 +3,7 @@ from typing import List
 
 import yaml
 
-from src import db
+from toxicbot import db
 
 
 def get_total() -> int:

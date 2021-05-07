@@ -6,20 +6,20 @@ from typing import Tuple
 
 import telegram
 
-from src.handlers.chain import ChainHandler
-from src.handlers.commands.command import Command
-from src.handlers.handler import Handler
-from src.helpers import general
-from src.helpers.general import is_admin
-from src.helpers.messages import reply
-from src.handlers import database
-from src.handlers.commands.joke import JokeCommand
-from src.handlers.commands.chats import ChatsCommand
-from src.handlers.commands.dump import DumpCommand
-from src.handlers.commands.send import SendCommand
-from src.handlers.commands.stat import StatCommand, PizditHandler
-from src.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
-from src.features.chain.splitters import PunctuationSplitter
+from toxicbot.handlers.chain import ChainHandler
+from toxicbot.handlers.commands.command import Command
+from toxicbot.handlers.handler import Handler
+from toxicbot.helpers import general
+from toxicbot.helpers.general import is_admin
+from toxicbot.helpers.messages import reply
+from toxicbot.handlers import database
+from toxicbot.handlers.commands.joke import JokeCommand
+from toxicbot.handlers.commands.chats import ChatsCommand
+from toxicbot.handlers.commands.dump import DumpCommand
+from toxicbot.handlers.commands.send import SendCommand
+from toxicbot.handlers.commands.stat import StatCommand, PizditHandler
+from toxicbot.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
+from toxicbot.features.chain.splitters import PunctuationSplitter
 
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')

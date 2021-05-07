@@ -2,11 +2,11 @@ import logging
 import math
 import time
 
-from src import db
-from src.helpers import messages
-from src.features.joke import get_random_joke
-from src.helpers.log import print_sleep
-from src.workers.worker import Worker
+from toxicbot import db
+from toxicbot.helpers import messages
+from toxicbot.features.joke import get_random_joke
+from toxicbot.helpers.log import print_sleep
+from toxicbot.workers.worker import Worker
 
 
 class JokesWorker(Worker):

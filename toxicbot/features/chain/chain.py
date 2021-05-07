@@ -1,8 +1,8 @@
 import random
 from typing import Optional
 
-from src.features.chain.splitters import Splitter
-from src.helpers.general import LINK_REGEXP
+from toxicbot.features.chain.splitters import Splitter
+from toxicbot.helpers.general import LINK_REGEXP
 
 BREAK = '[BREAK]'
 

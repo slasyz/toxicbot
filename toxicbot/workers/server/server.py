@@ -2,9 +2,9 @@ import sys
 
 from flask import Flask, render_template
 
-from src import config, db
-from src.workers.worker import Worker
-from src.workers.server.models import Chat, User, ChatMessage, UserMessage
+from toxicbot import config, db
+from toxicbot.workers.worker import Worker
+from toxicbot.workers.server.models import Chat, User, ChatMessage, UserMessage
 
 cli = sys.modules['flask.cli']
 cli.show_server_banner = lambda *x: None

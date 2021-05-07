@@ -8,12 +8,12 @@ import logging
 import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from src import config, db, handling
-from src.helpers import log, general
-from src.workers import worker
-from src.workers.jokes import JokesWorker
-from src.workers.reminders import ReminderWorker
-from src.workers.server.server import ServerWorker
+from toxicbot import config, db, handling
+from toxicbot.helpers import log, general
+from toxicbot.workers import worker
+from toxicbot.workers.jokes import JokesWorker
+from toxicbot.workers.reminders import ReminderWorker
+from toxicbot.workers.server.server import ServerWorker
 
 
 def init(config_file):

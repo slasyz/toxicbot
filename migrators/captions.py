@@ -8,7 +8,7 @@ import json
 
 import yaml
 
-from src import db
+from toxicbot import db
 
 
 def load():

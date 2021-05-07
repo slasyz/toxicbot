@@ -3,9 +3,9 @@ import re
 
 import telegram
 
-from src.handlers.handler import Handler
-from src.helpers import decorators, general, messages
-from src.helpers.messages import VoiceMessage
+from toxicbot.handlers.handler import Handler
+from toxicbot.helpers import decorators, general, messages
+from toxicbot.helpers.messages import VoiceMessage
 
 
 NAHUY_REGEXP = re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)')

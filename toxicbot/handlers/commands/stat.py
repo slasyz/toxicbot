@@ -3,10 +3,10 @@ from typing import List
 
 import telegram
 
-from src import db
-from src.handlers.commands.command import Command
-from src.handlers.handler import Handler
-from src.helpers import decorators, general, messages
+from toxicbot import db
+from toxicbot.handlers.commands.command import Command
+from toxicbot.handlers.handler import Handler
+from toxicbot.helpers import decorators, general, messages
 
 
 def get_stat(chat_id) -> str:
