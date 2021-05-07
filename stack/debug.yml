@@ -2,15 +2,13 @@ version: '3.9'
 
 services:
   app:
-    tty: true
+    entrypoint: tail -f /dev/null
 
   db:
     ports:
       - target: 5432
         published: 30111
         protocol: tcp
-        mode: host
-
 
 secrets:
   postgres_username:

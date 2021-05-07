@@ -3,10 +3,14 @@ version: '3.9'
 services:
   app:
     ports:
-      - 30120:8000
+      - target: 8000
+        published: 30120
+        protocol: tcp
   db:
     ports:
-      - 30121:5432
+      - target: 5432
+        published: 30121
+        protocol: tcp
 
 secrets:
   postgres_username:

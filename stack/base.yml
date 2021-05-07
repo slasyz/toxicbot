@@ -22,7 +22,7 @@ services:
     networks:
       - main
     volumes:
-      - postgres_data:/volumes/postgresql/data/
+      - postgres_data:/var/lib/postgresql/data
     secrets:
       - postgres_username
       - postgres_password
