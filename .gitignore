@@ -1,6 +1,8 @@
+__pycache__
+
 /config.json
 /venv
 /backups
-__pycache__
 /.idea
 /notes.md
+/log.log

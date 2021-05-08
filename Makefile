@@ -4,7 +4,7 @@
 ##
 
 export PYTHON_INTERPRETER=$(shell ls ./venv/Scripts/python.exe ./venv/bin/python 2> /dev/null)
-export BACKUP_FILENAME=./backups/backup-$(shell date +'%Y%m%d-%H%M%S').sql.gz
+export BACKUP_FILENAME=./backups/backup-$(shell date +'%Y%m%d-%H%M%S')
 export SHELL=/bin/bash
 
 .DEFAULT_GOAL := help

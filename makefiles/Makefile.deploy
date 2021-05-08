@@ -11,7 +11,7 @@ REMOTE_NAME_PROD=toxic_prod
 .PHONY: backup.container
 backup.container:  ## create remote database (running on host OS) backup in local directory
 	docker --context=$(REMOTE_NAME_PROD) exec -i $$(docker --context=$(REMOTE_NAME_PROD) ps -f name=toxic_prod_db --quiet) \
-		pg_dump --data-only --inserts -h localhost -d toxic -U toxic | gzip > "$(BACKUP_FILENAME)"
+		pg_dump --data-only --inserts -h localhost -d toxic -U toxic | gzip > "$(BACKUP_FILENAME)-host.sql.gz"
 	du -sh ./backups/*
 
 
@@ -93,10 +93,18 @@ init.prod:         ## initialize stuff for container for production deployment (
 	make _init.container REMOTE_NAME="$(REMOTE_NAME_PROD)" ENV="prod"
 
 
-.PHONY: logs.db.prod
-logs.db.prod:      ## show database production logs
+.PHONY: logs.prod.db
+logs.prod.db:      ## show database production logs
 	docker --context $(REMOTE_NAME_PROD) logs --tail 50 --follow --timestamps $$(docker --context $(REMOTE_NAME_PROD) ps -f name=toxic_prod_db --quiet)
 
-.PHONY: logs.app.prod
-logs.app.prod:     ## show application production logs
+.PHONY: logs.prod.app
+logs.prod.app:     ## show application production logs
 	docker --context $(REMOTE_NAME_PROD) logs --tail 50 --follow --timestamps $$(docker --context $(REMOTE_NAME_PROD) ps -f name=toxic_prod_app --quiet)
+
+.PHONY: stop.prod.app
+stop.prod.app:     ## shop production app
+	docker --context $(REMOTE_NAME_PROD) service rm toxic_prod_app
+
+.PHONY: stop.local.app
+stop.local.app:    ## stop local app
+	docker service rm toxic_prod_app

@@ -7,7 +7,7 @@
 
 .PHONY: backup.host
 backup.host:    ## create remote database (running on host OS) backup in local directory
-	ssh sl@slasyz.ru 'pg_dump --data-only --inserts -h localhost -U toxicuser -d toxicdb | gzip' > "$(BACKUP_FILENAME)"
+	ssh sl@slasyz.ru 'pg_dump --data-only --inserts -h localhost -U toxicuser -d toxicdb | gzip' > "$(BACKUP_FILENAME)-host.sql.gz"
 	du -sh ./backups/*
 
 
@@ -22,9 +22,10 @@ lint.all: pylint
 
 
 .PHONY: port
-port:           ## run port forwarding to open Flask server locally
-	echo "http://localhost:30120/messages"
-	ssh -L 30120:localhost:30120 sl@slasyz.ru "sleep infinity"
+port:           ## run port forwarding to open Flask server locally and connect to prod database
+	@echo "http://localhost:30120/messages"
+	@echo "psql -h localhost -p 30121 -U toxic -d toxic"
+	@ssh -L 30120:localhost:30120 -L 30121:localhost:30121 sl@slasyz.ru "sleep infinity"
 
 .PHONY: pylint
 pylint:         ## run pylint (with disabled checks specified in $DISABLE variable)

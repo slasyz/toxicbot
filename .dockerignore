@@ -1,7 +1,10 @@
+/.git
+
+__pycache__
+
 /config.json
 /venv
 /backups
-__pycache__
 /.idea
 /notes.md
-/.git
+/log.log
