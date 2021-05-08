@@ -14,6 +14,5 @@ ENV PYTHONUNBUFFERED 1
 RUN make venv
 
 COPY . /app/
-COPY ./config.container.json /app/config.json
 
 ENTRYPOINT make run

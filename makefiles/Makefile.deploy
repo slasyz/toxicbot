@@ -55,14 +55,10 @@ deploy.prod:       ## run app in container remotely
 
 .PHONY: _init.container
 _init.container:
-	@#docker --context "$(REMOTE_NAME)" swarm init
 	@{ \
   		if [[ -z "$(ENV)" ]]; then \
 			echo "Error: no environment specified."; \
 			exit 1; \
-		fi; \
-		if [[ -z "$$(docker service ls | awk -F' ' '{print $$2}' | grep registry)" ]]; then \
-			docker service create --name registry --publish published=5000,target=5000 registry:2; \
 		fi; \
 		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_postgres_database)" ]]; then \
 			read -s -p "Please enter Postgres database: " postgres_database; \
@@ -75,10 +71,6 @@ _init.container:
 		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_postgres_password)" ]]; then \
 			read -s -p "Please enter Postgres password: " postgres_password; \
 			printf "$$postgres_password" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_postgres_password -; \
-		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_telegram_token)" ]]; then \
-			read -s -p "Please enter Telegram token: " telegram_token; \
-			printf "$$telegram_token" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_telegram_token -; \
 		fi; \
 	}
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/

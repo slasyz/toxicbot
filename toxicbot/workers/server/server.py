@@ -85,7 +85,10 @@ def handler_messages():
 
 
 class ServerWorker(Worker):
+    def __init__(self, host: str, port: int):
+        self.host = host
+        self.port = port
+
     def work(self):
-        if 'server' is not config.c:
-            # TODO: replace app.run() with something production ready
-            app.run(host=config.c['server']['host'], port=config.c['server']['port'])
+        # TODO: replace app.run() with something production ready
+        app.run(host=self.host, port=self.port)

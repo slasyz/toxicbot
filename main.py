@@ -9,6 +9,7 @@ import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxicbot import config, db
+from toxicbot.features.joke import JokerFactory
 from toxicbot.handlers.chain import ChainHandler
 from toxicbot.features.chain.splitters import PunctuationSplitter
 from toxicbot.handlers.commands.joke import JokeCommand
@@ -25,44 +26,52 @@ from toxicbot.workers.reminders import ReminderWorker
 from toxicbot.workers.server.server import ServerWorker
 
 
-def init(config_file):
+def init(config_files: list):
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()  # pylint: disable=no-member
 
-    config.load(config_file)
+    c = config.load(config_files)
     db.connect(
-        config.c['database']['host'],
-        config.c['database']['port'],
-        config.c['database']['name'],
-        config.c['database']['user'],
-        config.c['database']['pass'],
+        c['database']['host'],
+        c['database']['port'],
+        c['database']['name'],
+        c['database']['user'],
+        c['database']['pass'],
     )
 
-    general.bot = telegram.Bot(config.c['telegram']['token'])
+    general.bot = telegram.Bot(c['telegram']['token'])
+
+    return c
 
 
 def __main__():
-    init('./config.json')
+    c = init(['./config.json', '/etc/toxic/config.json'])
 
-    worker.start_workers([ServerWorker(), JokesWorker(), ReminderWorker()])
+    joker = JokerFactory().create(c['replies']['joker'])
+
+    worker.start_workers([
+        ServerWorker(c['server']['host'], c['server']['port']),
+        JokesWorker(joker),
+        ReminderWorker(),
+    ])
 
     handlers_private = (
-        PrivateHandler(config.c['replies']['private']),
+        PrivateHandler(c['replies']['private']),
     )
 
     handlers_chats = (
-        VoiceHandlerFactory().create(config.c['replies']['voice']),
-        KeywordsHandlerFactory().create(config.c['replies']['keywords']),
-        SorryHandlerFactory().create(config.c['replies']['sorry']),
-        StatsHandlerFactory().create(config.c['replies']['stats']),
+        VoiceHandlerFactory().create(c['replies']['voice']),
+        KeywordsHandlerFactory().create(c['replies']['keywords']),
+        SorryHandlerFactory().create(c['replies']['sorry']),
+        StatsHandlerFactory().create(c['replies']['stats']),
         ChainHandler(window=3, splitter=PunctuationSplitter()),
     )
 
     commands = (
         CommandDefinition('dump', DumpCommand(), True),
         CommandDefinition('stat', StatCommand(), False),
-        CommandDefinition('joke', JokeCommand(), False),
+        CommandDefinition('joke', JokeCommand(joker), False),
         CommandDefinition('send', SendCommand(), True),
         CommandDefinition('chats', ChatsCommand(), True),
     )

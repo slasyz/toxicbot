@@ -1,11 +1,12 @@
-# TODO: this file is very very bad.
-
 import json
 
-c = {}
 
+def load(files: list[str]):
+    for file in files:
+        try:
+            with open(file) as f:
+                return json.load(f)
+        except FileNotFoundError:
+            pass
 
-def load(filepath):
-    with open(filepath) as f:
-        global c
-        c = json.load(f)
+    raise Exception('cannot load config')

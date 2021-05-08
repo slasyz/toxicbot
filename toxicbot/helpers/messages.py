@@ -91,9 +91,9 @@ def __main__():
     from toxicbot import config  # pylint: disable=import-outside-toplevel
     import main  # pylint: disable=import-outside-toplevel
 
-    main.init('../../config.json')
+    c = main.init(['../../config.json'])
 
-    general.bot = telegram.Bot(config.c['telegram']['token'])
+    general.bot = telegram.Bot(c['telegram']['token'])
 
     send(-362750796, VoiceMessage('приветики'))
 

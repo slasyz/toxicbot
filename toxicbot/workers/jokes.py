@@ -4,12 +4,15 @@ import time
 
 from toxicbot import db
 from toxicbot.helpers import messages
-from toxicbot.features.joke import get_random_joke
+from toxicbot.features.joke import Joker
 from toxicbot.helpers.log import print_sleep
 from toxicbot.workers.worker import Worker
 
 
 class JokesWorker(Worker):
+    def __init__(self, joker: Joker):
+        self.joker = joker
+
     def work(self):
         while True:
             now = time.localtime()
@@ -22,12 +25,12 @@ class JokesWorker(Worker):
                 cur.execute('SELECT tg_id FROM chats WHERE tg_id < 0;')
                 for record in cur:
                     logging.info('sending anek to %d', record[0])
-                    anek, _ = get_random_joke()
+                    anek, _ = self.joker.get_random_joke()
                     messages.send(record[0], anek)
 
             time.sleep(2)
 
 
 if __name__ == '__main__':
-    text, _ = get_random_joke()
+    text, _ = Joker('ошибка').get_random_joke()
     print(text)

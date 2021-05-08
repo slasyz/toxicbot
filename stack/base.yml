@@ -3,15 +3,13 @@ version: '3.9'
 services:
   app:
     image: slasyz/toxicbot/app:latest
-    depends_on:
-      - db
+    deploy:
+      max_attempts: 5
+      window: 5s
     networks:
       - main
-    secrets:
-      - postgres_username
-      - postgres_password
-      - postgres_database
-      - telegram_token
+    depends_on:
+      - db
 
   db:
     image: slasyz/toxicbot/db:latest
@@ -19,14 +17,14 @@ services:
       - POSTGRES_USER_FILE=/run/secrets/postgres_username
       - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
       - POSTGRES_DB_FILE=/run/secrets/postgres_database
-    networks:
-      - main
     volumes:
       - postgres_data:/var/lib/postgresql/data
     secrets:
       - postgres_username
       - postgres_password
       - postgres_database
+    networks:
+      - main
 
 networks:
   main:
@@ -40,6 +38,4 @@ secrets:
   postgres_password:
     external: true
   postgres_database:
-    external: true
-  telegram_token:
     external: true

@@ -9,18 +9,19 @@ I'm running application in Docker for production, and for local debug I use `mak
 ### In container locally
 - Install docker on local machine.
 - Join Swarm: `docker swarm init`.
+- Create config by `cp config.default.json config.json` and edit it.
 - Initialize secrets: `make init.local`.
 - Start it locally, there are two options:
     1. Deploy everything in container via `make deploy.local`.
     2. Deploy dependencies in container and run bot on host machine:
-        - run `make debug` to deploy dependencies;
-        - run `cp config.debug.json config.json` and specify all credentials in new file;
+        - run `make debug` to deploy dependencies containers;
         - run `make venv` to create virtual env and install dependencies;
-        - `./venv/bin/python main.py` to start it.
+        - run `make run` or press green triangle button in your IDE to start it.
 
 ### In container remotely
 - Install docker on local and remote machine.
 - Join Swarm on remote machine: `docker swarm init`.
+- Create file `/etc/toxic/config.json` based on `config.default.json` and edit it.
 - Initialize secrets: `make init.prod`.
 - Deploy everything: `make deploy.prod`.
 
@@ -29,7 +30,7 @@ I'm running application in Docker for production, and for local debug I use `mak
 - Copy sources to remote machine.
 - Create virtual env and install dependencies: `make venv`.
 - Create database, initialize it manually.
-- Run `cp config.debug.json config.json` and specify all credentials in new file;
+- Run `cp config.default.json config.json` and specify all credentials in new file;
 - Run `make tmux.start`, `make tmux.restart` or `./venv/bin/python main.py`
 
 

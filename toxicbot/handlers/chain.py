@@ -80,7 +80,7 @@ class ChainHandler(Handler):
 
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    main.init('../../config.json')
+    main.init(['../../config.json'])
 
     # splitter = NoPunctuationSplitter()
     splitter = PunctuationSplitter()
