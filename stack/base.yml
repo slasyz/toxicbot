@@ -4,8 +4,9 @@ services:
   app:
     image: slasyz/toxicbot/app:latest
     deploy:
-      max_attempts: 5
-      window: 5s
+      restart_policy:
+        max_attempts: 5
+        window: 5s
     networks:
       - main
     depends_on:
@@ -38,4 +39,6 @@ secrets:
   postgres_password:
     external: true
   postgres_database:
+    external: true
+  telegram_token:
     external: true

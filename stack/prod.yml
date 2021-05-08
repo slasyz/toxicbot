@@ -27,3 +27,6 @@ secrets:
   postgres_database:
     external: true
     name: toxic_prod_postgres_database
+  telegram_token:
+    external: true
+    name: toxic_prod_telegram_token
