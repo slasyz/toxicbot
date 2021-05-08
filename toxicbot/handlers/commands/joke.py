@@ -1,5 +1,3 @@
-from typing import List
-
 import telegram
 
 from toxicbot.handlers.commands.command import Command
@@ -11,6 +9,6 @@ class JokeCommand(Command):
     def __init__(self, joker: Joker):
         self.joker = joker
 
-    def handle(self, message: telegram.Message, args: List[str]):
+    def handle(self, message: telegram.Message, args: list[str]):
         text, _ = self.joker.get_random_joke()
         messages.reply(message, text)

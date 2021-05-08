@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 import telegram
 
@@ -35,7 +34,7 @@ class StatCommand(Command):
         response += get_stat(chat_id)
         return response
 
-    def _parse_args_and_send(self, message: telegram.Message, args: List[str]):
+    def _parse_args_and_send(self, message: telegram.Message, args: list[str]):
         try:
             chat_id = int(args[1])
         except ValueError:
@@ -45,7 +44,7 @@ class StatCommand(Command):
         response = self._get_response(chat_id)
         messages.reply(message, response)
 
-    def handle(self, message: telegram.Message, args: List[str]):
+    def handle(self, message: telegram.Message, args: list[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)

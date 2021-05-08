@@ -1,8 +1,6 @@
-from typing import List
-
 import telegram
 
 
 class Command:
-    def handle(self, message: telegram.Message, args: List[str]):
+    def handle(self, message: telegram.Message, args: list[str]):
         raise NotImplementedError()

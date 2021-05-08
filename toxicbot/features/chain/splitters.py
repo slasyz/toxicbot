@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 
 NO_PUNCTUATION_SPLIT_REGEXP = re.compile(r"[^\w'-]+")
@@ -11,30 +10,30 @@ SPACE_ADJOIN_SPLIT_REGEXP = re.compile(r"(([^\w'-]*|\s*)[^\w\s'-]+([^\w'-]*|\s*)
 
 
 class Splitter:
-    def split(self, message: str) -> List[str]:
+    def split(self, message: str) -> list[str]:
         raise NotImplementedError()
 
-    def join(self, tokens: List[str]) -> str:
+    def join(self, tokens: list[str]) -> str:
         raise NotImplementedError()
 
 
 class NoPunctuationSplitter(Splitter):
-    def split(self, message: str) -> List[str]:
+    def split(self, message: str) -> list[str]:
         res = NO_PUNCTUATION_SPLIT_REGEXP.split(message)
         if res == ['']:
             return []
 
         return res
 
-    def join(self, tokens: List[str]) -> str:
+    def join(self, tokens: list[str]) -> str:
         return ' '.join(tokens)
 
 
 class PunctuationSplitter(Splitter):
-    def split(self, message: str) -> List[str]:
+    def split(self, message: str) -> list[str]:
         return PUNCTUATION_SPLIT_REGEXP.findall(message)
 
-    def join(self, tokens: List[str]) -> str:
+    def join(self, tokens: list[str]) -> str:
         first_non_punctuation = next(
             (i for i, token in enumerate(tokens) if PUNCTUATION_FIRST_REGEXP.match(token)),
             len(tokens)
@@ -60,10 +59,10 @@ class SpaceAdjoinSplitter(Splitter):
     когда оба не пунктуационные).
     В этом случае пробелы не являются отдельными токенами => в одно "окно" помещается больше осмысленных токенов.
     """
-    def split(self, message: str) -> List[str]:
+    def split(self, message: str) -> list[str]:
         return [x for x, y, z in SPACE_ADJOIN_SPLIT_REGEXP.findall(message)]
 
-    def join(self, tokens: List[str]) -> str:
+    def join(self, tokens: list[str]) -> str:
         first_non_punctuation = next(
             (i for i, token in enumerate(tokens) if PUNCTUATION_FIRST_REGEXP.match(token)),
             len(tokens)

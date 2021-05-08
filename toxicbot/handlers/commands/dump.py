@@ -1,7 +1,6 @@
 import json
 import logging
 import traceback
-from typing import List
 
 import telegram
 
@@ -11,7 +10,7 @@ from toxicbot.helpers import messages
 
 
 class DumpCommand(Command):
-    def handle(self, message: telegram.Message, args: List[str]):
+    def handle(self, message: telegram.Message, args: list[str]):
         if len(args) != 2:
             messages.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return

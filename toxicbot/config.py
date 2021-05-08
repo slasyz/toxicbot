@@ -11,6 +11,7 @@ def load_secret(src: Union[dict, str]) -> str:
 
 
 def load_secrets(data: dict):
+    # TODO: do it better.
     data['database']['name'] = load_secret(data['database']['name'])
     data['database']['user'] = load_secret(data['database']['user'])
     data['database']['pass'] = load_secret(data['database']['pass'])

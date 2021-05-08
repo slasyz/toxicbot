@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 import telegram
 
@@ -9,7 +8,7 @@ from toxicbot.helpers import messages
 
 
 class SendCommand(Command):
-    def handle(self, message: telegram.Message, args: List[str]):
+    def handle(self, message: telegram.Message, args: list[str]):
         if len(args) < 3:
             messages.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE')
             return

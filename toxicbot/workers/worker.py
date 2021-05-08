@@ -3,7 +3,6 @@ import logging
 import threading
 import traceback
 from datetime import datetime
-from typing import List
 
 from toxicbot.helpers import messages
 
@@ -47,7 +46,7 @@ class WorkerWrapper:
                     return
 
 
-def start_workers(workers: List[Worker]):
+def start_workers(workers: list[Worker]):
     for worker in workers:
         wrapper = WorkerWrapper(worker)
         thread = threading.Thread(target=wrapper.start)

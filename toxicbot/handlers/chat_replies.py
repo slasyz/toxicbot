@@ -66,7 +66,7 @@ class VoiceHandler(Handler):
 
 class VoiceHandlerFactory:
     def create(self, config: list[str]) -> VoiceHandler:
-        replies: list[VoiceMessage] = []
+        replies = []
 
         for reply in config:
             replies.append(VoiceMessage(reply))

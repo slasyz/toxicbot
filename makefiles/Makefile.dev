@@ -29,7 +29,7 @@ port:           ## run port forwarding to open Flask server locally and connect 
 
 .PHONY: pylint
 pylint:         ## run pylint (with disabled checks specified in $DISABLE variable)
-	cd ..; ./ToxicTgBot/$(PYTHON_INTERPRETER) -m pylint ./ToxicTgBot --rcfile="./ToxicTgBot/pylintrc" --disable="$(DISABLE)"
+	$(PYTHON_INTERPRETER) -m pylint ./main.py ./toxicbot --rcfile="./pylintrc" --disable="$(DISABLE)"
 
 
 .PHONY: test

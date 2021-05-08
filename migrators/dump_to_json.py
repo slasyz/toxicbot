@@ -1,5 +1,4 @@
 import gzip
-from typing import List
 
 import yaml
 
@@ -12,7 +11,7 @@ def get_total() -> int:
         return cur.fetchone()[0]
 
 
-def load(limit: int) -> List:
+def load(limit: int) -> list:
     res = []
 
     with db.conn, db.conn.cursor() as cur:
