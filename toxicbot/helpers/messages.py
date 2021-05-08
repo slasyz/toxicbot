@@ -88,7 +88,6 @@ def is_reply_or_mention(message: telegram.Message) -> bool:
 
 
 def __main__():
-    from toxicbot import config  # pylint: disable=import-outside-toplevel
     import main  # pylint: disable=import-outside-toplevel
 
     c = main.init(['../../config.json'])

@@ -32,7 +32,7 @@ class Logger:
 
 
 def init():
-    logfile = open("log.log", "a")
+    logfile = open("log.log", "a")  # pylint: disable=consider-using-with
     sys.stdout = Logger(sys.stdout, logfile)
     sys.stderr = Logger(sys.stderr, logfile)
     print('\n****************** ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' ******************\n')

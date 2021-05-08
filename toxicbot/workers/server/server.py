@@ -2,7 +2,7 @@ import sys
 
 from flask import Flask, render_template
 
-from toxicbot import config, db
+from toxicbot import db
 from toxicbot.workers.worker import Worker
 from toxicbot.workers.server.models import Chat, User, ChatMessage, UserMessage
 
