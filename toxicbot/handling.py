@@ -18,7 +18,7 @@ from toxicbot.handlers.commands.chats import ChatsCommand
 from toxicbot.handlers.commands.dump import DumpCommand
 from toxicbot.handlers.commands.send import SendCommand
 from toxicbot.handlers.commands.stat import StatCommand, PizditHandler
-from toxicbot.handlers.chat_replies import NahuyHandler, PidorHandler, PrivateHandler, VoiceHandler, SorryHandler
+from toxicbot.handlers.chat_replies import KeywordsHandler, PrivateHandler, VoiceHandler, SorryHandler
 from toxicbot.features.chain.splitters import PunctuationSplitter
 
 
@@ -117,8 +117,7 @@ def init():
 
     handlers_chats = (
         VoiceHandler(),
-        NahuyHandler(),
-        PidorHandler(),
+        KeywordsHandler(),
         SorryHandler(),
         PizditHandler(),
         ChainHandler(window=3, splitter=PunctuationSplitter()),

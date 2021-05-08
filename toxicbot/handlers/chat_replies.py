@@ -8,28 +8,23 @@ from toxicbot.helpers import decorators, general, messages
 from toxicbot.helpers.messages import VoiceMessage
 
 
-NAHUY_REGEXP = re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)')
-NAHUY_ANSWER = 'Что за токсичность...'
+KEYWORDS = {
+    re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)'): 'Что за токсичность...',
+    'пидор': 'Пошёл нахуй.',
+}
 
 
-class NahuyHandler(Handler):
+class KeywordsHandler(Handler):
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
-        if NAHUY_REGEXP.search(message.text.lower()) is None:
-            return False
+        for key, val in KEYWORDS.items():
+            if isinstance(key, str) and key not in message.text.lower():
+                return False
+            if isinstance(key, re.Pattern) and key.search(message.text.lower()) is None:
+                return False
 
-        messages.reply(message, NAHUY_ANSWER)
-        return True
-
-
-class PidorHandler(Handler):
-    @decorators.non_empty
-    def handle(self, message: telegram.Message) -> bool:
-        if 'пидор' not in message.text.lower():
-            return False
-
-        messages.reply(message, 'Пошёл нахуй.')
-        return True
+            messages.reply(message, val)
+            return True
 
 
 PRIVATE_ANSWERS = [
