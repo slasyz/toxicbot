@@ -8,76 +8,94 @@ from toxicbot.helpers import decorators, general, messages
 from toxicbot.helpers.messages import VoiceMessage
 
 
-KEYWORDS = {
-    re.compile(r'(иди|пошел|пошла|пошёл)\s+(на\s?хуй|в\s?пизду|в\s?ж[еоё]пп?у)'): 'Что за токсичность...',
-    'пидор': 'Пошёл нахуй.',
-}
+SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
 
 class KeywordsHandler(Handler):
+    def __init__(self, map: dict[re.Pattern, str]):
+        self.map = map
+
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
-        for key, val in KEYWORDS.items():
+        for key, val in self.map.items():
             if isinstance(key, str) and key not in message.text.lower():
-                return False
+                continue
             if isinstance(key, re.Pattern) and key.search(message.text.lower()) is None:
-                return False
+                continue
 
             messages.reply(message, val)
             return True
 
+        return False
 
-PRIVATE_ANSWERS = [
-    'Сделаю вид, что я этого не заметил.',
-    'Давай притворимся, будто этого не было.',
-    'Щас пожалуюсь Славе, что ты до меня домогаешься.'
-]
+
+class KeywordsHandlerFactory:
+    def create(self, config: dict[str, str]) -> KeywordsHandler:
+        map = {}
+
+        for key, val in config.items():
+            regexp = re.compile(key)
+            map[regexp] = val
+
+        return KeywordsHandler(map)
 
 
 class PrivateHandler(Handler):
+    def __init__(self, replies: list[str]):
+        self.replies = replies
+
     def handle(self, message: telegram.Message):
         if general.is_admin(message.chat_id):
-            messages.reply(message, 'Я запущен')
+            messages.reply(message, 'Я запущен', delay=0)
         else:
-            messages.reply(message, random.choice(PRIVATE_ANSWERS))
+            messages.reply(message, random.choice(self.replies))
         return True
 
 
-VOICE_ANSWERS = [
-    VoiceMessage('И что, мы должны щас все бросить свои дела и слушать это?'),
-    VoiceMessage('Зумеры совсем обезумели, буквы печатать разучились.'),
-    VoiceMessage('Напиши текстом.'),
-    VoiceMessage('Кожаный мешок, я не понимаю, что ты говоришь.'),
-]
-
-VOICE_DELAY = 2
-
-
 class VoiceHandler(Handler):
+    def __init__(self, replies: list[VoiceMessage]):
+        self.replies = replies
+
     def handle(self, message: telegram.Message) -> bool:
         if message.voice is None and message.video_note is None:
             return False
 
-        messages.reply(message, random.choice(VOICE_ANSWERS), delay=VOICE_DELAY)
+        messages.reply(message, random.choice(self.replies))
         return True
 
 
-SORRY_REGEXP = re.compile(r'бот,\s+извинись')
+class VoiceHandlerFactory:
+    def create(self, config: list[str]) -> VoiceHandler:
+        replies: list[VoiceMessage] = []
+
+        for reply in config:
+            replies.append(VoiceMessage(reply))
+
+        return VoiceHandler(replies)
 
 
 class SorryHandler(Handler):
+    def __init__(self, reply_sorry: str, reply_not_sorry: str):
+        self.reply_sorry = reply_sorry
+        self.reply_not_sorry = reply_not_sorry
+
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
-            messages.send(message.chat_id, 'Отсоси, потом проси.')
+            messages.send(message.chat_id, self.reply_not_sorry)
             return True
 
         if SORRY_REGEXP.search(message.text.lower()) is not None:
-            messages.send(message.chat_id, 'Извините.')
+            messages.send(message.chat_id, self.reply_sorry)
             return True
 
         if messages.is_reply_or_mention(message) and 'извинись' in message.text.lower():
-            messages.send(message.chat_id, 'Извините.')
+            messages.send(message.chat_id, self.reply_sorry)
             return True
 
         return False
+
+
+class SorryHandlerFactory:
+    def create(self, config: dict[str, str]) -> SorryHandler:
+        return SorryHandler(config['sorry'], config['not_sorry'])

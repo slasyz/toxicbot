@@ -65,16 +65,29 @@ class StatCommand(Command):
         self._parse_args_and_send(message, args)
 
 
-PIZDIT_REGEXP = re.compile(r'кто\s+больше\s+всех\s+пиздит')
+class StatsHandler(Handler):
+    def __init__(self, replies: dict[re.Pattern, str]):
+        self.replies = replies
 
-
-class PizditHandler(Handler):
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
-        if PIZDIT_REGEXP.search(message.text.lower()) is None:
-            return False
+        for key, value in self.replies.items():
+            if key.search(message.text.lower()) is None:
+                continue
 
-        response = 'Больше всех пиздят в этом чате:\n'
-        response += get_stat(message.chat_id)
-        messages.reply(message, response)
-        return True
+            response = value + ':\n'
+            response += get_stat(message.chat_id)
+            messages.reply(message, response)
+
+            return True
+
+
+class StatsHandlerFactory:
+    def create(self, config: dict[str, str]) -> StatsHandler:
+        replies: dict[re.Pattern, str] = {}
+
+        for key, value in config.items():
+            regexp = re.compile(key)
+            replies[regexp] = value
+
+        return StatsHandler(replies)

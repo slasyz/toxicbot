@@ -2,9 +2,9 @@
   "database": {
     "host": "localhost",
     "port": 30111,
-    "database": "toxic",
+    "name": "toxic",
     "user": "toxic",
-    "password": "toxic"
+    "pass": "toxic"
   },
   "server": {
     "host": "127.0.0.1",

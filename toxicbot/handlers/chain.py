@@ -9,9 +9,6 @@ from toxicbot.features.chain.chain import Chain
 from toxicbot.features.chain.splitters import Splitter, PunctuationSplitter
 
 
-CHAIN_TYPING_DELAY = 2
-
-
 class ChainHandler(Handler):
     def __init__(self, window: int, splitter: Splitter):
         self.chats = {}
@@ -62,7 +59,7 @@ class ChainHandler(Handler):
 
         if messages.is_reply_or_mention(message):
             text = self.chats[message.chat_id].predict_not_empty(message.text)
-            messages.reply(message, text, delay=CHAIN_TYPING_DELAY)
+            messages.reply(message, text)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -75,7 +72,7 @@ class ChainHandler(Handler):
 
             if count % self._get_period(message.chat_id) == 0:
                 text = self.chats[message.chat_id].predict_not_empty(message.text)
-                messages.send(message.chat_id, text, delay=CHAIN_TYPING_DELAY)
+                messages.send(message.chat_id, text)
                 return True
 
         return False

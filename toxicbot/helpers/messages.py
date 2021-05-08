@@ -11,6 +11,9 @@ from toxicbot.helpers import general
 from toxicbot.handlers.database import handle_message
 
 
+DEFAULT_DELAY = 2
+
+
 class Message:
     def get_chat_action(self) -> str:
         raise NotImplementedError()
@@ -47,16 +50,17 @@ class TextMessage(Message):
         return general.bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
 
 
-def reply(to: telegram.Message, msg: Union[str, Message], delay: int = 0) -> telegram.Message:
+def reply(to: telegram.Message, msg: Union[str, Message], delay: int = DEFAULT_DELAY) -> telegram.Message:
     return send(to.chat_id, msg, reply_to=to.message_id, delay=delay)
 
 
-def send(chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = 0) -> telegram.Message:
+def send(chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = DEFAULT_DELAY) -> telegram.Message:
     if isinstance(msg, str):
         msg = TextMessage(msg)
 
     if delay > 0:
         general.bot.send_chat_action(chat_id, msg.get_chat_action())
+        # TODO: do it asynchronously
         time.sleep(delay)
 
     message = msg.send(general.bot, chat_id, reply_to)
@@ -89,7 +93,7 @@ def __main__():
 
     main.init('../../config.json')
 
-    general.bot = telegram.Bot(config.get_telegram_token())
+    general.bot = telegram.Bot(config.c['telegram']['token'])
 
     send(-362750796, VoiceMessage('приветики'))
 
