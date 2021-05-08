@@ -48,10 +48,10 @@ def __main__():
                 update_id += 1
             time.sleep(1)
         except Unauthorized:  # The user has removed or blocked the bot.
-            logging.info("user removed or blocked the bot")
+            logging.info('user removed or blocked the bot')
             update_id += 1
         except Conflict:
-            logging.error("bot is already running somewhere, stopping it")
+            logging.error('bot is already running somewhere, stopping it')
             sys.exit(1)
         except KeyboardInterrupt:
             sys.exit(0)

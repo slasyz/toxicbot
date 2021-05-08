@@ -10,22 +10,24 @@ from toxicbot.helpers import messages
 MAX_ERRORS_PER_MINUTE = 3
 
 
-class Worker:
-    def __init__(self):
+class WorkerInterface:
+    def work(self):
+        raise Exception('method work() must be implemented')
+
+
+class WorkerWrapper:
+    def __init__(self, impl: WorkerInterface):
         self.counter = set()
+        self.impl = impl
 
     def _clean_counter(self):
         now = datetime.now()
-        is_last_min = lambda x: (now - x).total_seconds() <= 60
-        self.counter = {x for x in self.counter if is_last_min(x)}
-
-    def work(self):
-        raise Exception('method work() must be implemented')
+        self.counter = {x for x in self.counter if (now - x).total_seconds() <= 60}
 
     def start(self):
         while True:
             try:
-                self.work()
+                self.impl.work()
             except Exception as ex:
                 traceback.print_stack()
                 print(ex)
@@ -45,7 +47,9 @@ class Worker:
                     return
 
 
-def start_workers(workers: List[Worker]):
+def start_workers(workers: List[WorkerInterface]):
     for worker in workers:
-        thread = threading.Thread(target=worker.start)
+        worker_wrapper = WorkerWrapper(worker)
+        thread = threading.Thread(target=worker_wrapper.start)
+        thread.daemon = True
         thread.start()

@@ -4,14 +4,14 @@ from datetime import datetime
 from toxicbot import db
 from toxicbot.helpers import messages
 from toxicbot.helpers.log import print_sleep
-from toxicbot.workers.worker import Worker
+from toxicbot.workers.worker import WorkerInterface
 
 
 def until(dt: datetime) -> float:
     return time.mktime(dt.timetuple()) - datetime.utcnow().timestamp()
 
 
-class ReminderWorker(Worker):
+class ReminderWorker(WorkerInterface):
     def work(self):
         while True:
             with db.conn, db.conn.cursor() as cur:
