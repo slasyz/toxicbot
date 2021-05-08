@@ -1,4 +1,5 @@
 import logging
+import time
 import traceback
 from typing import Union
 
@@ -11,6 +12,9 @@ from toxicbot.handlers.database import handle_message
 
 
 class Message:
+    def get_chat_action(self) -> str:
+        raise NotImplementedError()
+
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         raise NotImplementedError()
 
@@ -19,6 +23,9 @@ class VoiceMessage(Message):
     def __init__(self, text, service=None):
         self.text = text
         self.service = service or NextUpService()
+
+    def get_chat_action(self) -> str:
+        return 'record_voice'
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         try:
@@ -29,15 +36,30 @@ class VoiceMessage(Message):
             return bot.send_message(chat_id, f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 
 
-def reply(to: telegram.Message, msg: Union[str, Message]) -> telegram.Message:
-    return send(to.chat_id, msg, to.message_id)
+class TextMessage(Message):
+    def __init__(self, text):
+        self.text = text
+
+    def get_chat_action(self) -> str:
+        return 'typing'
+
+    def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
+        return general.bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
 
 
-def send(chat_id: int, msg: Union[str, Message], reply_to: int = None) -> telegram.Message:
+def reply(to: telegram.Message, msg: Union[str, Message], delay: int = 0) -> telegram.Message:
+    return send(to.chat_id, msg, reply_to=to.message_id, delay=delay)
+
+
+def send(chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = 0) -> telegram.Message:
     if isinstance(msg, str):
-        message = general.bot.send_message(chat_id, msg, reply_to_message_id=reply_to)
-    else:
-        message = msg.send(general.bot, chat_id, reply_to)
+        msg = TextMessage(msg)
+
+    if delay > 0:
+        general.bot.send_chat_action(chat_id, msg.get_chat_action())
+        time.sleep(delay)
+
+    message = msg.send(general.bot, chat_id, reply_to)
 
     handle_message(message)
     return message

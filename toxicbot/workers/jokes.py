@@ -6,10 +6,10 @@ from toxicbot import db
 from toxicbot.helpers import messages
 from toxicbot.features.joke import get_random_joke
 from toxicbot.helpers.log import print_sleep
-from toxicbot.workers.worker import WorkerInterface
+from toxicbot.workers.worker import Worker
 
 
-class JokesWorker(WorkerInterface):
+class JokesWorker(Worker):
     def work(self):
         while True:
             now = time.localtime()

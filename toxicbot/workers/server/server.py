@@ -3,7 +3,7 @@ import sys
 from flask import Flask, render_template
 
 from toxicbot import config, db
-from toxicbot.workers.worker import WorkerInterface
+from toxicbot.workers.worker import Worker
 from toxicbot.workers.server.models import Chat, User, ChatMessage, UserMessage
 
 cli = sys.modules['flask.cli']
@@ -84,7 +84,7 @@ def handler_messages():
         })
 
 
-class ServerWorker(WorkerInterface):
+class ServerWorker(Worker):
     def work(self):
         server_config = config.get_server_config()
         if server_config is not None:

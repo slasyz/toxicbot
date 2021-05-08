@@ -10,13 +10,13 @@ from toxicbot.helpers import messages
 MAX_ERRORS_PER_MINUTE = 3
 
 
-class WorkerInterface:
+class Worker:
     def work(self):
-        raise Exception('method work() must be implemented')
+        raise NotImplementedError()
 
 
 class WorkerWrapper:
-    def __init__(self, impl: WorkerInterface):
+    def __init__(self, impl: Worker):
         self.counter = set()
         self.impl = impl
 
@@ -47,9 +47,9 @@ class WorkerWrapper:
                     return
 
 
-def start_workers(workers: List[WorkerInterface]):
+def start_workers(workers: List[Worker]):
     for worker in workers:
-        worker_wrapper = WorkerWrapper(worker)
-        thread = threading.Thread(target=worker_wrapper.start)
+        wrapper = WorkerWrapper(worker)
+        thread = threading.Thread(target=wrapper.start)
         thread.daemon = True
         thread.start()

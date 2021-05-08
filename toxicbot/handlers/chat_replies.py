@@ -55,13 +55,15 @@ VOICE_ANSWERS = [
     VoiceMessage('Кожаный мешок, я не понимаю, что ты говоришь.'),
 ]
 
+VOICE_DELAY = 2
+
 
 class VoiceHandler(Handler):
     def handle(self, message: telegram.Message) -> bool:
         if message.voice is None and message.video_note is None:
             return False
 
-        messages.reply(message, random.choice(VOICE_ANSWERS))
+        messages.reply(message, random.choice(VOICE_ANSWERS), delay=VOICE_DELAY)
         return True
 
 

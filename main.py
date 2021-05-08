@@ -9,7 +9,7 @@ import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxicbot import config, db, handling
-from toxicbot.helpers import log, general
+from toxicbot.helpers import log, general, messages
 from toxicbot.workers import worker
 from toxicbot.workers.jokes import JokesWorker
 from toxicbot.workers.reminders import ReminderWorker
@@ -33,6 +33,8 @@ def __main__():
 
     worker.start_workers([ServerWorker(), JokesWorker(), ReminderWorker()])
     handling.init()
+
+    messages.send_to_admins('Я запустился.')
 
     # TODO: распутать это всё
     update_id = None
