@@ -4,6 +4,8 @@ import threading
 import traceback
 from datetime import datetime
 
+import psycopg2
+
 from toxicbot.helpers import messages
 
 MAX_ERRORS_PER_MINUTE = 3
@@ -34,12 +36,19 @@ class WorkerWrapper:
                 self._clean_counter()
                 self.counter.add(datetime.now())
                 if len(self.counter) >= MAX_ERRORS_PER_MINUTE:
-                    logging.error('%d errors in worker %s in last minute, stopping', len(self.counter), self.__class__.__name__)
+                    logging.error(
+                        '%d errors in worker %s in last minute, stopping',
+                        len(self.counter), self.__class__.__name__,
+                        exc_info=ex,
+                    )
                     try:
                         messages.send_to_admins(f'Воркер {self.__class__.__name__} бросил исключение {len(self.counter)} раз. Выход.')
                     except AttributeError:
                         # Скорее всего, ошибка возникла на старте, когда ещё нет подключения к телеге.
                         # Если бот не запустится, это будет заметно сразу.
+                        pass
+                    except psycopg2.InterfaceError:
+                        # Ошибка БД, не получилось отправить сообщение.
                         pass
 
                     _thread.interrupt_main()

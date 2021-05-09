@@ -12,6 +12,9 @@
       "file": "/run/secrets/postgres_password"
     }
   },
+  "sentry": {
+    "dsn": "https://XXX.sentry.io/YYY"
+  },
   "server": {
     "host": "127.0.0.1",
     "port": 8000

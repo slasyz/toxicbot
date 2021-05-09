@@ -5,6 +5,7 @@ import sys
 import time
 import logging
 
+import sentry_sdk
 import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
@@ -35,6 +36,9 @@ def init(config_files: list):
     time.tzset()  # pylint: disable=no-member
 
     c = config.load(config_files)
+
+    sentry_sdk.init(c['sentry']['dsn'])  # pylint: disable=abstract-class-instantiated
+
     db.connect(
         c['database']['host'],
         c['database']['port'],
