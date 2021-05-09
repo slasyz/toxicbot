@@ -3,24 +3,25 @@ from datetime import datetime
 import telegram
 
 from toxicbot import db
+from toxicbot.features.chain.featurizer import Featurizer
+from toxicbot.features.chain.textizer import Textizer
 from toxicbot.handlers.handler import Handler
 from toxicbot.helpers import messages
-from toxicbot.features.chain.chain import Chain, Featurizer, Markov
+from toxicbot.features.chain.chain import MarkovChain, Chain
 from toxicbot.features.chain.splitters import PunctuationSplitter
 
 
 class ChainHandler(Handler):
-    def __init__(self, window: int, chain: Chain):
-        self.chats: dict[int, Markov] = {}
+    def __init__(self, window: int, textizer: Textizer):
+        self.chats: dict[int, Chain] = {}
         self.window = window
-        self.chain = chain
+        self.textizer = textizer
 
         # TODO: move to factory, use ChainsMap
         with db.conn, db.conn.cursor() as cur:
             cur.execute('''SELECT tg_id, chain_period FROM chats''')
             for record in cur:
-                self.chats[record[0]] = Markov(self.window)
-                # self.chats[record[0]] = Chain(machine=self.method, featurizer=self.featurizer, splitter=self.splitter)
+                self.chats[record[0]] = MarkovChain(self.window)
 
             # TODO: игнорировать изменения сообщений
             cur.execute('''
@@ -31,13 +32,13 @@ class ChainHandler(Handler):
             ''')
             for record in cur:
                 try:
-                    machine = self.chats[record[0]]
+                    chain = self.chats[record[0]]
                 except KeyError:
-                    # TODO: MachineFactory
-                    machine = Markov(self.window)
-                    self.chats[record[0]] = machine
+                    # TODO: ChainFactory
+                    chain = MarkovChain(self.window)
+                    self.chats[record[0]] = chain
 
-                self.chain.teach(machine, record[1])
+                self.textizer.teach(chain, record[1])
 
     def _get_period(self, chat_id: int):
         with db.conn, db.conn.cursor() as cur:
@@ -50,20 +51,20 @@ class ChainHandler(Handler):
             return
 
         try:
-            machine = self.chats[message.chat_id]
+            chain = self.chats[message.chat_id]
         except KeyError:
-            machine = Markov(self.window)
-            self.chats[message.chat_id] = machine
+            chain = MarkovChain(self.window)
+            self.chats[message.chat_id] = chain
 
-        self.chain.teach(machine, message.text)
+        self.textizer.teach(chain, message.text)
 
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
             return False
 
         if messages.is_reply_or_mention(message):
-            machine = self.chats[message.chat_id]
-            text = self.chain.predict_not_empty(machine, message.text)
+            chain = self.chats[message.chat_id]
+            text = self.textizer.predict_not_empty(chain, message.text)
             messages.reply(message, text)
             return True
 
@@ -76,8 +77,8 @@ class ChainHandler(Handler):
             count = record[0]
 
             if count % self._get_period(message.chat_id) == 0:
-                machine = self.chats[message.chat_id]
-                text = self.chain.predict_not_empty(machine, message.text)
+                chain = self.chats[message.chat_id]
+                text = self.textizer.predict_not_empty(chain, message.text)
                 messages.send(message.chat_id, text)
                 return True
 
@@ -90,15 +91,15 @@ def __main__():
 
     # splitter = NoPunctuationSplitter()
     splitter = PunctuationSplitter()
-    chain = Chain(Featurizer(), splitter)
-    handler = ChainHandler(window=3, chain=chain)
+    textizer = Textizer(Featurizer(), splitter)
+    handler = ChainHandler(window=3, textizer=textizer)
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
     for x in range(20):  # pylint: disable=unused-variable
-        machine = handler.chats[-362750796]
-        print('[' + chain.predict_not_empty(machine, 'Чисто') + ']')
+        chain = handler.chats[-362750796]
+        print('[' + textizer.predict_not_empty(chain, 'Чисто') + ']')
 
 
 if __name__ == '__main__':

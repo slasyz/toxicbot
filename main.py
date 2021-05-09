@@ -9,7 +9,8 @@ import telegram
 from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxicbot import config, db
-from toxicbot.features.chain.chain import Chain, Featurizer
+from toxicbot.features.chain.featurizer import Featurizer
+from toxicbot.features.chain.textizer import Textizer
 from toxicbot.features.joke import JokerFactory
 from toxicbot.handlers.chain import ChainHandler
 from toxicbot.features.chain.splitters import PunctuationSplitter
@@ -62,14 +63,14 @@ def __main__():
     )
 
     splitter = PunctuationSplitter()
-    chain = Chain(Featurizer(), splitter)
+    textizer = Textizer(Featurizer(), splitter)
 
     handlers_chats = (
         VoiceHandlerFactory().create(c['replies']['voice']),
         KeywordsHandlerFactory().create(c['replies']['keywords']),
         SorryHandlerFactory().create(c['replies']['sorry']),
         StatsHandlerFactory().create(c['replies']['stats']),
-        ChainHandler(window=3, chain=chain),
+        ChainHandler(window=3, textizer=textizer),
     )
 
     commands = (
