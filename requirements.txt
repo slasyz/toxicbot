@@ -1,10 +1,11 @@
-psycopg2~=2.8.6
-Jinja2~=2.11.2
 Flask~=1.1.2
-python-telegram-bot~=13.0
+Jinja2~=2.11.2
 lxml~=4.6.1
-requests~=2.25.0
-translate~=3.5.0
+prometheus-client==0.10.1
+psycopg2~=2.8.6
 pylint==2.8.2
 pytest==6.2.4
+python-telegram-bot~=13.0
+requests~=2.25.0
 sentry-sdk==1.1.0
+translate~=3.5.0

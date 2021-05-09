@@ -1,10 +1,10 @@
 /.git
 
 __pycache__
+log.log
 
 /config.json
 /venv
 /backups
 /.idea
 /notes.md
-/log.log

@@ -3,14 +3,16 @@ version: '3.9'
 services:
   app:
     image: slasyz/toxicbot/app:latest
-    deploy:
-      restart_policy:
-        max_attempts: 5
-        window: 5s
-    networks:
-      - main
     depends_on:
       - db
+    # Remove this hostname and use per-network aliases after https://github.com/moby/moby/issues/38066 and
+    # https://github.com/moby/moby/issues/30313 are fixed.
+    hostname: toxic_${ENV}_app
+    networks:
+      main:
+      infra:
+        aliases:
+          - toxic_${ENV}_app
 
   db:
     image: slasyz/toxicbot/db:latest
@@ -29,6 +31,9 @@ services:
 
 networks:
   main:
+  infra:
+    external: true
+    name: infra
 
 volumes:
   postgres_data:
@@ -36,9 +41,13 @@ volumes:
 secrets:
   postgres_username:
     external: true
+    name: toxic_${ENV}_postgres_username
   postgres_password:
     external: true
+    name: toxic_${ENV}_postgres_password
   postgres_database:
     external: true
+    name: toxic_${ENV}_postgres_database
   telegram_token:
     external: true
+    name: toxic_${ENV}_telegram_token

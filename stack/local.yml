@@ -11,22 +11,11 @@ services:
       - target: 8000
         published: 30110
         protocol: tcp
+      - target: 8001
+        published: 30112
+        protocol: tcp
   db:
     ports:
       - target: 5432
         published: 30111
         protocol: tcp
-
-secrets:
-  postgres_username:
-    external: true
-    name: toxic_local_postgres_username
-  postgres_password:
-    external: true
-    name: toxic_local_postgres_password
-  postgres_database:
-    external: true
-    name: toxic_local_postgres_database
-  telegram_token:
-    external: true
-    name: toxic_local_telegram_token

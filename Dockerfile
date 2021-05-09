@@ -1,6 +1,7 @@
 FROM python:3.9.5-slim-buster
 
 EXPOSE 8000
+EXPOSE 8001
 
 WORKDIR /app
 

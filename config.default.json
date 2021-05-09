@@ -12,6 +12,9 @@
       "file": "/run/secrets/postgres_password"
     }
   },
+  "prometheus": {
+    "port": 8001
+  },
   "sentry": {
     "dsn": "https://XXX.sentry.io/YYY"
   },
