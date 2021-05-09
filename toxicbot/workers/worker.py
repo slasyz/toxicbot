@@ -16,8 +16,8 @@ class Worker:
 
 class WorkerWrapper:
     def __init__(self, impl: Worker):
-        self.counter = set()
         self.impl = impl
+        self.counter = set()
 
     def _clean_counter(self):
         now = datetime.now()

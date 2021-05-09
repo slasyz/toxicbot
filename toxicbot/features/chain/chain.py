@@ -19,8 +19,6 @@ class MarkovChain(Chain):
         self.data: dict[Tuple[int, ...], dict[int, int]] = {}
         self.current: Tuple[int, ...] = ()
 
-        self.teach(FEATURE_BREAK)
-
     @staticmethod
     def pick(stat: dict[int, int]) -> int:
         res: list[int] = []
@@ -71,3 +69,13 @@ class MarkovChain(Chain):
             result.append(word)
 
         return result
+
+
+class ChainFactory:
+    def __init__(self, window: int):
+        self.window = window
+
+    def create(self) -> Chain:
+        chain = MarkovChain(self.window)
+        chain.teach(FEATURE_BREAK)
+        return chain

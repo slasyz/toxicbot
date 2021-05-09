@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 import telegram
 
@@ -7,38 +8,15 @@ from toxicbot.features.chain.featurizer import Featurizer
 from toxicbot.features.chain.textizer import Textizer
 from toxicbot.handlers.handler import Handler
 from toxicbot.helpers import messages
-from toxicbot.features.chain.chain import MarkovChain, Chain
+from toxicbot.features.chain.chain import Chain, ChainFactory
 from toxicbot.features.chain.splitters import PunctuationSplitter
 
 
 class ChainHandler(Handler):
-    def __init__(self, window: int, textizer: Textizer):
-        self.chats: dict[int, Chain] = {}
-        self.window = window
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer):
+        self.chain_factory = chain_factory
         self.textizer = textizer
-
-        # TODO: move to factory, use ChainsMap
-        with db.conn, db.conn.cursor() as cur:
-            cur.execute('''SELECT tg_id, chain_period FROM chats''')
-            for record in cur:
-                self.chats[record[0]] = MarkovChain(self.window)
-
-            # TODO: игнорировать изменения сообщений
-            cur.execute('''
-                SELECT chat_id, text 
-                FROM messages 
-                WHERE chat_id < 0 AND update_id IS NOT NULL 
-                ORDER BY tg_id
-            ''')
-            for record in cur:
-                try:
-                    chain = self.chats[record[0]]
-                except KeyError:
-                    # TODO: ChainFactory
-                    chain = MarkovChain(self.window)
-                    self.chats[record[0]] = chain
-
-                self.textizer.teach(chain, record[1])
+        self.chats: dict[int, Chain] = {}
 
     def _get_period(self, chat_id: int):
         with db.conn, db.conn.cursor() as cur:
@@ -46,17 +24,20 @@ class ChainHandler(Handler):
             record = cur.fetchone()
             return record[0]
 
+    def teach(self, chat_id: int, text: Optional[str]):
+        try:
+            chain = self.chats[chat_id]
+        except KeyError:
+            chain = self.chain_factory.create()
+            self.chats[chat_id] = chain
+
+        self.textizer.teach(chain, text)
+
     def pre_handle(self, message: telegram.Message):
         if message.chat_id > 0:
             return
 
-        try:
-            chain = self.chats[message.chat_id]
-        except KeyError:
-            chain = MarkovChain(self.window)
-            self.chats[message.chat_id] = chain
-
-        self.textizer.teach(chain, message.text)
+        self.teach(message.chat_id, message.text)
 
     def handle(self, message: telegram.Message) -> bool:
         if message.chat_id > 0:
@@ -85,6 +66,28 @@ class ChainHandler(Handler):
         return False
 
 
+class ChainHandlerFactory:
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer):
+        self.chain_factory = chain_factory
+        self.textizer = textizer
+
+    def create(self) -> ChainHandler:
+        chain_handler = ChainHandler(chain_factory=self.chain_factory, textizer=self.textizer)
+
+        with db.conn, db.conn.cursor() as cur:
+            # TODO: игнорировать изменения сообщений
+            cur.execute('''
+                SELECT chat_id, text 
+                FROM messages 
+                WHERE chat_id < 0 AND update_id IS NOT NULL 
+                ORDER BY tg_id
+            ''')
+            for record in cur:
+                chain_handler.teach(record[0], record[1])
+
+        return chain_handler
+
+
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
     main.init(['../../config.json'])
@@ -92,14 +95,15 @@ def __main__():
     # splitter = NoPunctuationSplitter()
     splitter = PunctuationSplitter()
     textizer = Textizer(Featurizer(), splitter)
-    handler = ChainHandler(window=3, textizer=textizer)
+    chain_factory = ChainFactory(window=3)
+    handler = ChainHandlerFactory(chain_factory, textizer).create()
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
     for x in range(20):  # pylint: disable=unused-variable
         chain = handler.chats[-362750796]
-        print('[' + textizer.predict_not_empty(chain, 'Чисто') + ']')
+        print('[' + textizer.predict_not_empty(chain, '') + ']')
 
 
 if __name__ == '__main__':
