@@ -33,7 +33,7 @@ def save(src: List):
 
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    main.init('../config.json')
+    main.init(['../../config.json'])
 
     total = get_total()
 
