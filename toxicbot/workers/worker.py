@@ -38,7 +38,7 @@ class WorkerWrapper:
                 self.counter.add(datetime.now())
                 if len(self.counter) >= MAX_ERRORS_PER_MINUTE:
                     logging.error(
-                        '%d errors in worker %s in last minute, stopping',
+                        'Got %d errors in worker %s in last minute, stopping.',
                         len(self.counter), self.__class__.__name__,
                         exc_info=ex,
                     )

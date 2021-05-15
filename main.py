@@ -128,18 +128,23 @@ def __main__():
                 handle_manager.handle_update(update)
                 update_id = update.update_id + 1
         except NetworkError as ex:
-            logging.error('network error: %s', ex)
+            logging.error('Network error.', exc_info=ex)
             if isinstance(ex, telegram.error.BadRequest):
                 update_id += 1
             time.sleep(1)
         except Unauthorized:  # The user has removed or blocked the bot.
-            logging.info('user removed or blocked the bot')
+            logging.info('User removed or blocked the bot.')
             update_id += 1
         except Conflict:
-            logging.error('bot is already running somewhere, stopping it')
+            logging.error('Bot is already running somewhere, stopping it.')
             sys.exit(1)
         except KeyboardInterrupt:
             sys.exit(0)
+        except Exception as ex:
+            logging.error(
+                'Caught an exception while handling an update.',
+                exc_info=ex,
+            )
 
 
 if __name__ == '__main__':

@@ -1,6 +1,5 @@
 import json
 import logging
-import traceback
 
 import telegram
 
@@ -34,5 +33,5 @@ class DumpCommand(Command):
         try:
             self.messenger.reply(message, json.dumps(json.loads(dump), indent=2, ensure_ascii=False))
         except json.decoder.JSONDecodeError as ex:
-            logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
+            logging.error('Caught exception when decoding dump.', exc_info=ex)
             self.messenger.reply(message, dump)

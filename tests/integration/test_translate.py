@@ -1,6 +1,6 @@
-from toxicbot.features import translate
+from toxicbot.features import translating
 
 
 def test_translate():
-    res = translate.do('токсичный', 'ru', 'uk')
+    res = translating.do('токсичный', 'ru', 'uk')
     assert res == 'токсичний'

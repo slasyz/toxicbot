@@ -8,6 +8,6 @@ def do(text: str, lang_from: str = 'ru', lang_to: str = 'uk') -> str:
         translator = Translator(lang_to, lang_from)
         return translator.translate(text)
     except Exception as ex:
-        logging.error('translate error: %s', ex)
+        logging.error('Translate error.', exc_info=ex)
 
     return text

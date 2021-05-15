@@ -117,7 +117,7 @@ class DatabaseUpdateSaver:
     def handle(self, update: telegram.Update):
         row = self.database.query_row('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
         if row is not None:
-            logging.info('ignoring %d', update.update_id)
+            logging.info('Ignoring update #%d.', update.update_id)
             return
 
         print(update)

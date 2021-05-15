@@ -1,5 +1,4 @@
 import logging
-import traceback
 import re
 from dataclasses import dataclass
 from typing import Tuple
@@ -106,7 +105,7 @@ class HandlersManager:
                     return
             except Exception as ex:
                 self.messenger.reply(update.message, 'Ошибка.')
-                logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
+                logging.error('Caught exception when handling update.', exc_info=ex)
 
     def handle_update(self, update: telegram.Update):
         with self.metrics.update_time.time():  # TODO: do with decorator

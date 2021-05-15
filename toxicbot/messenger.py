@@ -1,6 +1,5 @@
 import logging
 import time
-import traceback
 from typing import Union
 
 import telegram
@@ -41,7 +40,7 @@ class VoiceMessage(Message):
             f = self.service.load(self.text)
             return bot.send_voice(chat_id, voice=f, reply_to_message_id=reply_to)
         except Exception as ex:
-            logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
+            logging.error('Error sending voice message.', exc_info=ex)
             return bot.send_message(chat_id, f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 
 
@@ -65,7 +64,7 @@ class Messenger:
         self.database = database
         self.dum = dum
 
-    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: bool) -> telegram.Message:
+    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: bool = False) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=delay)
 
     def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, with_delay: bool = False) -> telegram.Message:

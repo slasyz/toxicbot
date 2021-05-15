@@ -13,7 +13,7 @@ def interval(seconds: float) -> str:
 
 def print_sleep(seconds: float, until: str):
     f = interval(seconds)
-    logging.info('sleeping %s seconds until %s', f, until)
+    logging.info('Sleeping %s until %s', f, until)
 
 
 class Logger:
