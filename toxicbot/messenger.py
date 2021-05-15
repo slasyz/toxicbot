@@ -11,10 +11,14 @@ from toxicbot.features.voice import NextUpService
 from toxicbot.handlers.database import DatabaseUpdateSaver
 
 DEFAULT_DELAY = 2
+SYMBOLS_PER_SECOND = 7
 
 
 class Message:
     def get_chat_action(self) -> str:
+        raise NotImplementedError()
+
+    def get_length(self) -> int:
         raise NotImplementedError()
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
@@ -29,6 +33,9 @@ class VoiceMessage(Message):
     def get_chat_action(self) -> str:
         return CHATACTION_RECORD_VOICE
 
+    def get_length(self) -> int:
+        return len(self.text)
+
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         try:
             f = self.service.load(self.text)
@@ -41,6 +48,9 @@ class VoiceMessage(Message):
 class TextMessage(Message):
     def __init__(self, text):
         self.text = text
+
+    def get_length(self) -> int:
+        return len(self.text)
 
     def get_chat_action(self) -> str:
         return CHATACTION_TYPING
@@ -55,14 +65,17 @@ class Messenger:
         self.database = database
         self.dum = dum
 
-    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: int = DEFAULT_DELAY) -> telegram.Message:
-        return self.send(to.chat_id, msg, reply_to=to.message_id, delay=delay)
+    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: bool) -> telegram.Message:
+        return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=delay)
 
-    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = DEFAULT_DELAY) -> telegram.Message:
+    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, with_delay: bool = False) -> telegram.Message:
         if isinstance(msg, str):
             msg = TextMessage(msg)
 
-        if delay > 0:
+        if with_delay:
+            length = msg.get_length()
+            delay = length / SYMBOLS_PER_SECOND
+
             self.bot.send_chat_action(chat_id, msg.get_chat_action())
             # TODO: do it asynchronously
             time.sleep(delay)
