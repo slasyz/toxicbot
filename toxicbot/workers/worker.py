@@ -6,7 +6,7 @@ from datetime import datetime
 
 import psycopg2
 
-from toxicbot.helpers import messages
+from toxicbot.helpers.messages import Bot
 
 MAX_ERRORS_PER_MINUTE = 3
 
@@ -17,8 +17,9 @@ class Worker:
 
 
 class WorkerWrapper:
-    def __init__(self, worker: Worker):
+    def __init__(self, worker: Worker, bot: Bot):
         self.worker = worker
+        self.bot = bot
         self.counter = set()
 
     def _clean_counter(self):
@@ -42,7 +43,7 @@ class WorkerWrapper:
                         exc_info=ex,
                     )
                     try:
-                        messages.send_to_admins(f'Воркер {type(self.worker).__name__} бросил исключение {len(self.counter)} раз. Выход.')
+                        self.bot.send_to_admins(f'Воркер {type(self.worker).__name__} бросил исключение {len(self.counter)} раз. Выход.')
                     except AttributeError:
                         # Скорее всего, ошибка возникла на старте, когда ещё нет подключения к телеге.
                         # Если бот не запустится, это будет заметно сразу.
@@ -55,9 +56,10 @@ class WorkerWrapper:
                     return
 
 
-def start_workers(workers: list[Worker]):
+# TODO: make a class
+def start_workers(workers: list[Worker], bot: Bot):
     for worker in workers:
-        wrapper = WorkerWrapper(worker)
+        wrapper = WorkerWrapper(worker, bot)
         thread = threading.Thread(target=wrapper.run)
         thread.daemon = True
         thread.start()

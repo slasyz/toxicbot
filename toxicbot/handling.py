@@ -6,15 +6,12 @@ from typing import Tuple
 
 import telegram
 
-from toxicbot import metrics
+from toxicbot.db import Database
 from toxicbot.handlers.commands.command import Command
+from toxicbot.handlers.database import DatabaseUpdateManager
 from toxicbot.handlers.handler import Handler
-from toxicbot.helpers import general
-from toxicbot.helpers.general import is_admin
-from toxicbot.helpers.messages import reply
-from toxicbot.handlers import database
-
-
+from toxicbot.helpers.messages import Bot
+from toxicbot.metrics import Metrics
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
 
@@ -30,10 +27,18 @@ class HandlersManager:
     def __init__(self,
                  handlers_private: Tuple[Handler, ...],
                  handlers_chats: Tuple[Handler, ...],
-                 commands: Tuple[CommandDefinition, ...]):
+                 commands: Tuple[CommandDefinition, ...],
+                 database: Database,
+                 bot: Bot,
+                 dum: DatabaseUpdateManager,
+                 metrics: Metrics):
         self.handlers_private = handlers_private
         self.handlers_chats = handlers_chats
         self.commands = commands
+        self.database = database
+        self.bot = bot
+        self.dum = dum
+        self.metrics = metrics
 
     def handle_command(self, message: telegram.Message) -> bool:
         command_name = ''
@@ -50,7 +55,7 @@ class HandlersManager:
             command_name = message.text[1:entity['length']]
             if '@' in command_name:
                 command_name, command_target = command_name.split('@', 2)
-                if command_target != general.bot.username:
+                if command_target != self.bot.bot.username:
                     continue
 
             break
@@ -64,7 +69,7 @@ class HandlersManager:
             if command_name != command.name:
                 continue
 
-            if command.admins_only and not is_admin(message.from_user.id):
+            if command.admins_only and not self.database.is_admin(message.from_user.id):
                 break
 
             command.handler.handle(message, args)
@@ -72,11 +77,10 @@ class HandlersManager:
 
         return False
 
-    @metrics.update_time.time()
-    def handle_update(self, update: telegram.Update):
-        metrics.updates.inc(1)
+    def _handle_update_inner(self, update: telegram.Update):
+        self.metrics.updates.inc(1)
         # Пишем в БД
-        database.handle(update)
+        self.dum.handle(update)
 
         # Обрабатываем только новые сообщения
         if update.message is None:
@@ -101,5 +105,9 @@ class HandlersManager:
                 if handler.handle(update.message):
                     return
             except Exception as ex:
-                reply(update.message, 'Ошибка.')
+                self.bot.reply(update.message, 'Ошибка.')
                 logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
+
+    def handle_update(self, update: telegram.Update):
+        with self.metrics.update_time.time():  # TODO: do with decorator
+            self._handle_update_inner(update)

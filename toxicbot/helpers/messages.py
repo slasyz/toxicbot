@@ -4,12 +4,11 @@ import traceback
 from typing import Union
 
 import telegram
+from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE
 
-from toxicbot import db
+from toxicbot.db import Database
 from toxicbot.features.voice import NextUpService
-from toxicbot.helpers import general
-from toxicbot.handlers.database import handle_message
-
+from toxicbot.handlers.database import DatabaseUpdateManager
 
 DEFAULT_DELAY = 2
 
@@ -28,7 +27,7 @@ class VoiceMessage(Message):
         self.service = service or NextUpService()
 
     def get_chat_action(self) -> str:
-        return 'record_voice'
+        return CHATACTION_RECORD_VOICE
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         try:
@@ -44,57 +43,58 @@ class TextMessage(Message):
         self.text = text
 
     def get_chat_action(self) -> str:
-        return 'typing'
+        return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return general.bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
+        return bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
 
 
-def reply(to: telegram.Message, msg: Union[str, Message], delay: int = DEFAULT_DELAY) -> telegram.Message:
-    return send(to.chat_id, msg, reply_to=to.message_id, delay=delay)
+# TODO: move up from helpers
+# TODO: rename to Telegram (and all instances too)
+class Bot:
+    def __init__(self, bot: telegram.Bot, database: Database, dum: DatabaseUpdateManager):
+        self.bot = bot
+        self.database = database
+        self.dum = dum
 
+    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: int = DEFAULT_DELAY) -> telegram.Message:
+        return self.send(to.chat_id, msg, reply_to=to.message_id, delay=delay)
 
-def send(chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = DEFAULT_DELAY) -> telegram.Message:
-    if isinstance(msg, str):
-        msg = TextMessage(msg)
+    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, delay: int = DEFAULT_DELAY) -> telegram.Message:
+        if isinstance(msg, str):
+            msg = TextMessage(msg)
 
-    if delay > 0:
-        general.bot.send_chat_action(chat_id, msg.get_chat_action())
-        # TODO: do it asynchronously
-        time.sleep(delay)
+        if delay > 0:
+            self.bot.send_chat_action(chat_id, msg.get_chat_action())
+            # TODO: do it asynchronously
+            time.sleep(delay)
 
-    message = msg.send(general.bot, chat_id, reply_to)
+        message = msg.send(self.bot, chat_id, reply_to)
 
-    handle_message(message)
-    return message
+        self.dum.handle_message(message)
+        return message
 
+    def send_to_admins(self, msg: Union[str, Message]):
+        for row in self.database.query('SELECT tg_id FROM users WHERE admin'):
+            self.send(row[0], msg)
 
-def send_to_admins(msg: Union[str, Message]):
-    with db.conn, db.conn.cursor() as cur:
-        cur.execute('SELECT tg_id FROM users WHERE admin')
-        for record in cur:
-            send(record[0], msg)
-
-
-def is_reply_or_mention(message: telegram.Message) -> bool:
-    if message.reply_to_message is not None and message.reply_to_message.from_user.id == general.bot.id:
-        return True
-
-    for entity in message.entities:
-        if entity.type == 'mention' and message.text[entity.offset:entity.offset + entity.length] == '@' + general.bot.username:
+    def is_reply_or_mention(self, message: telegram.Message) -> bool:
+        if message.reply_to_message is not None and message.reply_to_message.from_user.id == self.bot.id:
             return True
 
-    return False
+        for entity in message.entities:
+            if entity.type == 'mention' and message.text[entity.offset:entity.offset + entity.length] == '@' + self.bot.username:
+                return True
+
+        return False
 
 
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
 
-    c = main.init(['../../config.json'])
+    _, _, bot, _, _ = main.init(['../../config.json'])
 
-    general.bot = telegram.Bot(c['telegram']['token'])
-
-    send(-362750796, VoiceMessage('приветики'))
+    bot.send(-362750796, VoiceMessage('приветики'))
 
 
 if __name__ == '__main__':

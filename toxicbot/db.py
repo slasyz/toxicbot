@@ -1,17 +1,38 @@
+from typing import Generator
+
 import psycopg2
 
-conn: psycopg2._psycopg.connection
+
+class Database:
+    def __init__(self, conn: psycopg2._psycopg.connection):
+        self.conn = conn
+
+    def query(self, query, vars=None) -> Generator:
+        with self.conn, self.conn.cursor() as cur:
+            cur.execute(query, vars)
+            for record in cur:
+                yield record
+
+    def query_row(self, query, vars=None):
+        for record in self.query(query, vars):
+            return record
+
+        return None
+
+    def is_admin(self, user_id: int) -> bool:
+        row = self.query_row('SELECT true FROM users WHERE tg_id=%s AND admin', (user_id,))
+        return row is not None
 
 
-def connect(host: str, port: int, database: str, user: str, password: str):
-    # TODO: do it better
-    global conn
+class DatabaseFactory:
+    @staticmethod
+    def connect(host: str, port: int, database: str, user: str, password: str) -> Database:
+        conn = psycopg2.connect(
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password
+        )
 
-    # TODO: do several attempts
-    conn = psycopg2.connect(
-        host=host,
-        port=port,
-        database=database,
-        user=user,
-        password=password
-    )
+        return Database(conn)

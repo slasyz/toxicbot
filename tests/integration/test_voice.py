@@ -1,5 +1,5 @@
 from toxicbot.features.voice import NextUpService
-from toxicbot.helpers.general import LINK_REGEXP
+from toxicbot.helpers.consts import LINK_REGEXP
 
 
 def test_voice_nextup():

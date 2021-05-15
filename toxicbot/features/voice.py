@@ -3,7 +3,7 @@ from typing import IO
 
 import requests
 
-from toxicbot.helpers import general, decorators
+from toxicbot.helpers import consts, decorators
 
 MAX_ATTEMPTS = 3
 MAX_ERROR_LENGTH = 100
@@ -49,7 +49,7 @@ class NextUpService(VoiceService):
             }
         )
         with req:
-            if not general.LINK_REGEXP.match(req.text):
+            if not consts.LINK_REGEXP.match(req.text):
                 result = req.text[:min(len(req.text), MAX_ERROR_LENGTH)]
                 raise InvalidLinkException(result)
 

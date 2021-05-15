@@ -37,5 +37,6 @@ class Joker:
 
 
 class JokerFactory:
-    def create(self, config: dict[str, str]) -> Joker:
-        return Joker(config['error'])
+    @staticmethod
+    def create(replies: dict[str, str]) -> Joker:
+        return Joker(replies['error'])

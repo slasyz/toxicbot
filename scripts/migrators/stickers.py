@@ -8,7 +8,7 @@ import json
 import telegram
 
 from toxicbot import db
-from toxicbot.helpers import general
+from toxicbot.helpers import consts
 
 
 def load():
@@ -20,7 +20,7 @@ def load():
             update_id, dump = record
 
             try:
-                update = telegram.Update.de_json(dump, general.bot)
+                update = telegram.Update.de_json(dump, consts.bot)
                 if update.message is None:
                     continue
                 if update.message.sticker is None:

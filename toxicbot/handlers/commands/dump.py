@@ -4,32 +4,35 @@ import traceback
 
 import telegram
 
-from toxicbot import db
+from toxicbot.db import Database
 from toxicbot.handlers.commands.command import Command
-from toxicbot.helpers import messages
+from toxicbot.helpers.messages import Bot
 
 
 class DumpCommand(Command):
+    def __init__(self, database: Database, bot: Bot):
+        self.database = database
+        self.bot = bot
+
     def handle(self, message: telegram.Message, args: list[str]):
         if len(args) != 2:
-            messages.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
+            self.bot.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return
 
         try:
             update_id = int(args[1])
         except ValueError:
-            messages.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
+            self.bot.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return
 
-        with db.conn, db.conn.cursor() as cur:
-            cur.execute('SELECT json FROM updates WHERE tg_id=%s', (update_id,))
-            res = cur.fetchone()
-            if res is None:
-                messages.reply(message, 'В базе нет такого апдейта.')
-                return
+        row = self.database.query_row('SELECT json FROM updates WHERE tg_id=%s', (update_id,))
+        if row is None:
+            self.bot.reply(message, 'В базе нет такого апдейта.')
+            return
 
-            try:
-                messages.reply(message, json.dumps(json.loads(res[0]), indent=2, ensure_ascii=False))
-            except json.decoder.JSONDecodeError as ex:
-                logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
-                messages.reply(message, res[0])
+        dump = row[0]
+        try:
+            self.bot.reply(message, json.dumps(json.loads(dump), indent=2, ensure_ascii=False))
+        except json.decoder.JSONDecodeError as ex:
+            logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
+            self.bot.reply(message, dump)

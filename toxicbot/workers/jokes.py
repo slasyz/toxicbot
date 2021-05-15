@@ -2,16 +2,18 @@ import logging
 import math
 import time
 
-from toxicbot import db
-from toxicbot.helpers import messages
+from toxicbot.db import Database
 from toxicbot.features.joke import Joker
 from toxicbot.helpers.log import print_sleep
+from toxicbot.helpers.messages import Bot
 from toxicbot.workers.worker import Worker
 
 
 class JokesWorker(Worker):
-    def __init__(self, joker: Joker):
+    def __init__(self, joker: Joker, database: Database, bot: Bot):
         self.joker = joker
+        self.database = database
+        self.bot = bot
 
     def work(self):
         while True:
@@ -21,12 +23,11 @@ class JokesWorker(Worker):
             print_sleep(seconds, 'next midnight joke')
             time.sleep(seconds)
 
-            with db.conn, db.conn.cursor() as cur:
-                cur.execute('SELECT tg_id FROM chats WHERE tg_id < 0;')
-                for record in cur:
-                    logging.info('sending anek to %d', record[0])
-                    anek, _ = self.joker.get_random_joke()
-                    messages.send(record[0], anek)
+            rows = self.database.query('SELECT tg_id FROM chats WHERE tg_id < 0;')
+            for row in rows:
+                logging.info('sending joke to %d', row[0])
+                joke, _ = self.joker.get_random_joke()
+                self.bot.send(row[0], joke)
 
             time.sleep(2)
 

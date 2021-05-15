@@ -1,16 +1,17 @@
 from typing import Optional
 
-from toxicbot import metrics
 from toxicbot.features.chain.chain import Chain
 from toxicbot.features.chain.featurizer import Featurizer
 from toxicbot.features.chain.splitters import Splitter
-from toxicbot.helpers.general import LINK_REGEXP
+from toxicbot.helpers.consts import LINK_REGEXP
+from toxicbot.metrics import Metrics
 
 
 class Textizer:
-    def __init__(self, featurizer: Featurizer, splitter: Splitter):
+    def __init__(self, featurizer: Featurizer, splitter: Splitter, metrics: Metrics):
         self.featurizer = featurizer
         self.splitter = splitter
+        self.metrics = metrics
 
     def teach(self, chain: Chain, message: Optional[str]):
         if message is None or message == '':
@@ -51,8 +52,7 @@ class Textizer:
 
         return ''
 
-    @metrics.chain_predict.time()
-    def predict_not_empty(self, chain: Chain, message: str = None):
+    def _predict_not_empty_inner(self, chain: Chain, message: str = None):
         for _ in range(10):
             res = self.predict(chain, message)
             if res != '':
@@ -64,3 +64,7 @@ class Textizer:
                 return res
 
         return 'Не могу сказать ничего дельного.'
+
+    def predict_not_empty(self, chain: Chain, message: str = None):
+        with self.metrics.chain_predict.time():  # TODO: do with decorator
+            self._predict_not_empty_inner(chain, message)

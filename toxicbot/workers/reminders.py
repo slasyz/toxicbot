@@ -1,9 +1,9 @@
 import time
 from datetime import datetime
 
-from toxicbot import db
-from toxicbot.helpers import messages
+from toxicbot.db import Database
 from toxicbot.helpers.log import print_sleep
+from toxicbot.helpers.messages import Bot
 from toxicbot.workers.worker import Worker
 
 
@@ -12,23 +12,22 @@ def until(dt: datetime) -> float:
 
 
 class ReminderWorker(Worker):
+    def __init__(self, database: Database, bot: Bot):
+        self.database = database
+        self.bot = bot
+
     def work(self):
         while True:
-            with db.conn, db.conn.cursor() as cur:
-                cur.execute('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
-
-                record = cur.fetchone()
-                if record is None:
-                    break
-
-                id, chat_id, dt, text = record
+            row = self.database.query_row('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
+            if row is None:
+                break
+            id, chat_id, dt, text = row
 
             seconds = until(dt)
             if seconds > 0:
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)
 
-            messages.send(chat_id, text)
+            self.bot.send(chat_id, text)
 
-            with db.conn, db.conn.cursor() as cur:
-                cur.execute('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))
+            self.database.query('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))
