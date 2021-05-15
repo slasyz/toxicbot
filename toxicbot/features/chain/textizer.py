@@ -1,5 +1,6 @@
 from typing import Optional
 
+from toxicbot import metrics
 from toxicbot.features.chain.chain import Chain
 from toxicbot.features.chain.featurizer import Featurizer
 from toxicbot.features.chain.splitters import Splitter
@@ -50,6 +51,7 @@ class Textizer:
 
         return ''
 
+    @metrics.chain_predict.time()
     def predict_not_empty(self, chain: Chain, message: str = None):
         for _ in range(10):
             res = self.predict(chain, message)

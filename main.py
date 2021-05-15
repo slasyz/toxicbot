@@ -10,7 +10,7 @@ import telegram
 from prometheus_client import start_http_server
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from toxicbot import config, db
+from toxicbot import config, db, metrics
 from toxicbot.features.chain.chain import ChainFactory
 from toxicbot.features.chain.featurizer import Featurizer
 from toxicbot.features.chain.textizer import Textizer
@@ -92,6 +92,10 @@ def __main__():
     handle_manager = HandlersManager(handlers_private, handlers_chats, commands)
 
     messages.send_to_admins('Я запустился.')
+
+    with db.conn, db.conn.cursor() as cur:
+        cur.execute('''SELECT count(*) FROM messages''')
+        metrics.messages.set(cur.fetchone()[0])
 
     # TODO: распутать это всё
     update_id = None

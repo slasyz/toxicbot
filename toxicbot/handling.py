@@ -6,6 +6,7 @@ from typing import Tuple
 
 import telegram
 
+from toxicbot import metrics
 from toxicbot.handlers.commands.command import Command
 from toxicbot.handlers.handler import Handler
 from toxicbot.helpers import general
@@ -71,7 +72,9 @@ class HandlersManager:
 
         return False
 
+    @metrics.update_time.time()
     def handle_update(self, update: telegram.Update):
+        metrics.updates.inc(1)
         # Пишем в БД
         database.handle(update)
 

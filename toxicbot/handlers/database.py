@@ -4,7 +4,7 @@ from typing import Optional
 import psycopg2
 import telegram
 
-from toxicbot import db
+from toxicbot import db, metrics
 
 
 def handle_user(cur: psycopg2._psycopg.cursor, user: telegram.User):
@@ -103,6 +103,9 @@ def handle_message(message: telegram.Message, update_id: Optional[int] = None):
             message.date,
             sticker
         ))
+
+        cur.execute('''SELECT count(*) FROM messages''')
+        metrics.messages.set(cur.fetchone()[0])
 
 
 def handle(update: telegram.Update):
