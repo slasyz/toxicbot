@@ -8,7 +8,7 @@ from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE
 
 from toxicbot.db import Database
 from toxicbot.features.voice import NextUpService
-from toxicbot.handlers.database import DatabaseUpdateManager
+from toxicbot.handlers.database import DatabaseUpdateSaver
 
 DEFAULT_DELAY = 2
 
@@ -49,10 +49,8 @@ class TextMessage(Message):
         return bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
 
 
-# TODO: move up from helpers
-# TODO: rename to Telegram (and all instances too)
-class Bot:
-    def __init__(self, bot: telegram.Bot, database: Database, dum: DatabaseUpdateManager):
+class Messenger:
+    def __init__(self, bot: telegram.Bot, database: Database, dum: DatabaseUpdateSaver):
         self.bot = bot
         self.database = database
         self.dum = dum
@@ -92,9 +90,9 @@ class Bot:
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
 
-    _, _, bot, _, _ = main.init(['../../config.json'])
+    _, _, messenger, _, _ = main.init(['../../config.json'])
 
-    bot.send(-362750796, VoiceMessage('приветики'))
+    messenger.send(-362750796, VoiceMessage('приветики'))
 
 
 if __name__ == '__main__':

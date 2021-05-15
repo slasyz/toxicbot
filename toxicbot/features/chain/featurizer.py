@@ -15,10 +15,10 @@ class Featurizer:
         try:
             return self.features[value]
         except KeyError:
-            n = len(self.features) + 1
-            self.features[value] = n
-            self.values[n] = value
-            return n
+            next_feature_num = len(self.features) + 1
+            self.features[value] = next_feature_num
+            self.values[next_feature_num] = value
+            return next_feature_num
 
     def get_value(self, feature: int) -> Optional[str]:
         if feature == FEATURE_BREAK:

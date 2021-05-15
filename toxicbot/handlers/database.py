@@ -7,7 +7,7 @@ from toxicbot.db import Database
 from toxicbot.metrics import Metrics
 
 
-class DatabaseUpdateManager:
+class DatabaseUpdateSaver:
     def __init__(self, database: Database, metrics: Metrics):
         self.database = database
         self.metrics = metrics

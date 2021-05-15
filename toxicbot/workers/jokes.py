@@ -5,15 +5,15 @@ import time
 from toxicbot.db import Database
 from toxicbot.features.joke import Joker
 from toxicbot.helpers.log import print_sleep
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 from toxicbot.workers.worker import Worker
 
 
 class JokesWorker(Worker):
-    def __init__(self, joker: Joker, database: Database, bot: Bot):
+    def __init__(self, joker: Joker, database: Database, messenger: Messenger):
         self.joker = joker
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     def work(self):
         while True:
@@ -27,7 +27,7 @@ class JokesWorker(Worker):
             for row in rows:
                 logging.info('sending joke to %d', row[0])
                 joke, _ = self.joker.get_random_joke()
-                self.bot.send(row[0], joke)
+                self.messenger.send(row[0], joke)
 
             time.sleep(2)
 

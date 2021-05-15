@@ -3,7 +3,7 @@ from datetime import datetime
 
 from toxicbot.db import Database
 from toxicbot.helpers.log import print_sleep
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 from toxicbot.workers.worker import Worker
 
 
@@ -12,9 +12,9 @@ def until(dt: datetime) -> float:
 
 
 class ReminderWorker(Worker):
-    def __init__(self, database: Database, bot: Bot):
+    def __init__(self, database: Database, messenger: Messenger):
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     def work(self):
         while True:
@@ -28,6 +28,6 @@ class ReminderWorker(Worker):
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)
 
-            self.bot.send(chat_id, text)
+            self.messenger.send(chat_id, text)
 
             self.database.query('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))

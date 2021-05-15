@@ -25,18 +25,18 @@ from toxicbot.handlers.commands.dump import DumpCommand
 from toxicbot.handlers.commands.send import SendCommand
 from toxicbot.handlers.commands.stat import StatCommand, StatsHandlerFactory
 from toxicbot.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
-from toxicbot.handlers.database import DatabaseUpdateManager
+from toxicbot.handlers.database import DatabaseUpdateSaver
 from toxicbot.handling import CommandDefinition, HandlersManager
 from toxicbot.helpers import log
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 from toxicbot.metrics import Metrics
-from toxicbot.workers import worker
 from toxicbot.workers.jokes import JokesWorker
 from toxicbot.workers.reminders import ReminderWorker
 from toxicbot.workers.server.server import ServerWorker, Server
+from toxicbot.workers.worker import WorkersManager
 
 
-def init(config_files: list) -> Tuple[Config, Database, Bot, Metrics, DatabaseUpdateManager]:
+def init(config_files: list) -> Tuple[Config, Database, Messenger, Metrics, DatabaseUpdateSaver]:
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()  # pylint: disable=no-member
@@ -53,18 +53,18 @@ def init(config_files: list) -> Tuple[Config, Database, Bot, Metrics, DatabaseUp
 
     metrics = Metrics()
 
-    dum = DatabaseUpdateManager(database, metrics)
+    dus = DatabaseUpdateSaver(database, metrics)
 
-    telegram_bot = telegram.Bot(config['telegram']['token'])
-    bot = Bot(telegram_bot, database, dum)
+    bot = telegram.Bot(config['telegram']['token'])
+    messenger = Messenger(bot, database, dus)
 
-    return config, database, bot, metrics, dum
+    return config, database, messenger, metrics, dus
 
 
 def __main__():
     # TODO: use dependency injection tool
     # TODO: inconsistency between factory constructor args and method args: Factory(X).create() vs Factory().create(X)
-    config, database, bot, metrics, dum = init(['./config.json', '/etc/toxic/config.json'])
+    config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
 
     sentry_sdk.init(config['sentry']['dsn'])  # pylint: disable=abstract-class-instantiated
     start_http_server(config['prometheus']['port'])
@@ -73,14 +73,15 @@ def __main__():
 
     server = Server(config['server']['host'], config['server']['port'], database)
 
-    worker.start_workers([
+    worker_manager = WorkersManager(messenger)
+    worker_manager.start([
         ServerWorker(server),
-        JokesWorker(joker, database, bot),
-        ReminderWorker(database, bot),
-    ], bot)
+        JokesWorker(joker, database, messenger),
+        ReminderWorker(database, messenger),
+    ])
 
     handlers_private = (
-        PrivateHandler(config['replies']['private'], database, bot),
+        PrivateHandler(config['replies']['private'], database, messenger),
     )
 
     splitter = PunctuationSplitter()
@@ -88,31 +89,31 @@ def __main__():
     chain_factory = ChainFactory(window=3)
 
     handlers_chats = (
-        VoiceHandlerFactory().create(config['replies']['voice'], bot),
-        KeywordsHandlerFactory().create(config['replies']['keywords'], bot),
-        SorryHandlerFactory().create(config['replies']['sorry'], bot),
-        StatsHandlerFactory().create(config['replies']['stats'], database, bot),
-        ChainHandlerFactory(chain_factory, textizer, database, bot).create(),
+        VoiceHandlerFactory().create(config['replies']['voice'], messenger),
+        KeywordsHandlerFactory().create(config['replies']['keywords'], messenger),
+        SorryHandlerFactory().create(config['replies']['sorry'], messenger),
+        StatsHandlerFactory().create(config['replies']['stats'], database, messenger),
+        ChainHandlerFactory(chain_factory, textizer, database, messenger).create(),
     )
 
     commands = (
-        CommandDefinition('dump', DumpCommand(database, bot), True),
-        CommandDefinition('stat', StatCommand(database, bot), False),
-        CommandDefinition('joke', JokeCommand(joker, bot), False),
-        CommandDefinition('send', SendCommand(database, bot), True),
-        CommandDefinition('chats', ChatsCommand(database, bot), True),
+        CommandDefinition('dump', DumpCommand(database, messenger), True),
+        CommandDefinition('stat', StatCommand(database, messenger), False),
+        CommandDefinition('joke', JokeCommand(joker, messenger), False),
+        CommandDefinition('send', SendCommand(database, messenger), True),
+        CommandDefinition('chats', ChatsCommand(database, messenger), True),
     )
     handle_manager = HandlersManager(
         handlers_private,
         handlers_chats,
         commands,
         database,
-        bot,
-        dum,
+        messenger,
+        dus,
         metrics,
     )
 
-    bot.send_to_admins('Я запустился.')
+    messenger.send_to_admins('Я запустился.')
 
     messages_total_row = database.query_row('''SELECT count(*) FROM messages''')
     metrics.messages.set(messages_total_row[0])
@@ -121,8 +122,8 @@ def __main__():
     update_id = None
     while True:
         try:
-            # TODO: bot.bot bad
-            for update in bot.bot.get_updates(offset=update_id, timeout=10):
+            # TODO: messenger.bot bad
+            for update in messenger.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
                 handle_manager.handle_update(update)
                 update_id = update.update_id + 1

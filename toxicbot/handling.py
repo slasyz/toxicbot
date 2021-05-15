@@ -8,9 +8,9 @@ import telegram
 
 from toxicbot.db import Database
 from toxicbot.handlers.commands.command import Command
-from toxicbot.handlers.database import DatabaseUpdateManager
+from toxicbot.handlers.database import DatabaseUpdateSaver
 from toxicbot.handlers.handler import Handler
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 from toxicbot.metrics import Metrics
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
@@ -29,14 +29,14 @@ class HandlersManager:
                  handlers_chats: Tuple[Handler, ...],
                  commands: Tuple[CommandDefinition, ...],
                  database: Database,
-                 bot: Bot,
-                 dum: DatabaseUpdateManager,
+                 messenger: Messenger,
+                 dum: DatabaseUpdateSaver,
                  metrics: Metrics):
         self.handlers_private = handlers_private
         self.handlers_chats = handlers_chats
         self.commands = commands
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
         self.dum = dum
         self.metrics = metrics
 
@@ -55,7 +55,7 @@ class HandlersManager:
             command_name = message.text[1:entity['length']]
             if '@' in command_name:
                 command_name, command_target = command_name.split('@', 2)
-                if command_target != self.bot.bot.username:
+                if command_target != self.messenger.bot.username:
                     continue
 
             break
@@ -105,7 +105,7 @@ class HandlersManager:
                 if handler.handle(update.message):
                     return
             except Exception as ex:
-                self.bot.reply(update.message, 'Ошибка.')
+                self.messenger.reply(update.message, 'Ошибка.')
                 logging.error('caught exception %s:\n\n%s', ex, traceback.format_exc())
 
     def handle_update(self, update: telegram.Update):

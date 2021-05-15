@@ -9,15 +9,15 @@ from toxicbot.features.chain.textizer import Textizer
 from toxicbot.handlers.handler import Handler
 from toxicbot.features.chain.chain import Chain, ChainFactory
 from toxicbot.features.chain.splitters import PunctuationSplitter
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 
 
 class ChainHandler(Handler):
-    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, database: Database, bot: Bot):
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, database: Database, messenger: Messenger):
         self.chain_factory = chain_factory
         self.textizer = textizer
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
         self.chats: dict[int, Chain] = {}
 
     def _get_period(self, chat_id: int):
@@ -42,10 +42,10 @@ class ChainHandler(Handler):
         if message.chat_id > 0:
             return False
 
-        if self.bot.is_reply_or_mention(message):
+        if self.messenger.is_reply_or_mention(message):
             chain = self.chats[message.chat_id]
             text = self.textizer.predict_not_empty(chain, message.text)
-            self.bot.reply(message, text)
+            self.messenger.reply(message, text)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -55,21 +55,21 @@ class ChainHandler(Handler):
         if count % self._get_period(message.chat_id) == 0:
             chain = self.chats[message.chat_id]
             text = self.textizer.predict_not_empty(chain, message.text)
-            self.bot.send(message.chat_id, text)
+            self.messenger.send(message.chat_id, text)
             return True
 
         return False
 
 
 class ChainHandlerFactory:
-    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, database: Database, bot: Bot):
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, database: Database, messenger: Messenger):
         self.chain_factory = chain_factory
         self.textizer = textizer
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     def create(self) -> ChainHandler:
-        chain_handler = ChainHandler(self.chain_factory, self.textizer, self.database, self.bot)
+        chain_handler = ChainHandler(self.chain_factory, self.textizer, self.database, self.messenger)
 
         for row in self.database.query('''
                 SELECT chat_id, text 
@@ -84,13 +84,13 @@ class ChainHandlerFactory:
 
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    _, database, bot, metrics, _ = main.init(['../../config.json'])
+    _, database, messenger, metrics, _ = main.init(['../../config.json'])
 
     # splitter = NoPunctuationSplitter()
     splitter = PunctuationSplitter()
     textizer = Textizer(Featurizer(), splitter, metrics)
     chain_factory = ChainFactory(window=3)
-    handler = ChainHandlerFactory(chain_factory, textizer, database, bot).create()
+    handler = ChainHandlerFactory(chain_factory, textizer, database, messenger).create()
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)

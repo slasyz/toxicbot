@@ -6,7 +6,7 @@ from toxicbot.db import Database
 from toxicbot.handlers.commands.command import Command
 from toxicbot.handlers.handler import Handler
 from toxicbot.helpers import decorators
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 
 
 def get_stat(chat_id: int, database: Database) -> str:
@@ -28,9 +28,9 @@ def get_stat(chat_id: int, database: Database) -> str:
 
 
 class StatCommand(Command):
-    def __init__(self, database: Database, bot: Bot):
+    def __init__(self, database: Database, messenger: Messenger):
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     def _get_response(self, chat_id) -> str:
         response = 'Кто сколько написал с момента запуска бота:\n'
@@ -41,37 +41,37 @@ class StatCommand(Command):
         try:
             chat_id = int(args[1])
         except ValueError:
-            self.bot.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID')
+            self.messenger.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID')
             return
 
         response = self._get_response(chat_id)
-        self.bot.reply(message, response)
+        self.messenger.reply(message, response)
 
     def handle(self, message: telegram.Message, args: list[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
-                self.bot.reply(message, response, delay=0)
+                self.messenger.reply(message, response, delay=0)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
             return
 
         if not self.database.is_admin(message.from_user.id):
-            self.bot.reply(message, 'Это нужно делать в общем чате, дурачок.')
+            self.messenger.reply(message, 'Это нужно делать в общем чате, дурачок.')
             return
 
         if len(args) != 2:
-            self.bot.reply(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
+            self.messenger.reply(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
             return
 
         self._parse_args_and_send(message, args)
 
 
 class StatsHandler(Handler):
-    def __init__(self, replies: dict[re.Pattern, str], database: Database, bot: Bot):
+    def __init__(self, replies: dict[re.Pattern, str], database: Database, messenger: Messenger):
         self.replies = replies
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
@@ -81,17 +81,17 @@ class StatsHandler(Handler):
 
             response = value + ':\n'
             response += get_stat(message.chat_id, self.database)
-            self.bot.reply(message, response, delay=0)
+            self.messenger.reply(message, response, delay=0)
 
             return True
 
 
 class StatsHandlerFactory:
-    def create(self, replies: dict[str, str], database: Database, bot: Bot) -> StatsHandler:
+    def create(self, replies: dict[str, str], database: Database, messenger: Messenger) -> StatsHandler:
         replies_regexes: dict[re.Pattern, str] = {}
 
         for key, value in replies.items():
             regexp = re.compile(key)
             replies_regexes[regexp] = value
 
-        return StatsHandler(replies_regexes, database, bot)
+        return StatsHandler(replies_regexes, database, messenger)

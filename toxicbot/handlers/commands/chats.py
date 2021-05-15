@@ -2,13 +2,13 @@ import telegram
 
 from toxicbot.db import Database
 from toxicbot.handlers.commands.command import Command
-from toxicbot.helpers.messages import Bot
+from toxicbot.messenger import Messenger
 
 
 class ChatsCommand(Command):
-    def __init__(self, database: Database, bot: Bot):
+    def __init__(self, database: Database, messenger: Messenger):
         self.database = database
-        self.bot = bot
+        self.messenger = messenger
 
     def handle(self, message: telegram.Message, args: list[str]):
         rows = self.database.query('''
@@ -25,4 +25,4 @@ class ChatsCommand(Command):
         for row in rows:
             response.append(f'{row[1]} — {row[0]}')
 
-        self.bot.reply(message, '\n'.join(response))
+        self.messenger.reply(message, '\n'.join(response))
