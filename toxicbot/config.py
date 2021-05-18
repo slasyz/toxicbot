@@ -32,7 +32,7 @@ class ConfigFactory:
                 with open(file) as f:
                     data = json.load(f)
             except FileNotFoundError:
-                pass
+                continue
 
             self.load_secrets(data)
             return Config(data)

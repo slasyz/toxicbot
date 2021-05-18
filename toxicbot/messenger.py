@@ -64,10 +64,10 @@ class Messenger:
         self.database = database
         self.dum = dum
 
-    def reply(self, to: telegram.Message, msg: Union[str, Message], delay: bool = False) -> telegram.Message:
-        return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=delay)
+    def reply(self, to: telegram.Message, msg: Union[str, Message], with_delay: bool = True) -> telegram.Message:
+        return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
 
-    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, with_delay: bool = False) -> telegram.Message:
+    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, with_delay: bool = True) -> telegram.Message:
         if isinstance(msg, str):
             msg = TextMessage(msg)
 

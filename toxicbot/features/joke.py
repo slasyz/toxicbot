@@ -1,3 +1,4 @@
+import logging
 import re
 import traceback
 from typing import Tuple
@@ -26,10 +27,9 @@ class Joker:
             return self.error_reply, False
 
         if not text.startswith('Анек #'):
-            # TODO: sentry
-            print('!!!!!!!  кривой анекдот !!!!!!!')
-            print(data)
-            print('!!!!!!! /кривой анекдот !!!!!!!')
+            logging.error('Invalid joke format', extra={
+                'data': data,
+            })
             return self.error_reply, False
 
         text = PREFIX_REGEXP.sub('', text)
@@ -38,5 +38,5 @@ class Joker:
 
 class JokerFactory:
     @staticmethod
-    def create(replies: dict[str, str]) -> Joker:
-        return Joker(replies['error'])
+    def create(error: str) -> Joker:
+        return Joker(error)

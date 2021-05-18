@@ -68,10 +68,10 @@ def __main__():
 
     sentry_dsn = config['sentry']['dsn']
     if sentry_dsn:
-        sentry_sdk.init(config['sentry']['dsn'])  # pylint: disable=abstract-class-instantiated
+        sentry_sdk.init(sentry_dsn)  # pylint: disable=abstract-class-instantiated
     start_http_server(config['prometheus']['port'])
 
-    joker = JokerFactory().create(config['replies']['joker'])
+    joker = JokerFactory().create(config['replies']['joker']['error'])
 
     server = Server(config['server']['host'], config['server']['port'], database)
 
