@@ -65,6 +65,6 @@ class Textizer:
 
         return 'Не могу сказать ничего дельного.'
 
-    def predict_not_empty(self, chain: Chain, message: str = None):
+    def predict_not_empty(self, chain: Chain, message: str = None) -> str:
         with self.metrics.chain_predict.time():  # TODO: do with decorator
-            self._predict_not_empty_inner(chain, message)
+            return self._predict_not_empty_inner(chain, message)

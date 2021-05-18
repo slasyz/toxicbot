@@ -51,7 +51,8 @@ class ChainHandler(Handler):
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
             return False
 
-        count = self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (message.chat_id,))
+        row = self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (message.chat_id,))
+        count = row[0]
         if count % self._get_period(message.chat_id) == 0:
             chain = self.chats[message.chat_id]
             text = self.textizer.predict_not_empty(chain, message.text)
