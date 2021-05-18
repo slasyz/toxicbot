@@ -31,9 +31,10 @@ class ConfigFactory:
             try:
                 with open(file) as f:
                     data = json.load(f)
-                    self.load_secrets(data)
-                    return Config(data)
             except FileNotFoundError:
                 pass
+
+            self.load_secrets(data)
+            return Config(data)
 
         raise Exception('cannot load config: no files found')

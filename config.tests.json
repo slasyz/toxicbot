@@ -16,16 +16,14 @@
     "port": 8001
   },
   "sentry": {
-    "dsn": "https://XXX.sentry.io/YYY"
+    "dsn": ""
   },
   "server": {
     "host": "127.0.0.1",
     "port": 8000
   },
   "telegram": {
-    "token": {
-      "file": "/run/secrets/telegram_token"
-    }
+    "token": "telegram_token"
   },
   "replies": {
     "keywords": {

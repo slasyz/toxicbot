@@ -23,7 +23,7 @@ jobs:
         make deps
     - name: Run tests
       run: |
-        make test.all
+        make test
     - name: Run linter
       run: |
         make lint

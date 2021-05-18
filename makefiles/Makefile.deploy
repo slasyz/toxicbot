@@ -30,6 +30,44 @@ debug.attach:      ## attach to empty debug container
 	docker exec -i --tty $$(docker ps -f name=toxic_local_app --quiet) /bin/bash
 
 
+.PHONY: tests.integration
+tests.integration: ## run tests in container locally
+	@{ \
+		export ENV=tests; \
+		docker build -t slasyz/toxicbot/db:latest --progress plain ./db/; \
+		docker build -t slasyz/toxicbot/app:latest --progress plain .; \
+		docker stack deploy \
+			--compose-file stack/base.yml \
+			--compose-file stack/tests.yml \
+			--prune toxic_tests; \
+	}
+	# TODO: find out how to restart container automatically, so everything below could be simplified to:
+	#  docker exec -i --tty $$(docker ps -f name=toxic_tests_app --quiet) /bin/bash -c "make test.all"; \
+	@{ \
+		container_old_id=$$(docker ps -f name=toxic_tests_app --quiet); \
+		if [ -n "$$container_old_id" ]; then \
+			echo "Stopping old container..."; \
+			docker stop -t 2 $$container_old_id; \
+		fi; \
+	}
+	@{ \
+		n=0; \
+		container_id=; \
+		until [ "$$n" -ge 20 ] || (  [ -n "$$container_id" ] ) \
+		do \
+			echo -n "$$n."; \
+			container_id=$$(docker ps -f name=toxic_tests_app --quiet); \
+			n=$$((n+1)); \
+			sleep 1; \
+		done; \
+		if [ -n "$$container_id" ]; then \
+			docker exec -i --tty $$container_id /bin/bash -c "make test.all"; \
+		else \
+			echo "Error: container was not started."; \
+			exit 1; \
+		fi; \
+	}
+
 .PHONY: _deploy
 _deploy:
 	@{ \
@@ -74,6 +112,9 @@ _init.container:
 			read -s -p "Please enter Postgres password: " postgres_password; \
 			printf "$$postgres_password" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_postgres_password -; \
 		fi; \
+		if [[ -z "$$(docker network ls -f name=infra | grep infra)" ]]; then \
+			docker network create --scope=swarm infra; \
+		fi; \
 	}
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
@@ -85,6 +126,26 @@ init.local:        ## initialize stuff for container locally (secrets, ...)
 .PHONY: init.prod
 init.prod:         ## initialize stuff for container for production deployment (secrets, ...)
 	make _init.container REMOTE_NAME="$(REMOTE_NAME_PROD)" ENV="prod"
+
+
+.PHONY: init.tests
+init.tests:        ## initialize stuff for container for integration tests (secrets, ...)
+	@{ \
+		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_database)" ]]; then \
+			printf "toxic" | docker secret create toxic_tests_postgres_database -; \
+		fi; \
+		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_username)" ]]; then \
+			printf "toxic" | docker secret create toxic_tests_postgres_username -; \
+		fi; \
+		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_password)" ]]; then \
+			printf "toxic" | docker secret create toxic_tests_postgres_password -; \
+		fi; \
+		if [[ -z "$$(docker network ls -f name=infra | grep infra)" ]]; then \
+			docker network create --scope=swarm infra; \
+		fi; \
+	}
+	docker build -t slasyz/toxicbot/db:latest --progress plain ./db/
+	docker build -t slasyz/toxicbot/app:latest --progress plain .
 
 
 .PHONY: logs.prod.db

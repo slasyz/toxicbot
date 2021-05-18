@@ -66,7 +66,9 @@ def __main__():
     # TODO: inconsistency between factory constructor args and method args: Factory(X).create() vs Factory().create(X)
     config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
 
-    sentry_sdk.init(config['sentry']['dsn'])  # pylint: disable=abstract-class-instantiated
+    sentry_dsn = config['sentry']['dsn']
+    if sentry_dsn:
+        sentry_sdk.init(config['sentry']['dsn'])  # pylint: disable=abstract-class-instantiated
     start_http_server(config['prometheus']['port'])
 
     joker = JokerFactory().create(config['replies']['joker'])
