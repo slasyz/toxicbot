@@ -3,7 +3,7 @@ import time
 from typing import Union
 
 import telegram
-from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE
+from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE, MESSAGEENTITY_MENTION
 
 from toxicbot.db import Database
 from toxicbot.features.voice import NextUpService
@@ -93,7 +93,7 @@ class Messenger:
             return True
 
         for entity in message.entities:
-            if entity.type == 'mention' and message.text[entity.offset:entity.offset + entity.length] == '@' + self.bot.username:
+            if entity.type == MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + self.bot.username:
                 return True
 
         return False

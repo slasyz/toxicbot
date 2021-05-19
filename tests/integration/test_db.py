@@ -1,11 +1,22 @@
+import pytest
+import telegram
+
 from toxicbot.config import ConfigFactory
 from toxicbot.db import DatabaseFactory
 
 
-def test_database_query():
+testdata = [
+    ('SELECT %s;', (1337,), [(1337,)]),
+    ('SELECT %(name)s;', {'name': 'Vyacheslav'}, [('Vyacheslav',)]),
+    ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', telegram.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
+]
+
+
+@pytest.fixture
+def database():
     config = ConfigFactory().load(['/app/config.tests.json'])
 
-    db = DatabaseFactory().connect(
+    return DatabaseFactory().connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],
@@ -13,7 +24,8 @@ def test_database_query():
         config['database']['pass'],
     )
 
-    rows = list(db.query('SELECT %s;', (1337,)))
 
-    assert len(rows) == 1
-    assert rows[0][0] == 1337
+@pytest.mark.parametrize(['query', 'vars', 'expected'], testdata)
+def test_database_query(query, vars, expected, database):
+    rows = list(database.query(query, vars))
+    assert rows == expected

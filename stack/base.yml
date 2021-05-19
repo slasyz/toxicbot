@@ -5,6 +5,11 @@ services:
     image: slasyz/toxicbot/app:latest
     depends_on:
       - db
+    secrets:
+      - postgres_username
+      - postgres_password
+      - postgres_database
+      - telegram_token
     # Remove this hostname and use per-network aliases after https://github.com/moby/moby/issues/38066 and
     # https://github.com/moby/moby/issues/30313 are fixed.
     hostname: toxic_${ENV}_app
