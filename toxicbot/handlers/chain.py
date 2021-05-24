@@ -77,7 +77,6 @@ class ChainHandlerFactory:
                 FROM messages 
                 WHERE chat_id < 0 AND update_id IS NOT NULL 
                 ORDER BY tg_id'''):
-            # TODO: игнорировать изменения сообщений (кстати, они вообще сейчас эксепшн бросают)
             chain_handler.teach(row[0], row[1])
 
         return chain_handler

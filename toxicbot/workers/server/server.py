@@ -17,7 +17,7 @@ class Server:
         cli = sys.modules['flask.cli']
         cli.show_server_banner = lambda *x: None
         # TODO: replace with FastAPI?
-        app = Flask(__name__, template_folder='../../../html')  # TODO: config?
+        app = Flask(__name__, template_folder='../../../html')
         app.route('/messages')(self.handler_messages)
         # TODO: replace app.run() with something production ready; or not
         app.run(host=self.host, port=self.port)

@@ -28,6 +28,7 @@ from toxicbot.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, 
 from toxicbot.handlers.database import DatabaseUpdateSaver
 from toxicbot.handling import CommandDefinition, HandlersManager
 from toxicbot.helpers import log
+from toxicbot.helpers.delayer import DelayerFactory
 from toxicbot.messenger import Messenger
 from toxicbot.metrics import Metrics
 from toxicbot.workers.jokes import JokesWorker
@@ -55,8 +56,10 @@ def init(config_files: list) -> Tuple[Config, Database, Messenger, Metrics, Data
 
     dus = DatabaseUpdateSaver(database, metrics)
 
+    delayer_factory = DelayerFactory()
+
     bot = telegram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, database, dus)
+    messenger = Messenger(bot, database, dus, delayer_factory)
 
     return config, database, messenger, metrics, dus
 
@@ -124,7 +127,6 @@ def __main__():
     update_id = None
     while True:
         try:
-            # TODO: messenger.bot bad
             for update in messenger.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
                 handle_manager.handle_update(update)

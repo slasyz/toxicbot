@@ -29,14 +29,14 @@ class HandlersManager:
                  commands: Tuple[CommandDefinition, ...],
                  database: Database,
                  messenger: Messenger,
-                 dum: DatabaseUpdateSaver,
+                 dus: DatabaseUpdateSaver,
                  metrics: Metrics):
         self.handlers_private = handlers_private
         self.handlers_chats = handlers_chats
         self.commands = commands
         self.database = database
         self.messenger = messenger
-        self.dum = dum
+        self.dum = dus
         self.metrics = metrics
 
     def handle_command(self, message: telegram.Message) -> bool:

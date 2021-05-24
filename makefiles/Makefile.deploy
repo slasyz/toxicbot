@@ -86,6 +86,7 @@ _deploy:
 		--compose-file stack/base.yml \
 		--compose-file stack/$(ENV).yml \
 		--prune toxic_$(ENV)
+	docker --context "$(REMOTE_NAME)" stop -t 5 $$(docker --context $(REMOTE_NAME_PROD) ps -f name=toxic_prod_app --quiet)
 
 .PHONY: deploy.local
 deploy.local:      ## run app in container locally

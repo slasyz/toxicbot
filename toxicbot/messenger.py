@@ -8,9 +8,11 @@ from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE, MESSA
 from toxicbot.db import Database
 from toxicbot.features.voice import NextUpService
 from toxicbot.handlers.database import DatabaseUpdateSaver
+from toxicbot.helpers.delayer import DelayerFactory
 
-DEFAULT_DELAY = 2
-SYMBOLS_PER_SECOND = 7
+SYMBOLS_PER_SECOND = 10
+MIN_DELAY = 10
+DELAY_KEEPALIVE = 5
 
 
 class Message:
@@ -59,10 +61,11 @@ class TextMessage(Message):
 
 
 class Messenger:
-    def __init__(self, bot: telegram.Bot, database: Database, dum: DatabaseUpdateSaver):
+    def __init__(self, bot: telegram.Bot, database: Database, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
         self.bot = bot
         self.database = database
-        self.dum = dum
+        self.dus = dus
+        self.delayer_factory = delayer_factory
 
     def reply(self, to: telegram.Message, msg: Union[str, Message], with_delay: bool = True) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
@@ -73,15 +76,17 @@ class Messenger:
 
         if with_delay:
             length = msg.get_length()
-            delay = length / SYMBOLS_PER_SECOND
+            total_delay = min(length // SYMBOLS_PER_SECOND, MIN_DELAY)
 
-            self.bot.send_chat_action(chat_id, msg.get_chat_action())
-            # TODO: do it asynchronously
-            time.sleep(delay)
+            delayer = self.delayer_factory.create(total_delay, DELAY_KEEPALIVE)
+            for interval in delayer:
+                self.bot.send_chat_action(chat_id, msg.get_chat_action())
+                # TODO: do it asynchronously
+                time.sleep(interval)
 
         message = msg.send(self.bot, chat_id, reply_to)
 
-        self.dum.handle_message(message)
+        self.dus.handle_message(message)
         return message
 
     def send_to_admins(self, msg: Union[str, Message]):
