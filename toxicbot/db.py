@@ -7,9 +7,20 @@ class Database:
     def __init__(self, conn: psycopg2._psycopg.connection):
         self.conn = conn
 
+    def exec(self, query, vars=None):
+        with self.conn, self.conn.cursor() as cur:
+            cur.execute(query, vars)
+            self.conn.commit()
+
     def query(self, query, vars=None) -> Generator:
         with self.conn, self.conn.cursor() as cur:
             cur.execute(query, vars)
+            # TODO: возможно, делать коммит и возвращать итератор с записями
+            self.conn.commit()
+
+            if cur.description is None:
+                return
+
             for record in cur:
                 yield record
 

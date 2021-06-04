@@ -2,30 +2,22 @@
   "database": {
     "host": "db",
     "port": 5432,
-    "name": {
-      "file": "/run/secrets/postgres_database"
-    },
-    "user": {
-      "file": "/run/secrets/postgres_username"
-    },
-    "pass": {
-      "file": "/run/secrets/postgres_password"
-    }
+    "name": "toxic",
+    "user": "toxic",
+    "pass": "toxic"
   },
   "prometheus": {
     "port": 8001
   },
   "sentry": {
-    "dsn": "https://XXX.sentry.io/YYY"
+    "dsn": ""
   },
   "server": {
     "host": "127.0.0.1",
     "port": 8000
   },
   "telegram": {
-    "token": {
-      "file": "/run/secrets/telegram_token"
-    }
+    "token": "telegram_token"
   },
   "replies": {
     "keywords": {

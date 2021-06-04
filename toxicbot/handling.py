@@ -36,7 +36,7 @@ class HandlersManager:
         self.commands = commands
         self.database = database
         self.messenger = messenger
-        self.dum = dus
+        self.dus = dus
         self.metrics = metrics
 
     def handle_command(self, message: telegram.Message) -> bool:
@@ -79,9 +79,9 @@ class HandlersManager:
     def _handle_update_inner(self, update: telegram.Update):
         self.metrics.updates.inc(1)
         # Пишем в БД
-        self.dum.handle(update)
+        self.dus.handle(update)
 
-        # Обрабатываем только новые сообщения
+        # Обрабатываем только сообщения
         if update.message is None:
             return
 

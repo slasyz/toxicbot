@@ -2,15 +2,9 @@
   "database": {
     "host": "db",
     "port": 5432,
-    "name": {
-      "file": "/run/secrets/postgres_database"
-    },
-    "user": {
-      "file": "/run/secrets/postgres_username"
-    },
-    "pass": {
-      "file": "/run/secrets/postgres_password"
-    }
+    "name": "toxic",
+    "user": "toxic",
+    "pass": "toxic"
   },
   "prometheus": {
     "port": 8001

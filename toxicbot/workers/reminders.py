@@ -30,4 +30,4 @@ class ReminderWorker(Worker):
 
             self.messenger.send(chat_id, text)
 
-            self.database.query('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))
+            self.database.exec('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))

@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  app:
+    entrypoint: tail -f /dev/null
+    volumes:
+      - type: bind
+        source: ../config.tests.json
+        target: /etc/toxic/config.json
+        read_only: true
+    ports:
+      - 127.0.0.1:30130:8000/tcp
+      - 127.0.0.1:30132:8001/tcp
+  db:
+    ports:
+      - 127.0.0.1:30131:5432/tcp
+    volumes:
+      - type: bind
+        source: ../config.tests.json
+        target: /etc/toxic/config.json
+        read_only: true
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data

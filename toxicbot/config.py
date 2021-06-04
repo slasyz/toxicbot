@@ -19,13 +19,6 @@ class ConfigFactory:
         with open(src['file']) as f:
             return f.read()
 
-    def load_secrets(self, data: dict):
-        # TODO: do it better.
-        data['database']['name'] = self.load_secret(data['database']['name'])
-        data['database']['user'] = self.load_secret(data['database']['user'])
-        data['database']['pass'] = self.load_secret(data['database']['pass'])
-        data['telegram']['token'] = self.load_secret(data['telegram']['token'])
-
     def load(self, files: list[str]) -> Config:
         for file in files:
             try:
@@ -34,7 +27,6 @@ class ConfigFactory:
             except FileNotFoundError:
                 continue
 
-            self.load_secrets(data)
             return Config(data)
 
         raise Exception('cannot load config: no files found')

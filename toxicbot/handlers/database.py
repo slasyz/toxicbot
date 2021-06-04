@@ -20,7 +20,7 @@ class DatabaseUpdateSaver:
         ''', (user.id,))
 
         if row is None:
-            self.database.query('''
+            self.database.exec('''
                 INSERT INTO users(tg_id, first_name, last_name, username)
                 VALUES(%s, %s, %s, %s)
             ''', (
@@ -30,7 +30,7 @@ class DatabaseUpdateSaver:
                 user.username
             ))
         elif row[0] != user.first_name or row[1] != user.last_name or row[2] != user.username:
-            self.database.query('''
+            self.database.exec('''
                 UPDATE users
                 SET first_name = %s,
                     last_name = %s,
@@ -48,7 +48,7 @@ class DatabaseUpdateSaver:
 
         row = self.database.query_row('SELECT title FROM chats WHERE tg_id=%s', (chat.id,))
         if row is None:
-            self.database.query('''
+            self.database.exec('''
                 INSERT INTO chats(tg_id, title)
                 VALUES(%s, %s)
             ''', (
@@ -56,7 +56,7 @@ class DatabaseUpdateSaver:
                 title
             ))
         elif row[0] != title:
-            self.database.query('''
+            self.database.exec('''
                 UPDATE chats
                 SET title = %s
                 WHERE tg_id=%s
@@ -89,7 +89,7 @@ class DatabaseUpdateSaver:
             text = message.sticker.emoji
             sticker = message.sticker.file_id
 
-        self.database.query('''
+        self.database.exec('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
             VALUES(%s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (chat_id, tg_id) DO UPDATE SET 
@@ -127,7 +127,8 @@ class DatabaseUpdateSaver:
         if message is not None:
             chat_id = message.chat_id
 
-        self.database.query('''
+        print("inserting")
+        self.database.exec('''
             INSERT INTO updates(tg_id, chat_id, json)
             VALUES(%s, %s, %s)
         ''', (
@@ -135,6 +136,7 @@ class DatabaseUpdateSaver:
             chat_id,
             update.to_json(),
         ))
+        print("inserted")
 
         if message is None:
             return

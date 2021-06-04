@@ -8,9 +8,10 @@ I'm running application in Docker for production, and for local debug I use `mak
 
 ### In container locally
 - Install docker on local machine.
-- Join Swarm: `docker swarm init`.
-- Create config by `cp config.default.json config.json` and edit it.
-- Initialize secrets: `make init.local`.
+- Initialize stuff for Docker: `make init.local`.
+- Create config by `cp config.default.json config.json` and edit it:
+    - create random database password;
+    - create Telegram token.
 - Start it locally, there are two options:
     1. Deploy everything in container via `make deploy.local`.
     2. Deploy dependencies in container and run bot on host machine:
@@ -20,10 +21,9 @@ I'm running application in Docker for production, and for local debug I use `mak
 
 ### In container remotely
 - Install docker on local and remote machine.
-- Join Swarm on remote machine: `docker swarm init`.
-- Create file `/etc/toxic/config.json` based on `config.default.json` and edit it.
-- Initialize secrets: `make init.prod`.
-- Deploy everything: `make deploy.prod`.
+- On target machine create file `/etc/toxic/config.json` based on `config.default.json` and edit it.
+- Initialize secrets by running `make init.prod` on dev machine.
+- Deploy everything: `make deploy.prod` on dev machine.
 
 ### On host machine (locally or remotely)
 - Install tmux on remote machine.

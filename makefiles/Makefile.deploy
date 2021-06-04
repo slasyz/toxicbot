@@ -18,12 +18,10 @@ backup.container:  ## create remote database (running in container) backup in lo
 .PHONY: debug
 debug:             ## start dependencies
 	export ENV=local
-	docker build -t slasyz/toxicbot/db:latest --progress plain ./db/
-	docker build -t slasyz/toxicbot/app:latest --progress plain .
-	docker stack deploy \
-		--compose-file stack/base.yml \
-		--compose-file stack/debug.yml \
-		--prune toxic_local
+	docker compose \
+		-f compose/base.yml -f compose/debug.yml \
+		-p toxic_local \
+		up --build --force-recreate --remove-orphans
 
 .PHONY: debug.attach
 debug.attach:      ## attach to empty debug container
@@ -32,44 +30,19 @@ debug.attach:      ## attach to empty debug container
 
 .PHONY: tests.integration
 tests.integration: ## run tests in container locally
+	docker compose -f compose/base.yml -f compose/tests.yml -p toxic_tests down -t 2
+	docker volume rm -f toxic_tests_postgres_data
 	@{ \
 		export ENV=tests; \
 		docker build -t slasyz/toxicbot/db:latest --progress plain ./db/; \
 		docker build -t slasyz/toxicbot/app:latest --progress plain .; \
-		docker stack deploy \
-			--compose-file stack/base.yml \
-			--compose-file stack/tests.yml \
-			--prune toxic_tests; \
+		docker compose \
+			-f compose/base.yml -f compose/tests.yml \
+			-p toxic_tests \
+			up -d --build --force-recreate --remove-orphans -t 2; \
 	}
-	# TODO: find out how to restart container automatically, so everything below could be simplified to:
-	#  docker exec -i --tty $$(docker ps -f name=toxic_tests_app --quiet) /bin/bash -c "make test.all";
-	@{ \
-		container_old_id=$$(docker ps -f name=toxic_tests_app --quiet); \
-		if [ -n "$$container_old_id" ]; then \
-			echo "Stopping old container..."; \
-			docker stop -t 2 $$container_old_id; \
-		else \
-		  	echo "Old container not found."; \
-		fi; \
-	}
-	@{ \
-		n=0; \
-		container_id=; \
-		echo "Starting new container..."; \
-		until [ "$$n" -ge 20 ] || (  [ -n "$$container_id" ] ) \
-		do \
-			echo -n "$$n."; \
-			container_id=$$(docker ps -f name=toxic_tests_app --quiet); \
-			n=$$((n+1)); \
-			sleep 1; \
-		done; \
-		if [ -n "$$container_id" ]; then \
-			docker exec -i --tty $$container_id /bin/bash -c "make test.all"; \
-		else \
-			echo "Error: container was not started."; \
-			exit 1; \
-		fi; \
-	}
+	docker compose -f compose/base.yml -f compose/tests.yml -p toxic_tests exec app /bin/bash -c "make test.all"
+	docker compose -f compose/base.yml -f compose/tests.yml -p toxic_tests down -t 2
 
 .PHONY: _deploy
 _deploy:
@@ -79,14 +52,13 @@ _deploy:
 			exit 1; \
 		fi; \
 	}
-	export ENV=$(ENV)
+	export ENV=$(ENV)  # TODO: это точно имеет смысл?
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
-	docker --context "$(REMOTE_NAME)" stack deploy \
-		--compose-file stack/base.yml \
-		--compose-file stack/$(ENV).yml \
-		--prune toxic_$(ENV)
-	docker --context "$(REMOTE_NAME)" stop -t 5 $$(docker --context $(REMOTE_NAME_PROD) ps -f name=toxic_prod_app --quiet)
+	docker --context "$(REMOTE_NAME)" compose \
+			-f compose/base.yml -f compose/$(ENV).yml \
+			-p toxic_$(ENV) \
+			up -d --build --force-recreate --remove-orphans -t 2; \
 
 .PHONY: deploy.local
 deploy.local:      ## run app in container locally
@@ -104,24 +76,10 @@ _init.container:
 			echo "Error: no environment specified."; \
 			exit 1; \
 		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_postgres_database)" ]]; then \
-			read -s -p "Please enter Postgres database: " postgres_database; \
-			printf "$$postgres_database" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_postgres_database -; \
-		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_postgres_username)" ]]; then \
-			read -s -p "Please enter Postgres username: " postgres_username; \
-			printf "$$postgres_username" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_postgres_username -; \
-		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_$(ENV)_postgres_password)" ]]; then \
-			read -s -p "Please enter Postgres password: " postgres_password; \
-			printf "$$postgres_password" | docker --context "$(REMOTE_NAME)" secret create toxic_$(ENV)_postgres_password -; \
-		fi; \
 		if [[ -z "$$(docker network ls -f name=infra | grep infra)" ]]; then \
-			docker network create --scope=swarm infra; \
+			docker network create infra; \
 		fi; \
 	}
-	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
-	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
 
 .PHONY: init.local
 init.local:        ## initialize stuff for container locally (secrets, ...)
@@ -135,17 +93,8 @@ init.prod:         ## initialize stuff for container for production deployment (
 .PHONY: init.tests
 init.tests:        ## initialize stuff for container for integration tests (secrets, ...)
 	@{ \
-		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_database)" ]]; then \
-			printf "toxic" | docker secret create toxic_tests_postgres_database -; \
-		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_username)" ]]; then \
-			printf "toxic" | docker secret create toxic_tests_postgres_username -; \
-		fi; \
-		if [[ -z "$$(docker secret ls | grep toxic_tests_postgres_password)" ]]; then \
-			printf "toxic" | docker secret create toxic_tests_postgres_password -; \
-		fi; \
 		if [[ -z "$$(docker network ls -f name=infra | grep infra)" ]]; then \
-			docker network create --scope=swarm infra; \
+			docker network create --attachable infra; \
 		fi; \
 	}
 	docker build -t slasyz/toxicbot/db:latest --progress plain ./db/

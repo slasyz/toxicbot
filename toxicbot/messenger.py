@@ -10,8 +10,8 @@ from toxicbot.features.voice import NextUpService
 from toxicbot.handlers.database import DatabaseUpdateSaver
 from toxicbot.helpers.delayer import DelayerFactory
 
-SYMBOLS_PER_SECOND = 10
-MIN_DELAY = 10
+SYMBOLS_PER_SECOND = 20
+MAX_DELAY = 4
 DELAY_KEEPALIVE = 5
 
 
@@ -76,7 +76,7 @@ class Messenger:
 
         if with_delay:
             length = msg.get_length()
-            total_delay = min(length // SYMBOLS_PER_SECOND, MIN_DELAY)
+            total_delay = min(length // SYMBOLS_PER_SECOND, MAX_DELAY)
 
             delayer = self.delayer_factory.create(total_delay, DELAY_KEEPALIVE)
             for interval in delayer:

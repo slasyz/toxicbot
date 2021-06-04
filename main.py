@@ -25,6 +25,7 @@ from toxicbot.handlers.commands.dump import DumpCommand
 from toxicbot.handlers.commands.send import SendCommand
 from toxicbot.handlers.commands.stat import StatCommand, StatsHandlerFactory
 from toxicbot.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
+from toxicbot.handlers.commands.voice import VoiceCommand
 from toxicbot.handlers.database import DatabaseUpdateSaver
 from toxicbot.handling import CommandDefinition, HandlersManager
 from toxicbot.helpers import log
@@ -107,6 +108,7 @@ def __main__():
         CommandDefinition('joke', JokeCommand(joker, messenger), False),
         CommandDefinition('send', SendCommand(database, messenger), True),
         CommandDefinition('chats', ChatsCommand(database, messenger), True),
+        CommandDefinition('voice', VoiceCommand(database, messenger), False),
     )
     handle_manager = HandlersManager(
         handlers_private,
