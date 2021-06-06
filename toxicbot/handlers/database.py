@@ -127,7 +127,6 @@ class DatabaseUpdateSaver:
         if message is not None:
             chat_id = message.chat_id
 
-        print("inserting")
         self.database.exec('''
             INSERT INTO updates(tg_id, chat_id, json)
             VALUES(%s, %s, %s)
@@ -136,7 +135,6 @@ class DatabaseUpdateSaver:
             chat_id,
             update.to_json(),
         ))
-        print("inserted")
 
         if message is None:
             return

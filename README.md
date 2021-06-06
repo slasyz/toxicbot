@@ -6,10 +6,10 @@ Toxic Bot is a bot for Telegram.
 
 I'm running application in Docker for production, and for local debug I use `make port` to run SSH tunnel to production database and start bot on host machine connecting to production database.
 
-### In container locally
+### Using Docker, locally
 - Install docker on local machine.
 - Initialize stuff for Docker: `make init.local`.
-- Create config by `cp config.default.json config.json` and edit it:
+- Create file `/etc/toxic/config.json` based on `config.default.json` and edit it:
     - create random database password;
     - create Telegram token.
 - Start it locally, there are two options:
@@ -19,13 +19,15 @@ I'm running application in Docker for production, and for local debug I use `mak
         - run `make venv` to create virtual env and install dependencies;
         - run `make run` or press green triangle button in your IDE to start it.
 
-### In container remotely
+### Using Docker, remotely
 - Install docker on local and remote machine.
 - On target machine create file `/etc/toxic/config.json` based on `config.default.json` and edit it.
+    - create random database password;
+    - create Telegram token.
 - Initialize secrets by running `make init.prod` on dev machine.
 - Deploy everything: `make deploy.prod` on dev machine.
 
-### On host machine (locally or remotely)
+### Directly (locally or remotely)
 - Install tmux on remote machine.
 - Copy sources to remote machine.
 - Create virtual env and install dependencies: `make venv`.

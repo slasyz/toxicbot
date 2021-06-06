@@ -1,3 +1,5 @@
+import logging
+
 import telegram
 
 from toxicbot.db import Database
@@ -17,8 +19,8 @@ class VoiceCommand(Command):
 
         row = self.database.query_row('SELECT text FROM messages WHERE chat_id=%s AND tg_id=%s', (message.chat_id, message.reply_to_message.message_id))
         if row is None:
-            # TODO: залогировать ошибку нормально
-            self.messenger.reply(message, 'Нет (не могу найти {} и {}).'.format(message.chat_id, message.reply_to_message.message_id))
+            logging.error('Error trying to voice message: message not found.', chat_id=message.chat_id, reply_to=message.reply_to_message.message_id)
+            self.messenger.reply(message, 'Нет.')
             return
 
         self.messenger.reply(message, VoiceMessage(row[0]))

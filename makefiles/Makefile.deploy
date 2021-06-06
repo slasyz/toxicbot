@@ -52,7 +52,6 @@ _deploy:
 			exit 1; \
 		fi; \
 	}
-	export ENV=$(ENV)  # TODO: это точно имеет смысл?
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/db:latest --progress plain ./db/
 	docker --context "$(REMOTE_NAME)" build -t slasyz/toxicbot/app:latest --progress plain .
 	docker --context "$(REMOTE_NAME)" compose \
