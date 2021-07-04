@@ -18,6 +18,8 @@ backup.container:  ## create remote database (running in container) backup in lo
 .PHONY: debug
 debug:             ## start dependencies
 	export ENV=local
+	docker build -t slasyz/toxicbot/db:latest --progress plain ./db/
+	docker build -t slasyz/toxicbot/app:latest --progress plain .
 	docker compose \
 		-f compose/base.yml -f compose/debug.yml \
 		-p toxic_local \
@@ -107,11 +109,3 @@ logs.prod.db:      ## show database production logs
 .PHONY: logs.prod.app
 logs.prod.app:     ## show application production logs
 	docker --context $(REMOTE_NAME_PROD) logs --tail 50 --follow --timestamps $$(docker --context $(REMOTE_NAME_PROD) ps -f name=toxic_prod_app --quiet)
-
-.PHONY: stop.prod.app
-stop.prod.app:     ## shop production app
-	docker --context $(REMOTE_NAME_PROD) service rm toxic_prod_app
-
-.PHONY: stop.local.app
-stop.local.app:    ## stop local app
-	docker service rm toxic_prod_app
