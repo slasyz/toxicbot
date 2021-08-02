@@ -20,7 +20,10 @@ class Joker:
                 data = req.content.decode('utf-8', 'ignore')
                 parser = html.HTMLParser(encoding='utf-8')
                 document = html.document_fromstring(data, parser=parser)
-                text = document.find('.//*[@class="anek-view"]//article').text_content().strip().replace('            ', '')
+                element = document.find('.//*[@class="anek-view"]//article')
+                if element is None:
+                    return 'Без анекдота.', False
+                text = element.text_content().strip().replace('            ', '')
         except requests.HTTPError as ex:  # обрабатывать нормально
             traceback.print_stack()
             print(ex)
