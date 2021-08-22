@@ -1,6 +1,6 @@
 import pytest
 
-from toxicbot.features.chain.splitters import NoPunctuationSplitter, PunctuationSplitter, SpaceAdjoinSplitter
+from toxic.features.chain.splitters import NoPunctuationSplitter, PunctuationSplitter, SpaceAdjoinSplitter
 
 
 @pytest.mark.parametrize(

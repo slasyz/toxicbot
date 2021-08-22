@@ -1,8 +1,8 @@
 import pytest
 import telegram
 
-from toxicbot.config import ConfigFactory
-from toxicbot.db import DatabaseFactory, Database
+from toxic.config import ConfigFactory
+from toxic.db import DatabaseFactory, Database
 
 
 @pytest.fixture

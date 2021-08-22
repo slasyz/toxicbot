@@ -1,4 +1,4 @@
-from toxicbot.features import translating
+from toxic.features import translating
 
 
 def test_translate():

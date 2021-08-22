@@ -3,10 +3,10 @@ import re
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.handlers.handler import Handler
-from toxicbot.helpers import decorators
-from toxicbot.messenger import VoiceMessage, Messenger
+from toxic.db import Database
+from toxic.handlers.handler import Handler
+from toxic.helpers import decorators
+from toxic.messenger import VoiceMessage, Messenger
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 

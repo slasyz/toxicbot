@@ -11,31 +11,31 @@ import telegram
 from prometheus_client import start_http_server
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from toxicbot.config import ConfigFactory, Config
-from toxicbot.db import Database, DatabaseFactory
-from toxicbot.features.chain.chain import ChainFactory
-from toxicbot.features.chain.featurizer import Featurizer
-from toxicbot.features.chain.textizer import Textizer
-from toxicbot.features.joke import JokerFactory
-from toxicbot.handlers.chain import ChainHandlerFactory
-from toxicbot.features.chain.splitters import PunctuationSplitter
-from toxicbot.handlers.commands.joke import JokeCommand
-from toxicbot.handlers.commands.chats import ChatsCommand
-from toxicbot.handlers.commands.dump import DumpCommand
-from toxicbot.handlers.commands.send import SendCommand
-from toxicbot.handlers.commands.stat import StatCommand, StatsHandlerFactory
-from toxicbot.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
-from toxicbot.handlers.commands.voice import VoiceCommand
-from toxicbot.handlers.database import DatabaseUpdateSaver
-from toxicbot.handling import CommandDefinition, HandlersManager
-from toxicbot.helpers import log
-from toxicbot.helpers.delayer import DelayerFactory
-from toxicbot.messenger import Messenger
-from toxicbot.metrics import Metrics
-from toxicbot.workers.jokes import JokesWorker
-from toxicbot.workers.reminders import ReminderWorker
-from toxicbot.workers.server.server import ServerWorker, Server
-from toxicbot.workers.worker import WorkersManager
+from toxic.config import ConfigFactory, Config
+from toxic.db import Database, DatabaseFactory
+from toxic.features.chain.chain import ChainFactory
+from toxic.features.chain.featurizer import Featurizer
+from toxic.features.chain.textizer import Textizer
+from toxic.features.joke import JokerFactory
+from toxic.handlers.chain import ChainHandlerFactory
+from toxic.features.chain.splitters import PunctuationSplitter
+from toxic.handlers.commands.joke import JokeCommand
+from toxic.handlers.commands.chats import ChatsCommand
+from toxic.handlers.commands.dump import DumpCommand
+from toxic.handlers.commands.send import SendCommand
+from toxic.handlers.commands.stat import StatCommand, StatsHandlerFactory
+from toxic.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
+from toxic.handlers.commands.voice import VoiceCommand
+from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.handling import CommandDefinition, HandlersManager
+from toxic.helpers import log
+from toxic.helpers.delayer import DelayerFactory
+from toxic.messenger import Messenger
+from toxic.metrics import Metrics
+from toxic.workers.jokes import JokesWorker
+from toxic.workers.reminders import ReminderWorker
+from toxic.workers.server.server import ServerWorker, Server
+from toxic.workers.worker import WorkersManager
 
 
 def init(config_files: list) -> Tuple[Config, Database, Messenger, Metrics, DatabaseUpdateSaver]:

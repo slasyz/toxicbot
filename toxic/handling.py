@@ -5,12 +5,12 @@ from typing import Tuple
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.handlers.commands.command import Command
-from toxicbot.handlers.database import DatabaseUpdateSaver
-from toxicbot.handlers.handler import Handler
-from toxicbot.messenger import Messenger
-from toxicbot.metrics import Metrics
+from toxic.db import Database
+from toxic.handlers.commands.command import Command
+from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.handlers.handler import Handler
+from toxic.messenger import Messenger
+from toxic.metrics import Metrics
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
 

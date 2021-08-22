@@ -3,13 +3,13 @@ from typing import Optional
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.features.chain.featurizer import Featurizer
-from toxicbot.features.chain.textizer import Textizer
-from toxicbot.handlers.handler import Handler
-from toxicbot.features.chain.chain import Chain, ChainFactory
-from toxicbot.features.chain.splitters import PunctuationSplitter
-from toxicbot.messenger import Messenger
+from toxic.db import Database
+from toxic.features.chain.featurizer import Featurizer
+from toxic.features.chain.textizer import Textizer
+from toxic.handlers.handler import Handler
+from toxic.features.chain.chain import Chain, ChainFactory
+from toxic.features.chain.splitters import PunctuationSplitter
+from toxic.messenger import Messenger
 
 
 class ChainHandler(Handler):

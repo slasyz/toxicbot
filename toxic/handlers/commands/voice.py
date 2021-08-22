@@ -2,9 +2,9 @@ import logging
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.handlers.commands.command import Command
-from toxicbot.messenger import Messenger, VoiceMessage
+from toxic.db import Database
+from toxic.handlers.commands.command import Command
+from toxic.messenger import Messenger, VoiceMessage
 
 
 class VoiceCommand(Command):

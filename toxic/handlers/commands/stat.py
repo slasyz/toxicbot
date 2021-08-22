@@ -2,11 +2,11 @@ import re
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.handlers.commands.command import Command
-from toxicbot.handlers.handler import Handler
-from toxicbot.helpers import decorators
-from toxicbot.messenger import Messenger
+from toxic.db import Database
+from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import Handler
+from toxic.helpers import decorators
+from toxic.messenger import Messenger
 
 
 def get_stat(chat_id: int, database: Database) -> str:

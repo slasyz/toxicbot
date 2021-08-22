@@ -1,10 +1,10 @@
 import time
 from datetime import datetime
 
-from toxicbot.db import Database
-from toxicbot.helpers.log import print_sleep
-from toxicbot.messenger import Messenger
-from toxicbot.workers.worker import Worker
+from toxic.db import Database
+from toxic.helpers.log import print_sleep
+from toxic.messenger import Messenger
+from toxic.workers.worker import Worker
 
 
 def until(dt: datetime) -> float:

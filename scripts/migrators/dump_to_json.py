@@ -2,7 +2,7 @@ import gzip
 
 import yaml
 
-from toxicbot import db
+from toxic import db
 
 
 def get_total() -> int:

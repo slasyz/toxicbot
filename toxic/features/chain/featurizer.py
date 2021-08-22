@@ -1,6 +1,6 @@
 from typing import Optional
 
-from toxicbot.features.chain.chain import FEATURE_BREAK
+from toxic.features.chain.chain import FEATURE_BREAK
 
 
 class Featurizer:

@@ -3,8 +3,8 @@ from typing import Optional
 
 import telegram
 
-from toxicbot.db import Database
-from toxicbot.metrics import Metrics
+from toxic.db import Database
+from toxic.metrics import Metrics
 
 
 class DatabaseUpdateSaver:

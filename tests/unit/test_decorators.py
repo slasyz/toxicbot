@@ -1,6 +1,6 @@
 import pytest
 
-from toxicbot.helpers.decorators import with_retry
+from toxic.helpers.decorators import with_retry
 
 
 class FirstException(Exception):

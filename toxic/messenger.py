@@ -5,10 +5,10 @@ from typing import Union
 import telegram
 from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE, MESSAGEENTITY_MENTION
 
-from toxicbot.db import Database
-from toxicbot.features.voice import NextUpService
-from toxicbot.handlers.database import DatabaseUpdateSaver
-from toxicbot.helpers.delayer import DelayerFactory
+from toxic.db import Database
+from toxic.features.voice import NextUpService
+from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.helpers.delayer import DelayerFactory
 
 SYMBOLS_PER_SECOND = 20
 MAX_DELAY = 4

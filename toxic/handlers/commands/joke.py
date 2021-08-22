@@ -1,8 +1,8 @@
 import telegram
 
-from toxicbot.handlers.commands.command import Command
-from toxicbot.features.joke import Joker
-from toxicbot.messenger import Messenger
+from toxic.handlers.commands.command import Command
+from toxic.features.joke import Joker
+from toxic.messenger import Messenger
 
 
 class JokeCommand(Command):

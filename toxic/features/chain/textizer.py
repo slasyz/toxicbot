@@ -1,10 +1,10 @@
 from typing import Optional
 
-from toxicbot.features.chain.chain import Chain
-from toxicbot.features.chain.featurizer import Featurizer
-from toxicbot.features.chain.splitters import Splitter
-from toxicbot.helpers.consts import LINK_REGEXP
-from toxicbot.metrics import Metrics
+from toxic.features.chain.chain import Chain
+from toxic.features.chain.featurizer import Featurizer
+from toxic.features.chain.splitters import Splitter
+from toxic.helpers.consts import LINK_REGEXP
+from toxic.metrics import Metrics
 
 
 class Textizer:

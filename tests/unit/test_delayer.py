@@ -1,6 +1,6 @@
 import pytest
 
-from toxicbot.helpers.delayer import Delayer
+from toxic.helpers.delayer import Delayer
 
 
 @pytest.mark.parametrize(

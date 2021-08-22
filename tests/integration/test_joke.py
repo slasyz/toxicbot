@@ -1,4 +1,4 @@
-from toxicbot.features.joke import Joker
+from toxic.features.joke import Joker
 
 
 def test_get_random_joke():

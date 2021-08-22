@@ -7,8 +7,8 @@ import json
 
 import telegram
 
-from toxicbot import db
-from toxicbot.helpers import consts
+from toxic import db
+from toxic.helpers import consts
 
 
 def load():

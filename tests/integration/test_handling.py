@@ -3,10 +3,10 @@ from datetime import datetime
 import pytest
 import telegram
 
-from toxicbot.config import ConfigFactory
-from toxicbot.db import DatabaseFactory, Database
-from toxicbot.handlers.database import DatabaseUpdateSaver
-from toxicbot.metrics import Metrics
+from toxic.config import ConfigFactory
+from toxic.db import DatabaseFactory, Database
+from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.metrics import Metrics
 
 
 @pytest.fixture

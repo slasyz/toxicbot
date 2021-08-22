@@ -2,9 +2,9 @@ import sys
 
 from flask import Flask, render_template
 
-from toxicbot.db import Database
-from toxicbot.workers.worker import Worker
-from toxicbot.workers.server.models import Chat, User, ChatMessage, UserMessage
+from toxic.db import Database
+from toxic.workers.worker import Worker
+from toxic.workers.server.models import Chat, User, ChatMessage, UserMessage
 
 
 class Server:
