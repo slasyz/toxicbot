@@ -1,5 +1,6 @@
 __pycache__
 log.log
+.pytest_cache
 
 /config.json
 /venv

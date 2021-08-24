@@ -1,0 +1,13 @@
+# Put this to ~/.config/systemd/user/toxic.service
+
+[Unit]
+Description=Toxic telegram bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sl/deployments/ToxicTgBot
+ExecStart=/bin/sh "make run"
+Restart=always
+StandardOutput=append:/home/sl/logs/ToxicTgBot/stdout.log
+StandardError=append:/home/sl/logs/ToxicTgBot/stderr.log

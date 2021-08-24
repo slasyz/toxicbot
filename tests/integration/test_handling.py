@@ -11,7 +11,7 @@ from toxic.metrics import Metrics
 
 @pytest.fixture
 def database():
-    config = ConfigFactory().load(['/app/config.tests.json'])
+    config = ConfigFactory().load(['config.tests.json'])
 
     return DatabaseFactory().connect(
         config['database']['host'],

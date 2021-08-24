@@ -1,23 +1,23 @@
 {
   "database": {
-    "host": "db",
+    "host": "localhost",
     "port": 5432,
     "name": "toxic",
     "user": "toxic",
-    "pass": "toxic"
+    "pass": "*** PUT DATABASE PASSWORD HERE ***"
   },
   "prometheus": {
     "port": 8001
   },
   "sentry": {
-    "dsn": ""
+    "dsn": "*** PUT SENTRY DNS HERE ***"
   },
   "server": {
     "host": "127.0.0.1",
     "port": 8000
   },
   "telegram": {
-    "token": "telegram_token"
+    "token": "*** PUT TELEGRAM TOKEN HERE ***"
   },
   "replies": {
     "keywords": {

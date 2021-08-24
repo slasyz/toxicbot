@@ -1,7 +1,7 @@
 {
   "database": {
-    "host": "db",
-    "port": 5432,
+    "host": "localhost",
+    "port": 30131,
     "name": "toxic",
     "user": "toxic",
     "pass": "toxic"
