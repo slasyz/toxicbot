@@ -120,7 +120,7 @@ class DatabaseUpdateSaver:
             logging.info('Ignoring update #%d.', update.update_id)
             return
 
-        print(update)
+        logging.info(update)
 
         message = update.message or update.edited_message
         chat_id = 0

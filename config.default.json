@@ -10,7 +10,7 @@
     "port": 8001
   },
   "sentry": {
-    "dsn": "*** PUT SENTRY DNS HERE ***"
+    "dsn": "*** PUT SENTRY DSN HERE ***"
   },
   "server": {
     "host": "127.0.0.1",
@@ -38,6 +38,7 @@
     },
     "joker": {
       "error": "Ошибка, не могу рассказать анекдот."
-    }
+    },
+    "rate_limiter": "Превышен лимит сообщений."
   }
 }

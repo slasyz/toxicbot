@@ -32,7 +32,7 @@ class WorkerWrapper:
                 self.worker.work()
             except Exception as ex:
                 traceback.print_stack()
-                print(ex)
+                logging.error('Exception in worker %s', self.__class__.__name__, exc_info=ex)
 
                 self._clean_counter()
                 self.counter.add(datetime.now())

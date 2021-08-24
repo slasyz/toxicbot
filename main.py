@@ -30,6 +30,7 @@ from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handling import CommandDefinition, HandlersManager
 from toxic.helpers import log
 from toxic.helpers.delayer import DelayerFactory
+from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.workers.jokes import JokesWorker
@@ -94,6 +95,13 @@ def __main__():
     textizer = Textizer(Featurizer(), splitter, metrics)
     chain_factory = ChainFactory(window=3)
 
+    rate_limiter = RateLimiter(
+        rate=2,
+        per=20,
+        reply=config['replies']['rate_limiter'],
+        messenger=messenger,
+    )
+
     handlers_chats = (
         VoiceHandlerFactory().create(config['replies']['voice'], messenger),
         KeywordsHandlerFactory().create(config['replies']['keywords'], messenger),
@@ -118,6 +126,7 @@ def __main__():
         messenger,
         dus,
         metrics,
+        rate_limiter,
     )
 
     messenger.send_to_admins('Я запустился.')

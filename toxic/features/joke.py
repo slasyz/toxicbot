@@ -26,7 +26,7 @@ class Joker:
                 text = element.text_content().strip().replace('            ', '')
         except requests.HTTPError as ex:  # обрабатывать нормально
             traceback.print_stack()
-            print(ex)
+            logging.error('HTTP error when getting joke', exc_info=ex)
             return self.error_reply, False
 
         if not text.startswith('Анек #'):

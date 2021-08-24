@@ -9,6 +9,7 @@ from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.handler import Handler
+from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger import Messenger
 from toxic.metrics import Metrics
 
@@ -30,7 +31,8 @@ class HandlersManager:
                  database: Database,
                  messenger: Messenger,
                  dus: DatabaseUpdateSaver,
-                 metrics: Metrics):
+                 metrics: Metrics,
+                 rate_limiter: RateLimiter):
         self.handlers_private = handlers_private
         self.handlers_chats = handlers_chats
         self.commands = commands
@@ -38,6 +40,7 @@ class HandlersManager:
         self.messenger = messenger
         self.dus = dus
         self.metrics = metrics
+        self.rate_limiter = rate_limiter
 
     def handle_command(self, message: telegram.Message) -> bool:
         command_name = ''
@@ -70,6 +73,9 @@ class HandlersManager:
 
             if command.admins_only and not self.database.is_admin(message.from_user.id):
                 break
+
+            if self.rate_limiter.handle(message):
+                return True
 
             command.handler.handle(message, args)
             return True

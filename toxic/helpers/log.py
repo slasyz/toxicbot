@@ -2,6 +2,8 @@ import sys
 import logging
 from datetime import datetime
 
+import colorama
+
 
 def interval(seconds: float) -> str:
     days, remainder = divmod(seconds, 24*60*60)
@@ -37,4 +39,4 @@ def init():
     sys.stderr = Logger(sys.stderr, logfile)
     print('\n****************** ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' ******************\n')
     logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                        format=f'-> %(asctime)s - %(name)s - %(levelname)s - {colorama.Fore.BLUE}%(message)s{colorama.Fore.RESET}')
