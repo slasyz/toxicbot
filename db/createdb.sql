@@ -16,17 +16,17 @@ CREATE TABLE chats (
 );
 
 CREATE TABLE updates (
-    tg_id   int4 PRIMARY KEY,
+    tg_id   bigint PRIMARY KEY,
     chat_id bigint,
     created timestamptz DEFAULT now(),
     json    jsonb       DEFAULT NULL
 );
 
 CREATE TABLE messages (
-    chat_id   int4   REFERENCES chats(tg_id),
-    tg_id     int4,
+    chat_id   bigint REFERENCES chats(tg_id),
+    tg_id     bigint,
     user_id   bigint REFERENCES users(tg_id),
-    update_id int4   REFERENCES updates(tg_id),
+    update_id bigint REFERENCES updates(tg_id),
 
     text      text,
     date      timestamptz,

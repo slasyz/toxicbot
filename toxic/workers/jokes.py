@@ -25,7 +25,7 @@ class JokesWorker(Worker):
 
             rows = self.database.query('SELECT tg_id FROM chats WHERE tg_id < 0;')
             for row in rows:
-                logging.info('Sending joke to user #%d', row[0])
+                logging.info('Sending joke to chat #%d', row[0])
                 joke, _ = self.joker.get_random_joke()
                 self.messenger.send(row[0], joke)
 
