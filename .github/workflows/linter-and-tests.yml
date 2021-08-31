@@ -19,9 +19,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        make deps
+        make deps.global
     - name: Start dependencies in containers
-      run: $GITHUB_WORKSPACE/scripts/start-deps.sh
+      run: /bin/bash $GITHUB_WORKSPACE/scripts/start-deps.sh
     - name: Run tests
       run: |
         make test

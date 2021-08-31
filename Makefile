@@ -52,6 +52,11 @@ deps:           ## install all dependencies from requirements.txt to virtual env
 	fi;
 	./venv/bin/python -m pip install -r requirements.txt
 
+
+.PHONY: deps.global
+deps.global:    ## install all dependencies from requirements.txt globally
+	pip install -r requirements.txt
+
 .PHONY: run
 run:            ## start bot in foreground
 	$(PYTHON_INTERPRETER) ./main.py
