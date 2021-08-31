@@ -16,7 +16,7 @@ help:           ## show this help
 
 .PHONY: lint
 lint:           ## run linter with less strict checks
-lint: DISABLE=invalid-name,unused-argument
+lint: DISABLE=invalid-name,unused-argument,too-many-instance-attributes
 lint: pylint
 
 .PHONY: lint.all
