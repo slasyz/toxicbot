@@ -96,8 +96,8 @@ def __main__():
     chain_factory = ChainFactory(window=3)
 
     rate_limiter = RateLimiter(
-        rate=2,
-        per=20,
+        rate=5,
+        per=120,
         reply=config['replies']['rate_limiter'],
         messenger=messenger,
     )
