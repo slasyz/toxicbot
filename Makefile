@@ -38,13 +38,6 @@ test:           ## run all tests (you can start dependencies using ./scripts/sta
 	$(PYTHON_INTERPRETER) -m pytest tests
 
 
-.PHONY: port
-port:           ## run port forwarding to open Flask server locally and connect to prod database
-	@echo "http://localhost:30120/messages"
-	@echo "psql -h localhost -p 30121 -U toxic -d toxic"
-	@ssh -L 30120:localhost:30120 -L 30121:localhost:30121 sl@slasyz.ru "sleep infinity"
-
-
 .PHONY: deps
 deps:           ## install all dependencies from requirements.txt to virtual environment
 	if [[ ! -d venv ]]; then \

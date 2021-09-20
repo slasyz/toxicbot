@@ -2,6 +2,8 @@ import logging
 import math
 import time
 
+from telegram.error import Unauthorized
+
 from toxic.db import Database
 from toxic.features.joke import Joker
 from toxic.helpers.log import print_sleep
@@ -27,7 +29,12 @@ class JokesWorker(Worker):
             for row in rows:
                 logging.info('Sending joke to chat #%d', row[0])
                 joke, _ = self.joker.get_random_joke()
-                self.messenger.send(row[0], joke)
+
+                try:
+                    self.messenger.send(row[0], joke)
+                except Unauthorized as ex:
+                    logging.info('Cannot send joke to chat #%d', row[0], exc_info=ex)
+                    continue
 
             time.sleep(2)
 
