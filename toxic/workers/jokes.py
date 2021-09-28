@@ -25,8 +25,11 @@ class JokesWorker(Worker):
             print_sleep(seconds, 'next midnight joke')
             time.sleep(seconds)
 
-            rows = self.database.query('SELECT tg_id FROM chats WHERE tg_id < 0;')
+            rows = self.database.query('SELECT tg_id, joke FROM chats WHERE tg_id < 0;')
             for row in rows:
+                if not row[1]:
+                    continue
+
                 logging.info('Sending joke to chat #%d', row[0])
                 joke, _ = self.joker.get_random_joke()
 

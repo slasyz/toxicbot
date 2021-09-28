@@ -61,6 +61,7 @@ class VoiceHandler(Handler):
         self.messenger = messenger
 
     def handle(self, message: telegram.Message) -> bool:
+        # TODO: come up about something funnier
         if message.voice is None and message.video_note is None:
             return False
 

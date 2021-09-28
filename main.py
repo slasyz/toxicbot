@@ -17,6 +17,7 @@ from toxic.features.chain.chain import ChainFactory
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.features.joke import JokerFactory
+from toxic.features.odesli import Odesli
 from toxic.handlers.chain import ChainHandlerFactory
 from toxic.features.chain.splitters import PunctuationSplitter
 from toxic.handlers.commands.joke import JokeCommand
@@ -27,6 +28,7 @@ from toxic.handlers.commands.stat import StatCommand, StatsHandlerFactory
 from toxic.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.handlers.music import MusicHandler
 from toxic.handling import CommandDefinition, HandlersManager
 from toxic.helpers import log
 from toxic.helpers.delayer import DelayerFactory
@@ -102,7 +104,10 @@ def __main__():
         messenger=messenger,
     )
 
+    odesli = Odesli()
+
     handlers_chats = (
+        MusicHandler(odesli, messenger),
         VoiceHandlerFactory().create(config['replies']['voice'], messenger),
         KeywordsHandlerFactory().create(config['replies']['keywords'], messenger),
         SorryHandlerFactory().create(config['replies']['sorry'], messenger),

@@ -57,7 +57,27 @@ class TextMessage(Message):
         return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_message(chat_id, self.text, reply_to_message_id=reply_to)
+        # TODO: API for disable_web_page_preview and other kwargs
+        return bot.send_message(chat_id, self.text, reply_to_message_id=reply_to, disable_web_page_preview=True)
+
+
+class HTMLMessage(Message):
+    def __init__(self, text):
+        self.text = text
+
+    def get_length(self) -> int:
+        return len(self.text)
+
+    def get_chat_action(self) -> str:
+        return CHATACTION_TYPING
+
+    def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
+        # TODO: API for disable_web_page_preview and other kwargs
+        return bot.send_message(chat_id,
+                                self.text,
+                                reply_to_message_id=reply_to,
+                                disable_web_page_preview=True,
+                                parse_mode=telegram.ParseMode.HTML)
 
 
 class Messenger:
