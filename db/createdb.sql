@@ -1,3 +1,5 @@
+-- TODO: add NOT NULL constraints.
+
 CREATE TABLE users (
     tg_id       bigint PRIMARY KEY,
     first_name  text,

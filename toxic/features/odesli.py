@@ -38,7 +38,7 @@ class Odesli:
         if src == 'artist':
             return Type.ARTIST
         if src == 'album':
-            return Type.ARTIST
+            return Type.ALBUM
         if src == 'song':
             return Type.SONG
         raise UnknownTypeException()
