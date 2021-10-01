@@ -34,10 +34,10 @@ CREATE TABLE messages (
 
     text      text,
     date      timestamptz,
-    sticker   text,
-
-    UNIQUE (chat_id, json_id, tg_id)
+    sticker   text
 );
+CREATE UNIQUE INDEX ON messages(chat_id, json_id, tg_id);
+CREATE UNIQUE INDEX ON messages(chat_id, json_id) WHERE tg_id IS NULL;
 
 CREATE TABLE reminders (
     id       serial4     PRIMARY KEY,

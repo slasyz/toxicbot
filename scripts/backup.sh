@@ -10,5 +10,5 @@ fi
 
 BACKUP_FILENAME=./backups/backup-$(date +'%Y%m%d-%H%M%S')
 
-ssh "$1" 'pg_dump --data-only --inserts -h localhost -U toxic -d toxic | gzip' > "$BACKUP_FILENAME-host.sql.gz"
+ssh "$1" 'pg_dump --data-only --column-inserts -h localhost -U toxic -d toxic | gzip' > "$BACKUP_FILENAME-host.sql.gz"
 du -sh ./backups/*
