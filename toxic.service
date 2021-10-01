@@ -3,6 +3,8 @@
 [Unit]
 Description=Toxic telegram bot
 After=network.target
+StartLimitBurst=5
+StartLimitIntervalSec=20s
 
 [Service]
 Type=simple

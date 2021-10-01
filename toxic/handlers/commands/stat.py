@@ -11,7 +11,7 @@ from toxic.messenger import Messenger
 
 def get_stat(chat_id: int, database: Database) -> str:
     rows = database.query('''
-            SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.tg_id) as c
+            SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.*) as c
             FROM messages m
                 JOIN users u on m.user_id = u.tg_id
             WHERE chat_id=%s

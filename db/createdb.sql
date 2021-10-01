@@ -28,6 +28,7 @@ CREATE TABLE updates (
 CREATE TABLE messages (
     chat_id   bigint REFERENCES chats(tg_id),
     tg_id     bigint,
+    json_id   bigint DEFAULT NULL,
     user_id   bigint REFERENCES users(tg_id),
     update_id bigint REFERENCES updates(tg_id),
 
@@ -35,7 +36,7 @@ CREATE TABLE messages (
     date      timestamptz,
     sticker   text,
 
-    PRIMARY KEY (chat_id, tg_id)
+    UNIQUE (chat_id, json_id, tg_id)
 );
 
 CREATE TABLE reminders (

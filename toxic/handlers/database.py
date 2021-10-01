@@ -92,7 +92,7 @@ class DatabaseUpdateSaver:
         self.database.exec('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
             VALUES(%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (chat_id, tg_id) DO UPDATE SET 
+            ON CONFLICT (chat_id, json_id, tg_id) DO UPDATE SET 
                 update_id = %s,
                 text = %s,
                 date = %s,

@@ -9,8 +9,13 @@ services:
       - POSTGRES_PASSWORD=toxic
     ports:
       - 127.0.0.1:30131:5432/tcp
+    volumes:
+      - data:/var/lib/postgresql/data
     healthcheck:
       test: ps -p 1 -o comm= | grep postgres
       interval: 1s
       timeout: 5s
       retries: 20
+
+volumes:
+  data:
