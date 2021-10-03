@@ -8,7 +8,7 @@ from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.handlers.handler import Handler
 from toxic.features.chain.chain import Chain, ChainFactory
-from toxic.features.chain.splitters import PunctuationSplitter
+from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.messenger import Messenger
 
 
@@ -87,9 +87,10 @@ def __main__():
     _, database, messenger, metrics, _ = main.init(['../../config.json'])
 
     # splitter = NoPunctuationSplitter()
-    splitter = PunctuationSplitter()
+    # splitter = PunctuationSplitter()
+    splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, metrics)
-    chain_factory = ChainFactory(window=3)
+    chain_factory = ChainFactory(window=2)
     handler = ChainHandlerFactory(chain_factory, textizer, database, messenger).create()
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))

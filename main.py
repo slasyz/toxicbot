@@ -19,7 +19,7 @@ from toxic.features.chain.textizer import Textizer
 from toxic.features.joke import JokerFactory
 from toxic.features.odesli import Odesli
 from toxic.handlers.chain import ChainHandlerFactory
-from toxic.features.chain.splitters import PunctuationSplitter
+from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
@@ -93,9 +93,9 @@ def __main__():
         PrivateHandler(config['replies']['private'], database, messenger),
     )
 
-    splitter = PunctuationSplitter()
+    splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, metrics)
-    chain_factory = ChainFactory(window=3)
+    chain_factory = ChainFactory(window=2)
 
     rate_limiter = RateLimiter(
         rate=5,

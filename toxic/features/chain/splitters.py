@@ -10,6 +10,9 @@ SPACE_ADJOIN_SPLIT_REGEXP = re.compile(r"(([^\w'-]*|\s*)[^\w\s'-]+([^\w'-]*|\s*)
 
 
 class Splitter:
+    """
+    Splitter class implements a strategy of splitting and then joining tokens (words, punctuation marks, etc) back.
+    """
     def split(self, message: str) -> list[str]:
         raise NotImplementedError()
 
@@ -17,7 +20,10 @@ class Splitter:
         raise NotImplementedError()
 
 
-class NoPunctuationSplitter(Splitter):
+class WordsOnlySplitter(Splitter):
+    """
+    WordsOnlySplitter is a straightforward splitter that picks only letters, hyphens and apostrophes.
+    """
     def split(self, message: str) -> list[str]:
         res = NO_PUNCTUATION_SPLIT_REGEXP.split(message)
         if res == ['']:
@@ -30,6 +36,10 @@ class NoPunctuationSplitter(Splitter):
 
 
 class PunctuationSplitter(Splitter):
+    """
+    PunctuationSplitter extracts each sequence of punctuation marks, series of spaces and series of letters as separate
+    tokens.
+    """
     def split(self, message: str) -> list[str]:
         return PUNCTUATION_SPLIT_REGEXP.findall(message)
 
@@ -55,9 +65,11 @@ class PunctuationSplitter(Splitter):
 
 class SpaceAdjoinSplitter(Splitter):
     """
-    Примыкает пробелы к пунктуации, игнорирует отдельные пробелы, джойнит умнее (ставит пробел между токенами только
-    когда оба не пунктуационные).
-    В этом случае пробелы не являются отдельными токенами => в одно "окно" помещается больше осмысленных токенов.
+    Joins spaces to punctuation marks, ignores separate spaces, and joins more clever (places a space between tokens
+    only if both tokens are not punctuational).
+
+    Unlike PunctuationSplitter, spaces are not picked out as separate tokens, so single "window" can hold more
+    meaningful tokens.
     """
     def split(self, message: str) -> list[str]:
         return [x for x, y, z in SPACE_ADJOIN_SPLIT_REGEXP.findall(message)]

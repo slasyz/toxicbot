@@ -1,6 +1,6 @@
 import pytest
 
-from toxic.features.chain.splitters import NoPunctuationSplitter, PunctuationSplitter, SpaceAdjoinSplitter
+from toxic.features.chain.splitters import WordsOnlySplitter, PunctuationSplitter, SpaceAdjoinSplitter
 
 
 @pytest.mark.parametrize(
@@ -11,7 +11,7 @@ from toxic.features.chain.splitters import NoPunctuationSplitter, PunctuationSpl
     ]
 )
 def test_no_punctuation_splitter(message, tokens):
-    splitter = NoPunctuationSplitter()
+    splitter = WordsOnlySplitter()
     assert splitter.split(message) == tokens
 
 

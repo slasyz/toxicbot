@@ -6,14 +6,26 @@ FEATURE_BREAK = 0
 
 
 class Chain:
+    """
+    Chain class learns a sequence of features to be able to predict next feature using given input.
+    """
     def teach(self, feature: int):
-        pass
+        raise NotImplementedError()
 
-    def predict(self, features: list[int, ...]) -> list[int]:
-        pass
+    def predict(self, features: list[int, ...]) -> list[int]:  # TODO: replace with generator
+        raise NotImplementedError()
 
 
 class MarkovChain(Chain):
+    """
+    MarkovChain is an implementation of Markov chain algorithm.
+
+    Example: if it is taught using sequence [1 2 3 1 2 4 1 2 3 1 2 5], then given an input [1 2] it will predict next
+    feature with such probability:
+      - 3 with 50%
+      - 4 with 25%
+      - 5 with 25%
+    """
     def __init__(self, window: int):
         self.window = window
         self.data: dict[Tuple[int, ...], dict[int, int]] = {}

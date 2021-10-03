@@ -8,6 +8,12 @@ from toxic.metrics import Metrics
 
 
 class Textizer:
+    """
+    Textizer is a text prediction class.  It splits text to tokens using Splitter, maps them with integer features'
+    IDs using Featurizer, and uses chain to predict next tokens in a sequence.
+
+    It also preprocesses text and has some workarounds to make text more clean.
+    """
     def __init__(self, featurizer: Featurizer, splitter: Splitter, metrics: Metrics):
         self.featurizer = featurizer
         self.splitter = splitter

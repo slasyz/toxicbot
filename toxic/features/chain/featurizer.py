@@ -4,6 +4,9 @@ from toxic.features.chain.chain import FEATURE_BREAK
 
 
 class Featurizer:
+    """
+    Featurizer class maps a string with its unique ID.
+    """
     def __init__(self):
         self.features: dict[str, int] = {}
         self.values: dict[int, str] = {}
