@@ -1,18 +1,18 @@
-class Chat:
-    def __init__(self, id, title):
+class Group:
+    def __init__(self, id, title, messages):
         self.id = id
         self.title = title
-        self.messages = []
+        self.messages = messages
 
 
 class User:
-    def __init__(self, id, name):
+    def __init__(self, id, name, messages):
         self.id = id
         self.name = name
-        self.messages = []
+        self.messages = messages
 
 
-class ChatMessage:
+class GroupMessage:
     def __init__(self, update_id, tg_id, user_id, user_name, date, text):
         self.update_id = update_id
         self.tg_id = tg_id

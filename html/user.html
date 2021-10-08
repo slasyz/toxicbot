@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Messages</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            border: 1px solid lightgray;
+            padding: 0.15rem;
+        }
+        thead {
+            font-weight: bold;
+        }
+        td.oneline { white-space: pre; }
+        td.text { white-space: pre-line; }
+    </style>
+</head>
+<body>
+    <div>
+        <a href="/messages">&leftarrow; Back</a>
+    </div>
+
+    <h1>User</h1>
+
+    <div>
+        <h2>{{ user.name }} <span style="color: gray;">({{ user.id }})</span></h2>
+        <p>messages: {{ user.messages }}</p>
+        <table>
+            <thead>
+            <tr>
+                <td>update_id</td>
+                <td>tg_id</td>
+                <td class="oneline">date</td>
+                <td>text</td>
+            </tr>
+            </thead>
+            <tbody>
+                {% for message in messages %}
+                    <tr>
+                        <td>{{ message.update_id }}</td>
+                        <td>{{ message.tg_id }}</td>
+                        <td class="oneline">{{ message.date }}</td>
+                        <td class="text">{{ message.text | safe }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

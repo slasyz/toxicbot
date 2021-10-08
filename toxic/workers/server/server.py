@@ -1,10 +1,11 @@
 import sys
 
+import flask
 from flask import Flask, render_template
 
 from toxic.db import Database
 from toxic.workers.worker import Worker
-from toxic.workers.server.models import Chat, User, ChatMessage, UserMessage
+from toxic.workers.server.models import Group, User, GroupMessage, UserMessage
 
 
 class Server:
@@ -22,35 +23,66 @@ class Server:
         # TODO: replace app.run() with something production ready; or not
         app.run(host=self.host, port=self.port)
 
-    def handler_messages(self):
-        chats_dict = {}
+    def _handler_chats(self):
+        groups_dict = {}
         users_dict = {}
 
         # Получаем чаты
         rows = self.database.query('''
-            SELECT c.tg_id, c.title
+            SELECT c.tg_id, c.title, count(m)
             FROM chats c
+                LEFT JOIN messages m ON c.tg_id = m.chat_id
             WHERE c.tg_id < 0
+            GROUP BY c.tg_id, c.title
+            ORDER BY c.title
         ''')
         for row in rows:
-            chats_dict[row[0]] = Chat(row[0], row[1])
+            groups_dict[row[0]] = Group(row[0], row[1], row[2])
 
         # Получаем пользователей
         rows = self.database.query('''
-            SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name))
+            SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name)) as name, count(m)
             FROM users u
+                LEFT JOIN messages m on u.tg_id = m.chat_id
+            GROUP BY u.tg_id, u.first_name, u.last_name
+            ORDER BY name
         ''')
         for row in rows:
-            users_dict[row[0]] = User(row[0], row[1])
+            users_dict[row[0]] = User(row[0], row[1], row[2])
 
-        # Получаем все сообщения из чатов
+        groups_list = []
+        for val in groups_dict.values():
+            groups_list.append(val)
+        users_list = []
+        for val in users_dict.values():
+            users_list.append(val)
+
+        return render_template('chats.html', **{
+            'groups': groups_list,
+            'users': users_list,
+        })
+
+    def _handler_group(self, id: int):
+        # Получаем чат
+        row = self.database.query_row('''
+            SELECT c.title, count(m)
+            FROM chats c
+                LEFT JOIN messages m ON c.tg_id = m.chat_id
+            WHERE c.tg_id = %s
+            GROUP BY c.tg_id, c.title
+        ''', (id,))
+        group = Group(id, row[0], row[1])
+
+        messages = []
+
+        # Получаем все сообщения из чата
         rows = self.database.query('''
             SELECT chat_id, update_id, m.tg_id, user_id, btrim(concat(u.first_name, ' ', u.last_name)), date, text
             FROM messages m
-                JOIN users u on m.user_id = u.tg_id
-            WHERE chat_id < 0
-            ORDER BY tg_id, update_id
-        ''')
+                JOIN users u ON m.user_id = u.tg_id
+            WHERE chat_id = %s
+            ORDER BY tg_id NULLS FIRST, json_id, update_id
+        ''', (id,))
         for row in rows:
             chat_id, update_id, tg_id, user_id, user_name, date, text = row
 
@@ -59,16 +91,34 @@ class Server:
 
             date = date.astimezone(tz=None)
 
-            message = ChatMessage(update_id, tg_id, user_id, user_name, date, text)
-            chats_dict[chat_id].messages.append(message)
+            message = GroupMessage(update_id, tg_id, user_id, user_name, date, text)
+            messages.append(message)
 
-        # Получаем все сообщения от пользователей
+        return render_template('group.html', **{
+            'group': group,
+            'messages': messages,
+        })
+
+    def _handler_user(self, id: int):
+        # Получаем пользователя
+        row = self.database.query_row('''
+            SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m)
+            FROM users u
+                LEFT JOIN messages m ON u.tg_id = m.chat_id 
+            WHERE u.tg_id = %s
+            GROUP BY u.tg_id, u.first_name, u.last_name
+        ''', (id,))
+        user = User(id, row[0], row[1])
+
+        messages = []
+
+        # Получаем все сообщения от пользователя
         rows = self.database.query('''
             SELECT chat_id, update_id, tg_id, date, text
             FROM messages m
-            WHERE chat_id > 0
-            ORDER BY tg_id, update_id
-        ''')
+            WHERE chat_id = %s
+            ORDER BY tg_id NULLS FIRST, json_id, update_id
+        ''', (id,))
         for row in rows:
             user_id, update_id, tg_id, date, text = row
 
@@ -78,19 +128,21 @@ class Server:
             date = date.astimezone(tz=None)
 
             message = UserMessage(update_id, tg_id, user_id, date, text)
-            users_dict[user_id].messages.append(message)
+            messages.append(message)
 
-        chats_list = []
-        for val in chats_dict.values():
-            chats_list.append(val)
-        users_list = []
-        for val in users_dict.values():
-            users_list.append(val)
-
-        return render_template('messages.html', **{
-            'chats': chats_list,
-            'users': users_list,
+        return render_template('user.html', **{
+            'user': user,
+            'messages': messages,
         })
+
+    def handler_messages(self):
+        id = flask.request.args.get('chat', 0, type=int)
+        if id == 0:
+            return self._handler_chats()
+        elif id < 0:
+            return self._handler_group(id)
+        else:
+            return self._handler_user(id)
 
 
 class ServerWorker(Worker):
