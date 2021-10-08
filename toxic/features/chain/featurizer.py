@@ -1,11 +1,15 @@
 from typing import Optional
 
-from toxic.features.chain.chain import FEATURE_BREAK
+
+FEATURE_NONE = 0
 
 
 class Featurizer:
     """
     Featurizer class maps a string with its unique ID.
+
+    None value can be passed instead of a string.  It can be used to encode something outside of set of all possible
+    words.  For example, in case of chat bot it's the end of the message.
     """
     def __init__(self):
         self.features: dict[str, int] = {}
@@ -13,7 +17,7 @@ class Featurizer:
 
     def get_feature(self, value: Optional[str]) -> int:
         if value is None:
-            return FEATURE_BREAK
+            return FEATURE_NONE
 
         try:
             return self.features[value]
@@ -24,7 +28,7 @@ class Featurizer:
             return next_feature_num
 
     def get_value(self, feature: int) -> Optional[str]:
-        if feature == FEATURE_BREAK:
+        if feature == FEATURE_NONE:
             return None
 
         return self.values[feature]

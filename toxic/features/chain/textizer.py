@@ -1,7 +1,7 @@
 from typing import Optional
 
 from toxic.features.chain.chain import Chain
-from toxic.features.chain.featurizer import Featurizer
+from toxic.features.chain.featurizer import Featurizer, FEATURE_NONE
 from toxic.features.chain.splitters import Splitter
 from toxic.helpers.consts import LINK_REGEXP
 from toxic.metrics import Metrics
@@ -13,6 +13,8 @@ class Textizer:
     IDs using Featurizer, and uses chain to predict next tokens in a sequence.
 
     It also preprocesses text and has some workarounds to make text more clean.
+
+    TODO: написать тесты для этого и других классов.  Зря что ли декомпозировал?
     """
     def __init__(self, featurizer: Featurizer, splitter: Splitter, metrics: Metrics):
         self.featurizer = featurizer
@@ -46,11 +48,20 @@ class Textizer:
             feature = self.featurizer.get_feature(word)
             src_features.append(feature)
 
-        result_features = chain.predict(src_features)
+        current = chain.get_start(src_features)
+        result_features = []
+
+        while True:
+            feature = chain.predict(current)
+            if feature is None or feature == FEATURE_NONE:
+                break
+            result_features.append(feature)
+            current = current[1:] + (feature,)
 
         result_words = []
         for feature in result_features:
-            result_words.append(self.featurizer.get_value(feature))
+            word = self.featurizer.get_value(feature)
+            result_words.append(word)
 
         result_message = self.splitter.join(result_words)
         if result_message != '':
@@ -59,6 +70,7 @@ class Textizer:
         return ''
 
     def _predict_not_empty_inner(self, chain: Chain, message: str = None):
+        # TODO: исправить этот костыль, или для начала добавить метрики на плохие предсказания
         for _ in range(10):
             res = self.predict(chain, message)
             if res != '':
