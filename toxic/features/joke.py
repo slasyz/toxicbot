@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 import traceback
@@ -13,6 +15,10 @@ PREFIX_REGEXP = re.compile(r'^Анек #\d+\s+')
 class Joker:
     def __init__(self, error_reply: str):
         self.error_reply = error_reply
+
+    @staticmethod
+    def create(error: str) -> Joker:
+        return Joker(error)
 
     def get_random_joke(self) -> Tuple[str, bool]:
         try:
@@ -37,9 +43,3 @@ class Joker:
 
         text = PREFIX_REGEXP.sub('', text)
         return text, True
-
-
-class JokerFactory:
-    @staticmethod
-    def create(error: str) -> Joker:
-        return Joker(error)

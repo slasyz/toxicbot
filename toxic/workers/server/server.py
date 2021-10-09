@@ -77,14 +77,14 @@ class Server:
 
         # Получаем все сообщения из чата
         rows = self.database.query('''
-            SELECT chat_id, update_id, m.tg_id, user_id, btrim(concat(u.first_name, ' ', u.last_name)), date, text
+            SELECT update_id, m.tg_id, user_id, btrim(concat(u.first_name, ' ', u.last_name)), date, text
             FROM messages m
                 JOIN users u ON m.user_id = u.tg_id
             WHERE chat_id = %s
             ORDER BY tg_id NULLS FIRST, json_id, update_id
         ''', (id,))
         for row in rows:
-            chat_id, update_id, tg_id, user_id, user_name, date, text = row
+            update_id, tg_id, user_id, user_name, date, text = row
 
             if not text:
                 text = ''
@@ -139,10 +139,9 @@ class Server:
         id = flask.request.args.get('chat', 0, type=int)
         if id == 0:
             return self._handler_chats()
-        elif id < 0:
+        if id < 0:
             return self._handler_group(id)
-        else:
-            return self._handler_user(id)
+        return self._handler_user(id)
 
 
 class ServerWorker(Worker):

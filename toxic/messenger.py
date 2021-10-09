@@ -127,9 +127,9 @@ class Messenger:
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
 
-    _, _, messenger, _, _ = main.init(['../../config.json'])
+    deps = main.init(['../../config.json'])
 
-    messenger.send(-362750796, VoiceMessage('приветики'))
+    deps.messenger.send(-362750796, VoiceMessage('приветики'))
 
 
 if __name__ == '__main__':

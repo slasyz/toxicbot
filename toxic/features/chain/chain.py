@@ -77,5 +77,4 @@ class ChainFactory:
         self.window = window
 
     def create(self) -> Chain:
-        chain = MarkovChain(self.window)
-        return chain
+        return MarkovChain(self.window)

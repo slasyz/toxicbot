@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 import re
 
@@ -16,6 +18,16 @@ class KeywordsHandler(Handler):
         self.map = map
         self.messenger = messenger
 
+    @staticmethod
+    def new(config: dict[str, str], messenger: Messenger) -> KeywordsHandler:
+        map = {}
+
+        for key, val in config.items():
+            regexp = re.compile(key)
+            map[regexp] = val
+
+        return KeywordsHandler(map, messenger)
+
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         for key, val in self.map.items():
@@ -28,17 +40,6 @@ class KeywordsHandler(Handler):
             return True
 
         return False
-
-
-class KeywordsHandlerFactory:
-    def create(self, config: dict[str, str], messenger: Messenger) -> KeywordsHandler:
-        map = {}
-
-        for key, val in config.items():
-            regexp = re.compile(key)
-            map[regexp] = val
-
-        return KeywordsHandler(map, messenger)
 
 
 class PrivateHandler(Handler):
@@ -60,6 +61,15 @@ class VoiceHandler(Handler):
         self.replies = replies
         self.messenger = messenger
 
+    @staticmethod
+    def new(config: list[str], messenger: Messenger) -> VoiceHandler:
+        replies = []
+
+        for reply in config:
+            replies.append(VoiceMessage(reply))
+
+        return VoiceHandler(replies, messenger)
+
     def handle(self, message: telegram.Message) -> bool:
         # TODO: come up about something funnier
         if message.voice is None and message.video_note is None:
@@ -69,21 +79,15 @@ class VoiceHandler(Handler):
         return True
 
 
-class VoiceHandlerFactory:
-    def create(self, config: list[str], messenger: Messenger) -> VoiceHandler:
-        replies = []
-
-        for reply in config:
-            replies.append(VoiceMessage(reply))
-
-        return VoiceHandler(replies, messenger)
-
-
 class SorryHandler(Handler):
     def __init__(self, reply_sorry: str, reply_not_sorry: str, messenger: Messenger):
         self.reply_sorry = reply_sorry
         self.reply_not_sorry = reply_not_sorry
         self.messenger = messenger
+
+    @staticmethod
+    def new(config: dict[str, str], messenger: Messenger) -> SorryHandler:
+        return SorryHandler(config['sorry'], config['not_sorry'], messenger)
 
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
@@ -100,8 +104,3 @@ class SorryHandler(Handler):
             return True
 
         return False
-
-
-class SorryHandlerFactory:
-    def create(self, config: dict[str, str], messenger: Messenger) -> SorryHandler:
-        return SorryHandler(config['sorry'], config['not_sorry'], messenger)

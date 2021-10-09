@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import dataclasses
 from datetime import datetime
 from typing import Optional
 
@@ -19,6 +22,19 @@ class ChainHandler(Handler):
         self.database = database
         self.messenger = messenger
         self.chats: dict[int, Chain] = {}
+
+    @staticmethod
+    def new(chain_factory: ChainFactory, textizer: Textizer, database: Database, messenger: Messenger) -> ChainHandler:
+        chain_handler = ChainHandler(chain_factory, textizer, database, messenger)
+
+        for row in database.query('''
+                SELECT chat_id, text 
+                FROM messages 
+                WHERE chat_id < 0 AND update_id IS NOT NULL 
+                ORDER BY tg_id'''):
+            chain_handler.teach(row[0], row[1])
+
+        return chain_handler
 
     def _get_period(self, chat_id: int):
         return self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))[0]
@@ -62,36 +78,16 @@ class ChainHandler(Handler):
         return False
 
 
-class ChainHandlerFactory:
-    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, database: Database, messenger: Messenger):
-        self.chain_factory = chain_factory
-        self.textizer = textizer
-        self.database = database
-        self.messenger = messenger
-
-    def create(self) -> ChainHandler:
-        chain_handler = ChainHandler(self.chain_factory, self.textizer, self.database, self.messenger)
-
-        for row in self.database.query('''
-                SELECT chat_id, text 
-                FROM messages 
-                WHERE chat_id < 0 AND update_id IS NOT NULL 
-                ORDER BY tg_id'''):
-            chain_handler.teach(row[0], row[1])
-
-        return chain_handler
-
-
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    _, database, messenger, metrics, _ = main.init(['../../config.json'])
+    _, database, messenger, metrics, _ = dataclasses.astuple(main.init(['../../config.json']))
 
     # splitter = NoPunctuationSplitter()
     # splitter = PunctuationSplitter()
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, metrics)
     chain_factory = ChainFactory(window=2)
-    handler = ChainHandlerFactory(chain_factory, textizer, database, messenger).create()
+    handler = ChainHandler.new(chain_factory, textizer, database, messenger)
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)

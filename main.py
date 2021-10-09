@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
-
+import dataclasses
 import os
 import sys
 import time
 import logging
-from typing import Tuple
+from dataclasses import dataclass
 
 import sentry_sdk
 import telegram
 from prometheus_client import start_http_server
 from telegram.error import NetworkError, Unauthorized, Conflict
 
-from toxic.config import ConfigFactory, Config
-from toxic.db import Database, DatabaseFactory
+from toxic.config import Config
+from toxic.db import Database
 from toxic.features.chain.chain import ChainFactory
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
-from toxic.features.joke import JokerFactory
+from toxic.features.joke import Joker
 from toxic.features.odesli import Odesli
-from toxic.handlers.chain import ChainHandlerFactory
+from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.send import SendCommand
-from toxic.handlers.commands.stat import StatCommand, StatsHandlerFactory
-from toxic.handlers.chat_replies import PrivateHandler, VoiceHandlerFactory, KeywordsHandlerFactory, SorryHandlerFactory
+from toxic.handlers.commands.stat import StatCommand, StatsHandler
+from toxic.handlers.chat_replies import PrivateHandler, KeywordsHandler, SorryHandler, VoiceHandler
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.music import MusicHandler
@@ -41,14 +41,23 @@ from toxic.workers.server.server import ServerWorker, Server
 from toxic.workers.worker import WorkersManager
 
 
-def init(config_files: list) -> Tuple[Config, Database, Messenger, Metrics, DatabaseUpdateSaver]:
+@dataclass
+class BasicDependencies:
+    config: Config
+    database: Database
+    messenger: Messenger
+    metrics: Metrics
+    dus: DatabaseUpdateSaver
+
+
+def init(config_files: list) -> BasicDependencies:
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()  # pylint: disable=no-member
 
-    config = ConfigFactory().load(config_files)
+    config = Config.load(config_files)
 
-    database = DatabaseFactory().connect(
+    database = Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],
@@ -65,20 +74,18 @@ def init(config_files: list) -> Tuple[Config, Database, Messenger, Metrics, Data
     bot = telegram.Bot(config['telegram']['token'])
     messenger = Messenger(bot, database, dus, delayer_factory)
 
-    return config, database, messenger, metrics, dus
+    return BasicDependencies(config, database, messenger, metrics, dus)
 
 
 def __main__():
-    # TODO: use dependency injection tool
-    # TODO: inconsistency between factory constructor args and method args: Factory(X).create() vs Factory().create(X)
-    config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
+    config, database, messenger, metrics, dus = dataclasses.astuple(init(['./config.json', '/etc/toxic/config.json']))
 
     sentry_dsn = config['sentry']['dsn']
     if sentry_dsn:
         sentry_sdk.init(sentry_dsn)  # pylint: disable=abstract-class-instantiated
     start_http_server(config['prometheus']['port'], 'localhost')
 
-    joker = JokerFactory().create(config['replies']['joker']['error'])
+    joker = Joker.create(config['replies']['joker']['error'])
 
     server = Server(config['server']['host'], config['server']['port'], database)
 
@@ -104,15 +111,13 @@ def __main__():
         messenger=messenger,
     )
 
-    odesli = Odesli()
-
     handlers_chats = (
-        MusicHandler(odesli, messenger),
-        VoiceHandlerFactory().create(config['replies']['voice'], messenger),
-        KeywordsHandlerFactory().create(config['replies']['keywords'], messenger),
-        SorryHandlerFactory().create(config['replies']['sorry'], messenger),
-        StatsHandlerFactory().create(config['replies']['stats'], database, messenger),
-        ChainHandlerFactory(chain_factory, textizer, database, messenger).create(),
+        MusicHandler(Odesli(), messenger),
+        VoiceHandler.new(config['replies']['voice'], messenger),
+        KeywordsHandler.new(config['replies']['keywords'], messenger),
+        SorryHandler.new(config['replies']['sorry'], messenger),
+        StatsHandler.new(config['replies']['stats'], database, messenger),
+        ChainHandler.new(chain_factory, textizer, database, messenger),
     )
 
     commands = (

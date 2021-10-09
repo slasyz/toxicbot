@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 import telegram
@@ -73,6 +75,16 @@ class StatsHandler(Handler):
         self.database = database
         self.messenger = messenger
 
+    @staticmethod
+    def new(replies: dict[str, str], database: Database, messenger: Messenger) -> StatsHandler:
+        replies_regexes: dict[re.Pattern, str] = {}
+
+        for key, value in replies.items():
+            regexp = re.compile(key)
+            replies_regexes[regexp] = value
+
+        return StatsHandler(replies_regexes, database, messenger)
+
     @decorators.non_empty
     def handle(self, message: telegram.Message) -> bool:
         for key, value in self.replies.items():
@@ -84,14 +96,3 @@ class StatsHandler(Handler):
             self.messenger.reply(message, response, with_delay=False)
 
             return True
-
-
-class StatsHandlerFactory:
-    def create(self, replies: dict[str, str], database: Database, messenger: Messenger) -> StatsHandler:
-        replies_regexes: dict[re.Pattern, str] = {}
-
-        for key, value in replies.items():
-            regexp = re.compile(key)
-            replies_regexes[regexp] = value
-
-        return StatsHandler(replies_regexes, database, messenger)
