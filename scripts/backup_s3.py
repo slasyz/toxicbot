@@ -6,7 +6,8 @@ from subprocess import PIPE, Popen
 import boto3
 from botocore.exceptions import ClientError
 
-from toxic.config import ConfigFactory
+from main import init_sentry
+from toxic.config import Config
 
 BUCKET_NAME = "toxicbot"
 
@@ -44,7 +45,9 @@ def __main__():
     s3_name = 'backup-db/' + basename
 
     config_files = ['config.json', '/etc/toxic/config.json']
-    config = ConfigFactory().load(config_files)
+    config = Config.load(config_files)
+
+    init_sentry(config)
 
     print('-> pg_dump', file=sys.stderr)
     dump_table(

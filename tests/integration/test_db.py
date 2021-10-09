@@ -1,15 +1,15 @@
 import pytest
 import telegram
 
-from toxic.config import ConfigFactory
-from toxic.db import DatabaseFactory, Database
+from toxic.config import Config
+from toxic.db import Database
 
 
 @pytest.fixture
 def database():
-    config = ConfigFactory().load(['config.tests.json'])
+    config = Config.load(['config.tests.json'])
 
-    return DatabaseFactory().connect(
+    return Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],

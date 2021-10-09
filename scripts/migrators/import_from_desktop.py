@@ -2,8 +2,8 @@ from datetime import datetime
 import json
 from typing import Optional
 
-from toxic.config import ConfigFactory
-from toxic.db import Database, DatabaseFactory
+from toxic.config import Config
+from toxic.db import Database
 
 
 def crop_text(s: str) -> str:
@@ -78,9 +78,9 @@ def update(database: Database, chat_id: int, tg_id: int, json_id: int, text: str
 
 
 def __main__():
-    config = ConfigFactory().load(['/etc/toxic/config.json'])
+    config = Config.load(['/etc/toxic/config.json'])
 
-    database = DatabaseFactory().connect(
+    database = Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],

@@ -77,12 +77,16 @@ def init(config_files: list) -> BasicDependencies:
     return BasicDependencies(config, database, messenger, metrics, dus)
 
 
-def __main__():
-    config, database, messenger, metrics, dus = dataclasses.astuple(init(['./config.json', '/etc/toxic/config.json']))
-
+def init_sentry(config: Config):
     sentry_dsn = config['sentry']['dsn']
     if sentry_dsn:
         sentry_sdk.init(sentry_dsn)  # pylint: disable=abstract-class-instantiated
+
+
+def __main__():
+    config, database, messenger, metrics, dus = dataclasses.astuple(init(['./config.json', '/etc/toxic/config.json']))
+
+    init_sentry(config)
     start_http_server(config['prometheus']['port'], 'localhost')
 
     joker = Joker.create(config['replies']['joker']['error'])
