@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 from datetime import datetime
 from typing import Optional
 
@@ -80,7 +79,7 @@ class ChainHandler(Handler):
 
 def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    _, database, messenger, metrics, _ = dataclasses.astuple(main.init(['../../config.json']))
+    _, database, messenger, metrics, _ = main.init(['../../config.json'])
 
     # splitter = NoPunctuationSplitter()
     # splitter = PunctuationSplitter()

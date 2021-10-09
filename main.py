@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import dataclasses
 import os
 import sys
 import time
@@ -49,6 +48,9 @@ class BasicDependencies:
     metrics: Metrics
     dus: DatabaseUpdateSaver
 
+    def __iter__(self):
+        return iter((self.config, self.database, self.messenger, self.metrics, self.dus))
+
 
 def init(config_files: list) -> BasicDependencies:
     log.init()
@@ -84,7 +86,7 @@ def init_sentry(config: Config):
 
 
 def __main__():
-    config, database, messenger, metrics, dus = dataclasses.astuple(init(['./config.json', '/etc/toxic/config.json']))
+    config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
 
     init_sentry(config)
     start_http_server(config['prometheus']['port'], 'localhost')
