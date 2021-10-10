@@ -2,6 +2,7 @@ import os
 
 import uvicorn
 from fastapi import FastAPI
+from starlette_exporter import PrometheusMiddleware, handle_metrics
 from starlette.templating import Jinja2Templates
 
 from main import init, init_sentry
@@ -29,6 +30,8 @@ def __main__():
     init_sentry(config)
 
     app = FastAPI()
+    app.add_middleware(PrometheusMiddleware)
+
     templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '..', '..', 'html'))
 
     routes = [
@@ -37,6 +40,8 @@ def __main__():
 
     for route in routes:
         app.include_router(route)
+
+    app.add_route("/metrics", handle_metrics)
 
     uvicorn.run(app, host=config['server']['host'], port=config['server']['port'], log_config=LOGGING_CONFIG)
 

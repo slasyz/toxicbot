@@ -99,7 +99,9 @@ pluggy==0.13.1
 pre-commit==2.15.0
     # via translate
 prometheus-client==0.10.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   starlette-exporter
 psycopg2==2.8.6
     # via -r requirements.in
 py==1.10.0
@@ -144,8 +146,12 @@ six==1.16.0
     #   virtualenv
 sniffio==1.2.0
     # via anyio
+starlette-exporter==0.10.0
+    # via -r requirements.in
 starlette==0.16.0
-    # via fastapi
+    # via
+    #   fastapi
+    #   starlette-exporter
 toml==0.10.2
     # via
     #   pre-commit

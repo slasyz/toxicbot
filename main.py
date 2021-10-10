@@ -7,7 +7,6 @@ from dataclasses import dataclass
 
 import sentry_sdk
 import telegram
-from prometheus_client import start_http_server
 from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxic.config import Config
@@ -88,7 +87,6 @@ def __main__():
     config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
 
     init_sentry(config)
-    start_http_server(config['prometheus']['port'], 'localhost')
 
     joker = Joker.create(config['replies']['joker']['error'])
 

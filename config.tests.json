@@ -6,9 +6,6 @@
     "user": "toxic",
     "pass": "toxic"
   },
-  "prometheus": {
-    "port": 8001
-  },
   "sentry": {
     "dsn": ""
   },

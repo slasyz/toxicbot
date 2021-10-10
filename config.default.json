@@ -6,9 +6,6 @@
     "user": "toxic",
     "pass": "*** PUT DATABASE PASSWORD HERE ***"
   },
-  "prometheus": {
-    "port": 8001
-  },
   "sentry": {
     "dsn": "*** PUT SENTRY DSN HERE ***"
   },
