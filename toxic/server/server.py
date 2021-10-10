@@ -1,4 +1,5 @@
 import os
+from asyncio import CancelledError
 
 import uvicorn
 from fastapi import FastAPI
@@ -43,7 +44,10 @@ def __main__():
 
     app.add_route("/metrics", handle_metrics)
 
-    uvicorn.run(app, host=config['server']['host'], port=config['server']['port'], log_config=LOGGING_CONFIG)
+    try:
+        uvicorn.run(app, host=config['server']['host'], port=config['server']['port'], log_config=LOGGING_CONFIG)
+    except CancelledError:
+        pass
 
 
 if __name__ == '__main__':

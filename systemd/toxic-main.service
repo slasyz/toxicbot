@@ -9,5 +9,5 @@ Type=simple
 WorkingDirectory=/home/sl/deployments/ToxicTgBot
 ExecStart=/bin/sh -c "make run"
 Restart=always
-StandardOutput=append:/home/sl/logs/ToxicTgBot/stdout.log
-StandardError=append:/home/sl/logs/ToxicTgBot/stderr.log
+StandardOutput=append:/home/sl/logs/ToxicTgBot/main-stdout.log
+StandardError=append:/home/sl/logs/ToxicTgBot/main-stderr.log
