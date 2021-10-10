@@ -1,4 +1,3 @@
-import sys
 import logging
 from datetime import datetime
 
@@ -18,25 +17,7 @@ def print_sleep(seconds: float, until: str):
     logging.info('Sleeping %s until %s', f, until)
 
 
-class Logger:
-    def __init__(self, terminal, logfile):
-        self.terminal = terminal
-        self.log = logfile
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.log.write(message)
-        self.log.flush()
-
-    def flush(self):
-        self.terminal.flush()
-        self.log.flush()
-
-
 def init():
-    logfile = open("log.log", "a")  # pylint: disable=consider-using-with
-    sys.stdout = Logger(sys.stdout, logfile)
-    sys.stderr = Logger(sys.stderr, logfile)
     print('\n****************** ' + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' ******************\n')
     logging.basicConfig(level=logging.INFO,
                         format=f'-> %(asctime)s - %(name)s - %(levelname)s - {colorama.Fore.BLUE}%(message)s{colorama.Fore.RESET}')

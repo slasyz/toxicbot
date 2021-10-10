@@ -1,7 +1,5 @@
-# Put this to ~/.config/systemd/user/toxic.service
-
 [Unit]
-Description=Toxic telegram bot
+Description=Toxic telegram bot (main worker)
 After=network.target
 StartLimitBurst=5
 StartLimitIntervalSec=20s
@@ -9,7 +7,7 @@ StartLimitIntervalSec=20s
 [Service]
 Type=simple
 WorkingDirectory=/home/sl/deployments/ToxicTgBot
-ExecStart=/bin/sh "make run"
+ExecStart=/bin/sh -c "make run"
 Restart=always
 StandardOutput=append:/home/sl/logs/ToxicTgBot/stdout.log
 StandardError=append:/home/sl/logs/ToxicTgBot/stderr.log

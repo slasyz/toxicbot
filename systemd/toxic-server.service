@@ -1,0 +1,13 @@
+[Unit]
+Description=Toxic telegram bot (HTTP server)
+After=network.target
+StartLimitBurst=5
+StartLimitIntervalSec=20s
+
+[Service]
+Type=simple
+WorkingDirectory=/home/sl/deployments/ToxicTgBot
+ExecStart=/bin/sh -c "make server"
+Restart=always
+StandardOutput=append:/home/sl/logs/ToxicTgBot/server-stdout.log
+StandardError=append:/home/sl/logs/ToxicTgBot/server-stderr.log

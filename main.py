@@ -36,7 +36,6 @@ from toxic.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
-from toxic.workers.server.server import ServerWorker, Server
 from toxic.workers.worker import WorkersManager
 
 
@@ -93,11 +92,11 @@ def __main__():
 
     joker = Joker.create(config['replies']['joker']['error'])
 
-    server = Server(config['server']['host'], config['server']['port'], database)
+    # server = Server(config['server']['host'], config['server']['port'], database)
 
     worker_manager = WorkersManager(messenger)
     worker_manager.start([
-        ServerWorker(server),
+        # ServerWorker(server),
         JokesWorker(joker, database, messenger),
         ReminderWorker(database, messenger),
     ])

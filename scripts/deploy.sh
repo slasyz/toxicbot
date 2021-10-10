@@ -14,8 +14,12 @@ DEST="$1:~/deployments/ToxicTgBot/"
 rsync -avz --delete \
   --exclude='/.git' --exclude='/venv' --filter="dir-merge,- .gitignore" \
   "$SRC" "$DEST"
-scp config.json "$1:/etc/toxic/config.json"
+scp "$SRC/config.json" "$1:/etc/toxic/config.json"
+scp "$SRC/systemd/toxic-main.service" "$SRC/systemd/toxic-server.service" "$1:~/.config/systemd/user/"
 
-ssh "$1" "make -C ~/deployments/ToxicTgBot deps && systemctl --user restart toxic"
+ssh "$1" "make -C ~/deployments/ToxicTgBot deps &&
+  systemctl --user daemon-reload
+  systemctl --user restart toxic-main &&
+  systemctl --user restart toxic-server"
 
 echo "-> Done."
