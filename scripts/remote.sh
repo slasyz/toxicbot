@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $# -lt 2 ]
 then
     echo "Usage: $0 user@hostname.ru start|stop|restart"

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 cd "$(dirname "$0")"/.. || exit 1
 
 LOG_DIR=~/logs/ToxicTgBot/backup-db
