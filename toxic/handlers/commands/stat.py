@@ -8,7 +8,7 @@ from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.handlers.handler import Handler
 from toxic.helpers import decorators
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 
 def get_stat(chat_id: int, database: Database) -> str:

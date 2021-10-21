@@ -7,7 +7,8 @@ from toxic.features.odesli import Info, Type, Odesli
 from toxic.handlers.handler import Handler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
-from toxic.messenger import HTMLMessage, Messenger
+from toxic.messenger.message import HTMLMessage
+from toxic.messenger.messenger import Messenger
 
 HOSTS = [
     'music.yandex.ru',

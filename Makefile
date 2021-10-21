@@ -57,5 +57,4 @@ run:            ## start bot in foreground
 
 .PHONY: server
 server:         ## run server
-server:
 	PYTHONPATH=. $(PYTHON_INTERPRETER) ./toxic/server/server.py

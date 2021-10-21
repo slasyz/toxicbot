@@ -6,7 +6,7 @@ from datetime import datetime
 
 import psycopg2
 
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 MAX_ERRORS_PER_MINUTE = 3
 

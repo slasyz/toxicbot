@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 
 @dataclass

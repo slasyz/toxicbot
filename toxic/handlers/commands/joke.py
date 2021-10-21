@@ -2,7 +2,7 @@ import telegram
 
 from toxic.handlers.commands.command import Command
 from toxic.features.joke import Joker
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 
 class JokeCommand(Command):
