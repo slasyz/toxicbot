@@ -5,7 +5,7 @@ import telegram
 
 from toxic.db import Database
 from toxic.handlers.commands.command import Command
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 
 class DumpCommand(Command):

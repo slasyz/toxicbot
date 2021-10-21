@@ -11,7 +11,7 @@ from toxic.features.chain.textizer import Textizer
 from toxic.handlers.handler import Handler
 from toxic.features.chain.chain import Chain, ChainFactory
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 
 
 class ChainHandler(Handler):

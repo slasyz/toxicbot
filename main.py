@@ -31,7 +31,7 @@ from toxic.handling import CommandDefinition, HandlersManager
 from toxic.helpers import log
 from toxic.helpers.delayer import DelayerFactory
 from toxic.helpers.rate_limiter import RateLimiter
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker

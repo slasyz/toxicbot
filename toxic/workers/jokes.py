@@ -7,7 +7,7 @@ from telegram.error import Unauthorized
 from toxic.db import Database
 from toxic.features.joke import Joker
 from toxic.helpers.log import print_sleep
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 from toxic.workers.worker import Worker
 
 

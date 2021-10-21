@@ -10,7 +10,7 @@ from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.handler import Handler
 from toxic.helpers.rate_limiter import RateLimiter
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')

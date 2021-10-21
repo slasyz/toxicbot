@@ -8,7 +8,7 @@ import telegram
 from toxic.db import Database
 from toxic.handlers.handler import Handler
 from toxic.helpers import decorators
-from toxic.messenger import VoiceMessage, Messenger
+from toxic.messenger.messenger import VoiceMessage, Messenger
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 

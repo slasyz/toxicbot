@@ -3,7 +3,7 @@ from datetime import datetime
 
 from toxic.db import Database
 from toxic.helpers.log import print_sleep
-from toxic.messenger import Messenger
+from toxic.messenger.messenger import Messenger
 from toxic.workers.worker import Worker
 
 
