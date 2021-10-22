@@ -4,7 +4,7 @@ import os
 import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 
-from toxic.features.taro import Taro, Row
+from toxic.features.taro import Taro, CardData
 from toxic.handlers.commands.command import Command
 from toxic.handlers.handler import CallbackHandler
 from toxic.messenger.message import TextMessage, PhotoMessage
@@ -43,7 +43,7 @@ GOALS = {
 }
 
 
-def get_description_by_goal(card: Row, goal: str) -> str:
+def get_description_by_goal(card: CardData, goal: str) -> str:
     if goal == 'general':
         return card.general_forwards
     if goal == 'love':
@@ -102,7 +102,7 @@ class TaroSecondCallbackHandler(CallbackHandler):
         self.messenger = messenger
 
     def handle(self, callback: telegram.CallbackQuery, data: dict):
-        card, image = self.taro.get_random_card()
+        card = self.taro.get_random_card()
 
         logging.info('Handling taro callback: %s', data)
 
@@ -111,13 +111,13 @@ class TaroSecondCallbackHandler(CallbackHandler):
             return False
 
         goal = data.get('goal', '')
-        description = get_description_by_goal(card, goal)
+        description = get_description_by_goal(card.data, goal)
 
         mention = get_mention(callback.from_user)
 
         self.messenger.send(message.chat_id, PhotoMessage(
-            photo=image,
-            text=f'''{mention}, тебе выпала карта <b>{card.name}</b>\n\n{description}''',
+            photo=card.image,
+            text=f'''{mention}, тебе выпала карта <b>{card.data.name}</b>\n\n{description}''',
             is_html=True,
         ))
         self.messenger.delete_message(message.chat_id, message.message_id)

@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import requests
 from lxml import html
 
-from toxic.features.taro import Row
+from toxic.features.taro import CardData
 
 
 def normalize(src: str) -> str:
@@ -120,7 +120,7 @@ def get_card_content(url: str):
 
 
 def convert_map_to_table_row(map: dict[Tuple[str, str], List[str]]) -> List[str]:
-    row = Row()
+    row = CardData()
 
     if len(map) != 8:
         raise Exception('map length is not 8, but {}'.format(len(map)))
@@ -134,7 +134,7 @@ def convert_map_to_table_row(map: dict[Tuple[str, str], List[str]]) -> List[str]
     row.daily = map[('daily', '')]
     row.advice = map[('advice', '')]
 
-    return list(dataclasses.astuple(row))[1:]  # without name
+    return list(dataclasses.astuple(row))
 
 
 def main():
