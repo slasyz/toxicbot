@@ -8,7 +8,7 @@ from toxic.features.odesli import Info, Type, Odesli
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
-from toxic.messenger.message import PhotoWithHTMLAndMarkupMessage
+from toxic.messenger.message import PhotoMessage
 from toxic.messenger.messenger import Messenger
 
 HOSTS = [
@@ -29,19 +29,12 @@ def get_message_and_buttons(info: Info) -> Tuple[str, List[Tuple[str, str]]]:
 
     if info.apple_music is not None:
         services.append(('Apple Music', info.apple_music))
-        # services.append('<a href="{}">Apple Music</a>'.format(info.apple_music))
     if info.spotify is not None:
         services.append(('Spotify', info.spotify))
-        # services.append('<a href="{}">Spotify</a>'.format(info.spotify))
     if info.yandex is not None:
         services.append(('Яндекс.Музыка', info.yandex))
-        # services.append('<a href="{}">Яндекс.Музыка</a>'.format(info.yandex))
     if info.youtube is not None:
         services.append(('YouTube', info.youtube))
-        # services.append('<a href="{}">YouTube Music</a>'.format(info.youtube_music))
-
-    # if services:
-    #     result += '\n\n' + ' • '.join(services)
 
     return result, services
 
@@ -90,9 +83,9 @@ class MusicHandler(MessageHandler):
                 else:
                     buttons[-1].append(button)
 
-            self.messenger.reply(message, PhotoWithHTMLAndMarkupMessage(
-                text=text,
+            self.messenger.reply(message, PhotoMessage(
                 photo=info.thumbnail_url,
+                text=text,
                 markup=InlineKeyboardMarkup(buttons),
             ), with_delay=False)
 

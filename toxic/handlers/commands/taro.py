@@ -7,7 +7,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 from toxic.features.taro import Taro, Row
 from toxic.handlers.commands.command import Command
 from toxic.handlers.handler import CallbackHandler
-from toxic.messenger.message import PhotoWithHTMLAndMarkupMessage, PhotoWithHTMLMessage, MarkupMessage
+from toxic.messenger.message import TextMessage, PhotoMessage
 from toxic.messenger.messenger import Messenger
 
 
@@ -21,10 +21,10 @@ class TaroCommand(Command):
         buttons = []
         for goal in goals:
             buttons.append([InlineKeyboardButton(GOALS_EMOJI[goal] + ' ' + GOALS[goal], callback_data='{"name":"taro_first", "goal":"' + goal + '"}'),],)
-        self.messenger.reply(message, MarkupMessage(
-            text='Что хотим от вселенной?',
+        self.messenger.reply(message, TextMessage(
+            text='🧙 🌟 Что хотим получить от Вселенной? 🪐 🪄',
             markup=InlineKeyboardMarkup(buttons),
-        ))
+        ), with_delay=False)
 
 
 GOALS_EMOJI = {
@@ -77,9 +77,9 @@ class TaroFirstCallbackHandler(CallbackHandler):
         goal = data.get('goal', '')
         mention = get_mention(callback.from_user)
 
-        self.messenger.send(callback.message.chat_id, PhotoWithHTMLAndMarkupMessage(
-            text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
+        self.messenger.send(callback.message.chat_id, PhotoMessage(
             photo=photo,
+            text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
             markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton('1️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
@@ -90,7 +90,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
                     InlineKeyboardButton('4️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
                 ]
             ])
-        ))
+        ), with_delay=False)
         self.messenger.delete_message(callback.message.chat_id, callback.message.message_id)
         return True
 
@@ -115,9 +115,10 @@ class TaroSecondCallbackHandler(CallbackHandler):
 
         mention = get_mention(callback.from_user)
 
-        self.messenger.send(message.chat_id, PhotoWithHTMLMessage(
-            text=f'''{mention}, тебе выпала карта <b>{card.name}</b>\n\n{description}''',
+        self.messenger.send(message.chat_id, PhotoMessage(
             photo=image,
+            text=f'''{mention}, тебе выпала карта <b>{card.name}</b>\n\n{description}''',
+            is_html=True,
         ))
         self.messenger.delete_message(message.chat_id, message.message_id)
 
