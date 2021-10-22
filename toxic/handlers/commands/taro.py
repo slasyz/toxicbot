@@ -67,7 +67,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
         self.messenger = messenger
 
     def handle(self, callback: telegram.CallbackQuery, data: dict):
-        with open(os.path.join(self.res_dir, 'taro_back_four.jpg'), 'rb') as f:
+        with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
 
         message = callback.message

@@ -53,7 +53,7 @@ class Taro:
     def new(res_dir) -> Taro:
         cards_data = []
 
-        filename_src = os.path.join(res_dir, 'taro.csv')
+        filename_src = os.path.join(res_dir, 'data.csv')
         with open(filename_src, 'r') as f:
             reader = csv.reader(f, delimiter=';')
             for row in reader:
@@ -64,7 +64,7 @@ class Taro:
 
     def get_random_card(self) -> Card:
         data = random.choice(self.cards_data)
-        with open(os.path.join(self.res_dir, 'taro_cards', data.filename), 'rb') as f:
+        with open(os.path.join(self.res_dir, 'cards', data.filename), 'rb') as f:
             image = f.read()
 
         return Card(data, image)

@@ -52,6 +52,10 @@ class BasicDependencies:
         return iter((self.config, self.database, self.messenger, self.metrics, self.dus))
 
 
+def get_resource_subdir(config: Config, name: str) -> str:
+    return os.path.join(os.path.dirname(__file__), 'resources', name)
+
+
 def init(config_files: list) -> BasicDependencies:
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
@@ -87,7 +91,6 @@ def init_sentry(config: Config):
 
 def __main__():
     config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
-    res_dir = os.path.join(os.path.dirname(__file__), 'resources')
 
     init_sentry(config)
 
@@ -117,6 +120,8 @@ def __main__():
         messenger=messenger,
     )
 
+    taro_dir = get_resource_subdir(config, 'taro')
+
     handlers_chats = (
         MusicHandler(Odesli(), messenger),
         KeywordsHandler.new(config['replies']['keywords'], messenger),
@@ -132,11 +137,11 @@ def __main__():
         CommandDefinition('send', SendCommand(database, messenger), True),
         CommandDefinition('chats', ChatsCommand(database, messenger), True),
         CommandDefinition('voice', VoiceCommand(database, messenger), False),
-        CommandDefinition('taro', TaroCommand(res_dir, messenger), False),
+        CommandDefinition('taro', TaroCommand(taro_dir, messenger), False),
     )
     callbacks = (
-        CallbackDefinition('taro_first', TaroFirstCallbackHandler(res_dir, messenger)),
-        CallbackDefinition('taro_second', TaroSecondCallbackHandler(Taro.new(res_dir), messenger)),
+        CallbackDefinition('taro_first', TaroFirstCallbackHandler(taro_dir, messenger)),
+        CallbackDefinition('taro_second', TaroSecondCallbackHandler(Taro.new(taro_dir), messenger)),
     )
     handle_manager = HandlersManager(
         handlers_private,
