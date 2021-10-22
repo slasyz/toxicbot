@@ -3,11 +3,12 @@ from typing import Union
 
 import telegram
 from telegram.constants import MESSAGEENTITY_MENTION
+from telegram.error import BadRequest
 
 from toxic.db import Database
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.helpers.delayer import DelayerFactory
-from toxic.messenger.message import TextMessage, Message, VoiceMessage
+from toxic.messenger.message import TextMessage, Message
 
 SYMBOLS_PER_SECOND = 20
 MAX_DELAY = 4
@@ -46,6 +47,14 @@ class Messenger:
     def send_to_admins(self, msg: Union[str, Message]):
         for row in self.database.query('SELECT tg_id FROM users WHERE admin'):
             self.send(row[0], msg)
+
+    def delete_message(self, chat_id: int, message_id: int, ignore_not_found: bool = True):
+        try:
+            self.bot.delete_message(chat_id, message_id)
+        except BadRequest as ex:
+            if ignore_not_found and ex.message == 'Message to delete not found':
+                return
+            raise
 
     def is_reply_or_mention(self, message: telegram.Message) -> bool:
         if message.reply_to_message is not None and message.reply_to_message.from_user.id == self.bot.id:

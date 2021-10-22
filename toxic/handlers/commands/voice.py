@@ -4,7 +4,8 @@ import telegram
 
 from toxic.db import Database
 from toxic.handlers.commands.command import Command
-from toxic.messenger.messenger import Messenger, VoiceMessage
+from toxic.messenger.message import VoiceMessage
+from toxic.messenger.messenger import Messenger
 
 
 class VoiceCommand(Command):
@@ -16,6 +17,8 @@ class VoiceCommand(Command):
         if message.reply_to_message is None:
             self.messenger.reply(message, 'Нет.')
             return
+
+        # TODO: use message.reply_to_message.text ?
 
         row = self.database.query_row('SELECT text FROM messages WHERE chat_id=%s AND tg_id=%s', (message.chat_id, message.reply_to_message.message_id))
         if row is None:

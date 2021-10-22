@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from dataclasses import dataclass
@@ -8,7 +9,7 @@ import telegram
 from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
-from toxic.handlers.handler import Handler
+from toxic.handlers.handler import MessageHandler, CallbackHandler
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
@@ -23,11 +24,18 @@ class CommandDefinition:
     admins_only: bool
 
 
+@dataclass
+class CallbackDefinition:
+    name: str
+    handler: CallbackHandler
+
+
 class HandlersManager:
     def __init__(self,
-                 handlers_private: Tuple[Handler, ...],
-                 handlers_chats: Tuple[Handler, ...],
+                 handlers_private: Tuple[MessageHandler, ...],
+                 handlers_chats: Tuple[MessageHandler, ...],
                  commands: Tuple[CommandDefinition, ...],
+                 callbacks: Tuple[CallbackDefinition, ...],
                  database: Database,
                  messenger: Messenger,
                  dus: DatabaseUpdateSaver,
@@ -36,6 +44,7 @@ class HandlersManager:
         self.handlers_private = handlers_private
         self.handlers_chats = handlers_chats
         self.commands = commands
+        self.callbacks = callbacks
         self.database = database
         self.messenger = messenger
         self.dus = dus
@@ -77,15 +86,53 @@ class HandlersManager:
             if self.rate_limiter.handle(message):
                 return True
 
-            command.handler.handle(message, args)
+            try:
+                command.handler.handle(message, args)
+            except Exception as ex:
+                logging.error('Caught exception when handling command.', exc_info=ex)
             return True
 
         return False
+
+    def handle_callback(self, callback: telegram.CallbackQuery):
+        log_extra = {
+            'user_id': callback.from_user.id,
+        }
+        if callback.message is not None:
+            log_extra['chat_id'] = callback.message.chat_id
+            log_extra['message_id'] = callback.message.message_id
+
+        try:
+            data = json.loads(callback.data)
+        except json.JSONDecodeError as ex:
+            logging.error('Caught exception when decoding callback data.', exc_info=ex, extra=log_extra)
+            return False
+
+        try:
+            name = data['name']
+        except KeyError as ex:
+            logging.error('Callback data does not contain "name" key.', exc_info=ex, extra=log_extra)
+            return False
+
+        for callback_definition in self.callbacks:
+            if callback_definition.name != name:
+                continue
+
+            try:
+                callback_definition.handler.handle(callback, data)
+            except Exception as ex:
+                logging.error('Caught exception when handling callback.', exc_info=ex)
+            return True
 
     def _handle_update_inner(self, update: telegram.Update):
         self.metrics.updates.inc(1)
         # Пишем в БД
         self.dus.handle(update)
+
+        # Обрабатываем коллбэк
+        if update.callback_query is not None:
+            if self.handle_callback(update.callback_query):
+                return
 
         # Обрабатываем только сообщения
         if update.message is None:

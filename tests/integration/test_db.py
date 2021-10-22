@@ -32,8 +32,10 @@ def test_database_query(query, vars, expected, database: Database):
 
 
 def test_database_insert(database: Database):
-    row_insert = database.exec("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
-    assert row_insert is None
+    database.exec('DELETE FROM reminders WHERE chat_id=1235')
+    database.exec('DELETE FROM chats WHERE tg_id=1235')
+
+    database.exec("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
 
     row_insert = database.query_row("INSERT INTO reminders(chat_id, datetime, text, isactive) VALUES(1235, now(), 'asdf', TRUE) RETURNING id")
     assert row_insert is not None

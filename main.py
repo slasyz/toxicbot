@@ -16,6 +16,7 @@ from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.features.joke import Joker
 from toxic.features.odesli import Odesli
+from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.joke import JokeCommand
@@ -23,11 +24,12 @@ from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.send import SendCommand
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
-from toxic.handlers.chat_replies import PrivateHandler, KeywordsHandler, SorryHandler, VoiceHandler
+from toxic.handlers.chat_replies import PrivateHandler, KeywordsHandler, SorryHandler
+from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallbackHandler, TaroFirstCallbackHandler
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.music import MusicHandler
-from toxic.handling import CommandDefinition, HandlersManager
+from toxic.handling import CommandDefinition, HandlersManager, CallbackDefinition
 from toxic.helpers import log
 from toxic.helpers.delayer import DelayerFactory
 from toxic.helpers.rate_limiter import RateLimiter
@@ -85,6 +87,7 @@ def init_sentry(config: Config):
 
 def __main__():
     config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
+    res_dir = os.path.join(os.path.dirname(__file__), 'resources')
 
     init_sentry(config)
 
@@ -116,7 +119,6 @@ def __main__():
 
     handlers_chats = (
         MusicHandler(Odesli(), messenger),
-        VoiceHandler.new(config['replies']['voice'], messenger),
         KeywordsHandler.new(config['replies']['keywords'], messenger),
         SorryHandler.new(config['replies']['sorry'], messenger),
         StatsHandler.new(config['replies']['stats'], database, messenger),
@@ -130,11 +132,17 @@ def __main__():
         CommandDefinition('send', SendCommand(database, messenger), True),
         CommandDefinition('chats', ChatsCommand(database, messenger), True),
         CommandDefinition('voice', VoiceCommand(database, messenger), False),
+        CommandDefinition('taro', TaroCommand(res_dir, messenger), False),
+    )
+    callbacks = (
+        CallbackDefinition('taro_first', TaroFirstCallbackHandler(res_dir, messenger)),
+        CallbackDefinition('taro_second', TaroSecondCallbackHandler(Taro.new(res_dir), messenger)),
     )
     handle_manager = HandlersManager(
         handlers_private,
         handlers_chats,
         commands,
+        callbacks,
         database,
         messenger,
         dus,

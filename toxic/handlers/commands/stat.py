@@ -6,7 +6,7 @@ import telegram
 
 from toxic.db import Database
 from toxic.handlers.commands.command import Command
-from toxic.handlers.handler import Handler
+from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.messenger.messenger import Messenger
 
@@ -69,7 +69,7 @@ class StatCommand(Command):
         self._parse_args_and_send(message, args)
 
 
-class StatsHandler(Handler):
+class StatsHandler(MessageHandler):
     def __init__(self, replies: dict[re.Pattern, str], database: Database, messenger: Messenger):
         self.replies = replies
         self.database = database
