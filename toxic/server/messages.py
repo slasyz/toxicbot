@@ -17,8 +17,6 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
 
     @router.get('/', response_class=HTMLResponse)
     async def chats(request: Request):
-        logging.info('открываем чятики')
-
         groups_dict = {}
         users_dict = {}
 

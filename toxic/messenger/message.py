@@ -48,8 +48,10 @@ class VoiceMessage(Message):
 
 
 class TextMessage(Message):
-    def __init__(self, text):
+    def __init__(self, text, is_html: bool = False, markup: ReplyMarkup = None):
         self.text = text
+        self.is_html = is_html
+        self.markup = markup
 
     def get_length(self) -> int:
         return len(self.text)
@@ -58,85 +60,35 @@ class TextMessage(Message):
         return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        # TODO: API for disable_web_page_preview and other kwargs
-        return bot.send_message(chat_id,
-                                self.text,
-                                reply_to_message_id=reply_to,
-                                disable_web_page_preview=True)
+        return bot.send_message(
+            chat_id,
+            self.text,
+            reply_to_message_id=reply_to,
+            disable_web_page_preview=True,
+            parse_mode=telegram.ParseMode.HTML if self.is_html else None,
+            reply_markup=self.markup,
+        )
 
 
-class HTMLMessage(Message):
-    def __init__(self, text):
+class PhotoMessage(Message):
+    def __init__(self, photo: Union[bytes, str], text: str = None, is_html: bool = False, markup: ReplyMarkup = None):
+        self.photo = photo
         self.text = text
-
-    def get_length(self) -> int:
-        return len(self.text)
-
-    def get_chat_action(self) -> str:
-        return CHATACTION_TYPING
-
-    def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        # TODO: API for disable_web_page_preview and other kwargs
-        return bot.send_message(chat_id,
-                                self.text,
-                                reply_to_message_id=reply_to,
-                                disable_web_page_preview=True,
-                                parse_mode=telegram.ParseMode.HTML)
-
-
-class MarkupMessage(Message):
-    def __init__(self, text: str, markup: ReplyMarkup):
-        self.text = text
+        self.is_html = is_html
         self.markup = markup
 
     def get_length(self) -> int:
-        return 0
+        return len(self.text or '')
 
     def get_chat_action(self) -> str:
         return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_message(chat_id,
-                                self.text,
-                                reply_to_message_id=reply_to,
-                                reply_markup=self.markup)
-
-
-class PhotoWithHTMLAndMarkupMessage(Message):
-    def __init__(self, text: str, photo: Union[bytes, str], markup: ReplyMarkup):
-        self.text = text
-        self.photo = photo
-        self.markup = markup
-
-    def get_length(self) -> int:
-        return 0
-
-    def get_chat_action(self) -> str:
-        return CHATACTION_TYPING
-
-    def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_photo(chat_id,
-                              photo=self.photo,
-                              caption=self.text,
-                              reply_to_message_id=reply_to,
-                              reply_markup=self.markup,
-                              parse_mode=telegram.ParseMode.HTML)
-
-
-class PhotoWithHTMLMessage(Message):
-    def __init__(self, text: str, photo: Union[bytes, str]):
-        self.text = text
-        self.photo = photo
-
-    def get_length(self) -> int:
-        return 0
-
-    def get_chat_action(self) -> str:
-        return CHATACTION_TYPING
-
-    def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_photo(chat_id,
-                              photo=self.photo,
-                              caption=self.text,
-                              reply_to_message_id=reply_to,
-                              parse_mode=telegram.ParseMode.HTML)
+        return bot.send_photo(
+            chat_id,
+            photo=self.photo,
+            caption=self.text,
+            reply_to_message_id=reply_to,
+            reply_markup=self.markup,
+            parse_mode=telegram.ParseMode.HTML if self.is_html else None,
+        )
