@@ -35,8 +35,8 @@ class JokesWorker(Worker):
 
                 try:
                     self.messenger.send(row[0], joke)
-                except Unauthorized as ex:
-                    logging.info('Cannot send joke to chat #%d', row[0], exc_info=ex)
+                except Exception as ex:
+                    logging.error('Cannot send joke to chat #%d.', row[0], exc_info=ex)
                     continue
 
             time.sleep(2)
