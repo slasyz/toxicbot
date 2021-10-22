@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -20,7 +21,12 @@ class TaroCommand(Command):
         goals = ['general', 'love', 'question', 'daily', 'advice']
         buttons = []
         for goal in goals:
-            buttons.append([InlineKeyboardButton(GOALS_EMOJI[goal] + ' ' + GOALS[goal], callback_data='{"name":"taro_first", "goal":"' + goal + '"}'),],)
+            buttons.append([
+                InlineKeyboardButton(
+                    GOALS_EMOJI[goal] + ' ' + GOALS[goal],
+                    callback_data=json.dumps({'name': 'taro_first', 'goal': goal})
+                ),
+            ])
         self.messenger.reply(message, TextMessage(
             text='🧙 🌟 Что хотим получить от Вселенной? 🪐 🪄',
             markup=InlineKeyboardMarkup(buttons),
@@ -83,12 +89,12 @@ class TaroFirstCallbackHandler(CallbackHandler):
             is_html=True,
             markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton('1️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
-                    InlineKeyboardButton('2️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                    InlineKeyboardButton('1️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('2️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
                 ],
                 [
-                    InlineKeyboardButton('3️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
-                    InlineKeyboardButton('4️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                    InlineKeyboardButton('3️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('4️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
                 ]
             ])
         ), with_delay=False)
