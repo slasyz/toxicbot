@@ -80,6 +80,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
         self.messenger.send(callback.message.chat_id, PhotoMessage(
             photo=photo,
             text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
+            is_html=True,
             markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton('1️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
@@ -111,7 +112,6 @@ class TaroSecondCallbackHandler(CallbackHandler):
 
         goal = data.get('goal', '')
         description = get_description_by_goal(card, goal)
-        description = description[:min(666, len(description))]  # TODO: send second message with remaining text
 
         mention = get_mention(callback.from_user)
 

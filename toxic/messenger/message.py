@@ -1,5 +1,5 @@
 import logging
-from typing import Union
+from typing import Union, Tuple, List
 
 import telegram
 from telegram import ReplyMarkup
@@ -8,9 +8,13 @@ from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE
 from toxic.features.voice import NextUpService
 
 
-# TODO: если войс, то предлагаем caption, text/html, markup, прислать остаток вторым сообщением
-# TODO: если картинка, то предлагаем caption, text/html, markup, прислать остаток вторым сообщением
-# TODO: если текст, то предлагаем текст, text/html, markup, прислать остаток вторым сообщением
+# TODO: fix problems with HTML tags
+def split_into_chunks(text: str, max_len: int, max_trimmed_len: int) -> Tuple[str, List[str]]:
+    if len(text) <= max_len:
+        return text, []
+    text, rest = text[:max_len], text[max_len:]
+    trimmed = [rest[i:i + max_trimmed_len] for i in range(0, len(rest), max_trimmed_len)]
+    return text, trimmed
 
 
 class Message:
@@ -38,20 +42,22 @@ class VoiceMessage(Message):
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         try:
             f = self.service.load(self.text)
-            return bot.send_voice(chat_id,
-                                  voice=f,
-                                  reply_to_message_id=reply_to)
         except Exception as ex:
             logging.error('Error sending voice message.', exc_info=ex)
             return bot.send_message(chat_id,
                                     f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 
+        return bot.send_voice(chat_id,
+                              voice=f,
+                              reply_to_message_id=reply_to)
+
 
 class TextMessage(Message):
-    def __init__(self, text, is_html: bool = False, markup: ReplyMarkup = None):
+    def __init__(self, text, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True):
         self.text = text
         self.is_html = is_html
         self.markup = markup
+        self.send_trimmed = send_trimmed
 
     def get_length(self) -> int:
         return len(self.text)
@@ -60,22 +66,37 @@ class TextMessage(Message):
         return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_message(
-            chat_id,
+        text, trimmed = split_into_chunks(
             self.text,
+            telegram.constants.MAX_MESSAGE_LENGTH,
+            telegram.constants.MAX_MESSAGE_LENGTH,
+        )
+        first_message = bot.send_message(
+            chat_id,
+            text,
             reply_to_message_id=reply_to,
             disable_web_page_preview=True,
             parse_mode=telegram.ParseMode.HTML if self.is_html else None,
             reply_markup=self.markup,
         )
+        if self.send_trimmed:
+            for text in trimmed:
+                bot.send_message(
+                    chat_id,
+                    text=text,
+                    disable_web_page_preview=True,
+                    parse_mode=telegram.ParseMode.HTML if self.is_html else None,
+                )
+        return first_message
 
 
 class PhotoMessage(Message):
-    def __init__(self, photo: Union[bytes, str], text: str = None, is_html: bool = False, markup: ReplyMarkup = None):
+    def __init__(self, photo: Union[bytes, str], text: str = None, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True):
         self.photo = photo
         self.text = text
         self.is_html = is_html
         self.markup = markup
+        self.send_trimmed = send_trimmed
 
     def get_length(self) -> int:
         return len(self.text or '')
@@ -84,11 +105,24 @@ class PhotoMessage(Message):
         return CHATACTION_TYPING
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
-        return bot.send_photo(
+        text, trimmed = split_into_chunks(
+            self.text,
+            telegram.constants.MAX_CAPTION_LENGTH,
+            telegram.constants.MAX_MESSAGE_LENGTH,
+        )
+        first_message = bot.send_photo(
             chat_id,
             photo=self.photo,
-            caption=self.text,
+            caption=text,
             reply_to_message_id=reply_to,
             reply_markup=self.markup,
             parse_mode=telegram.ParseMode.HTML if self.is_html else None,
         )
+        if self.send_trimmed:
+            for text in trimmed:
+                bot.send_message(
+                    chat_id,
+                    text=text,
+                    parse_mode=telegram.ParseMode.HTML if self.is_html else None,
+                )
+        return first_message
