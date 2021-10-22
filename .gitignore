@@ -1,9 +1,11 @@
 __pycache__
 log.log
 .pytest_cache
+.DS_Store
 
 /config.json
 /venv
 /backups
 /.idea
 /notes.md
+/scripts/migrators/cache

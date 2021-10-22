@@ -6,14 +6,14 @@ import re
 import telegram
 
 from toxic.db import Database
-from toxic.handlers.handler import Handler
+from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
-from toxic.messenger.messenger import VoiceMessage, Messenger
+from toxic.messenger.messenger import Messenger
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
 
-class KeywordsHandler(Handler):
+class KeywordsHandler(MessageHandler):
     def __init__(self, map: dict[re.Pattern, str], messenger: Messenger):
         self.map = map
         self.messenger = messenger
@@ -42,7 +42,7 @@ class KeywordsHandler(Handler):
         return False
 
 
-class PrivateHandler(Handler):
+class PrivateHandler(MessageHandler):
     def __init__(self, replies: list[str], database: Database, messenger: Messenger):
         self.replies = replies
         self.database = database
@@ -56,30 +56,7 @@ class PrivateHandler(Handler):
         return True
 
 
-class VoiceHandler(Handler):
-    def __init__(self, replies: list[VoiceMessage], messenger: Messenger):
-        self.replies = replies
-        self.messenger = messenger
-
-    @staticmethod
-    def new(config: list[str], messenger: Messenger) -> VoiceHandler:
-        replies = []
-
-        for reply in config:
-            replies.append(VoiceMessage(reply))
-
-        return VoiceHandler(replies, messenger)
-
-    def handle(self, message: telegram.Message) -> bool:
-        # TODO: come up about something funnier
-        if message.voice is None and message.video_note is None:
-            return False
-
-        self.messenger.reply(message, random.choice(self.replies))
-        return True
-
-
-class SorryHandler(Handler):
+class SorryHandler(MessageHandler):
     def __init__(self, reply_sorry: str, reply_not_sorry: str, messenger: Messenger):
         self.reply_sorry = reply_sorry
         self.reply_not_sorry = reply_not_sorry

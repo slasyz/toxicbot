@@ -1,0 +1,124 @@
+import logging
+import os
+
+import telegram
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
+
+from toxic.features.taro import Taro, Row
+from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import CallbackHandler
+from toxic.messenger.message import PhotoWithHTMLAndMarkupMessage, PhotoWithHTMLMessage, MarkupMessage
+from toxic.messenger.messenger import Messenger
+
+
+class TaroCommand(Command):
+    def __init__(self, res_dir: str, messenger: Messenger):
+        self.res_dir = res_dir
+        self.messenger = messenger
+
+    def handle(self, message: telegram.Message, args: list[str]):
+        goals = ['general', 'love', 'question', 'daily', 'advice']
+        buttons = []
+        for goal in goals:
+            buttons.append([InlineKeyboardButton(GOALS_EMOJI[goal] + ' ' + GOALS[goal], callback_data='{"name":"taro_first", "goal":"' + goal + '"}'),],)
+        self.messenger.reply(message, MarkupMessage(
+            text='Что хотим от вселенной?',
+            markup=InlineKeyboardMarkup(buttons),
+        ))
+
+
+GOALS_EMOJI = {
+    'general': '🃏',
+    'love': '❤️',
+    'question': '❓',
+    'daily': '🗓',
+    'advice': '🤲',
+}
+GOALS = {
+    'general': 'общее предсказание',
+    'love': 'предсказание в любви',
+    'question': 'ответ на вопрос',
+    'daily': 'значение дня',
+    'advice': 'совет',
+}
+
+
+def get_description_by_goal(card: Row, goal: str) -> str:
+    if goal == 'general':
+        return card.general_forwards
+    if goal == 'love':
+        return card.love_forwards
+    if goal == 'daily':
+        return card.daily
+    if goal == 'advice':
+        return card.advice
+    return card.general_forwards
+
+
+def get_mention(user: User):
+    if user.username != '':
+        return '<a href="tg://user?id={}">@{}</a>'.format(user.id, user.username)
+    return '<a href="tg://user?id={}">{}</a>'.format(user.id, user.first_name)
+
+
+class TaroFirstCallbackHandler(CallbackHandler):
+    def __init__(self, res_dir: str, messenger: Messenger):
+        self.res_dir = res_dir
+        self.messenger = messenger
+
+    def handle(self, callback: telegram.CallbackQuery, data: dict):
+        with open(os.path.join(self.res_dir, 'taro_back_four.jpg'), 'rb') as f:
+            photo = f.read()
+
+        message = callback.message
+        if message is None:
+            return False
+
+        goal = data.get('goal', '')
+        mention = get_mention(callback.from_user)
+
+        self.messenger.send(callback.message.chat_id, PhotoWithHTMLAndMarkupMessage(
+            text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
+            photo=photo,
+            markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton('1️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                    InlineKeyboardButton('2️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                ],
+                [
+                    InlineKeyboardButton('3️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                    InlineKeyboardButton('4️⃣', callback_data='{"name":"taro_second", "goal":"' + goal + '"}'),
+                ]
+            ])
+        ))
+        self.messenger.delete_message(callback.message.chat_id, callback.message.message_id)
+        return True
+
+
+class TaroSecondCallbackHandler(CallbackHandler):
+    def __init__(self, taro: Taro, messenger: Messenger):
+        self.taro = taro
+        self.messenger = messenger
+
+    def handle(self, callback: telegram.CallbackQuery, data: dict):
+        card, image = self.taro.get_random_card()
+
+        logging.info('Handling taro callback: %s', data)
+
+        message = callback.message
+        if message is None:
+            return False
+
+        goal = data.get('goal', '')
+        description = get_description_by_goal(card, goal)
+        description = description[:min(666, len(description))]  # TODO: send second message with remaining text
+
+        mention = get_mention(callback.from_user)
+
+        self.messenger.send(message.chat_id, PhotoWithHTMLMessage(
+            text=f'''{mention}, тебе выпала карта <b>{card.name}</b>\n\n{description}''',
+            photo=image,
+        ))
+        self.messenger.delete_message(message.chat_id, message.message_id)
+
+        return True
