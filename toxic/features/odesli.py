@@ -27,7 +27,7 @@ class Info:
     apple_music: Optional[str]
     spotify: Optional[str]
     yandex: Optional[str]
-    youtube_music: Optional[str]
+    youtube: Optional[str]
 
     thumbnail_url: Optional[str]
 
@@ -53,7 +53,7 @@ class Odesli:
         apple_music = links.get('appleMusic')
         spotify = links.get('spotify')
         yandex = links.get('yandex')
-        youtube_music = links.get('youtubeMusic')
+        youtube = links.get('youtube')
 
         return Info(
             type=cls.str_to_type(raw_info['type']),
@@ -63,7 +63,7 @@ class Odesli:
             apple_music=apple_music['url'] if apple_music else None,
             spotify=spotify['url'] if spotify else None,
             yandex=yandex['url'] if yandex else None,
-            youtube_music=youtube_music['url'] if youtube_music else None,
+            youtube=youtube['url'] if youtube else None,
 
             thumbnail_url=raw_info.get('thumbnailUrl')
         )

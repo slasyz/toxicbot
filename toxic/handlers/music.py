@@ -1,13 +1,14 @@
 import urllib.parse
-from typing import List
+from typing import List, Tuple
 
 import telegram
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from toxic.features.odesli import Info, Type, Odesli
-from toxic.handlers.handler import Handler
+from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
-from toxic.messenger.message import HTMLMessage
+from toxic.messenger.message import PhotoWithHTMLAndMarkupMessage
 from toxic.messenger.messenger import Messenger
 
 HOSTS = [
@@ -19,7 +20,7 @@ HOSTS = [
 ]
 
 
-def get_message(info: Info) -> str:
+def get_message_and_buttons(info: Info) -> Tuple[str, List[Tuple[str, str]]]:
     result = f'Исполнитель: <b>{info.artist_name}</b>'
     if info.type != Type.ARTIST:
         result += f'\n{info.type.value}: <b>{info.title}</b>'
@@ -27,18 +28,22 @@ def get_message(info: Info) -> str:
     services = []
 
     if info.apple_music is not None:
-        services.append('<a href="{}">Apple Music</a>'.format(info.apple_music))
+        services.append(('Apple Music', info.apple_music))
+        # services.append('<a href="{}">Apple Music</a>'.format(info.apple_music))
     if info.spotify is not None:
-        services.append('<a href="{}">Spotify</a>'.format(info.spotify))
+        services.append(('Spotify', info.spotify))
+        # services.append('<a href="{}">Spotify</a>'.format(info.spotify))
     if info.yandex is not None:
-        services.append('<a href="{}">Яндекс.Музыка</a>'.format(info.yandex))
-    if info.youtube_music is not None:
-        services.append('<a href="{}">YouTube Music</a>'.format(info.youtube_music))
+        services.append(('Яндекс.Музыка', info.yandex))
+        # services.append('<a href="{}">Яндекс.Музыка</a>'.format(info.yandex))
+    if info.youtube is not None:
+        services.append(('YouTube', info.youtube))
+        # services.append('<a href="{}">YouTube Music</a>'.format(info.youtube_music))
 
-    if services:
-        result += '\n\n' + ' / '.join(services)
+    # if services:
+    #     result += '\n\n' + ' • '.join(services)
 
-    return result
+    return result, services
 
 
 def is_link_to_music(link: str) -> bool:
@@ -55,7 +60,11 @@ def search_links(text: str) -> List[str]:
     return links
 
 
-class MusicHandler(Handler):
+def get_button(text: str, url: str) -> InlineKeyboardButton:
+    return InlineKeyboardButton(text, url=url)
+
+
+class MusicHandler(MessageHandler):
     def __init__(self, service: Odesli, messenger: Messenger):
         self.service = service
         self.messenger = messenger
@@ -71,8 +80,20 @@ class MusicHandler(Handler):
             if info is None:
                 continue
 
-            reply_message = get_message(info)
-            # TODO: thumbnail
-            self.messenger.reply(message, HTMLMessage(reply_message), with_delay=False)
+            text, services = get_message_and_buttons(info)
+
+            buttons = []
+            for i, service in enumerate(services):
+                button = get_button(service[0], service[1])
+                if i % 2 == 0:
+                    buttons.append([button])
+                else:
+                    buttons[-1].append(button)
+
+            self.messenger.reply(message, PhotoWithHTMLAndMarkupMessage(
+                text=text,
+                photo=info.thumbnail_url,
+                markup=InlineKeyboardMarkup(buttons),
+            ), with_delay=False)
 
         return False
