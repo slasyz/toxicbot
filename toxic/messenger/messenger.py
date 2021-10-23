@@ -10,6 +10,7 @@ from toxic.db import Database
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
+from toxic.repositories.chats import CachedChatsRepository
 
 SYMBOLS_PER_SECOND = 20
 MAX_DELAY = 4
@@ -17,29 +18,12 @@ DELAY_KEEPALIVE = 5
 
 
 class Messenger:
-    def __init__(self, bot: telegram.Bot, database: Database, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
+    def __init__(self, bot: telegram.Bot, database: Database, chats_repo: CachedChatsRepository, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
         self.bot = bot
         self.database = database
+        self.chats_repo = chats_repo
         self.dus = dus
         self.delayer_factory = delayer_factory
-
-    # TODO: move this (and other SQL queries) to repository, write integration tests
-    def _get_latest_chat_id(self, chat_id: int) -> int:
-        row = self.database.query_row('''
-            WITH RECURSIVE r AS (
-                SELECT tg_id, next_tg_id
-                FROM chats
-                WHERE tg_id=%s
-                UNION
-                SELECT chats.tg_id, chats.next_tg_id
-                FROM chats
-                    JOIN r ON r.next_tg_id=chats.tg_id
-            )
-            SELECT tg_id, next_tg_id
-            FROM r
-            WHERE next_tg_id IS NULL;
-        ''', (chat_id,))
-        return row[0]
 
     def reply(self, to: telegram.Message, msg: Union[str, Message], with_delay: bool = True) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
@@ -58,7 +42,7 @@ class Messenger:
                 # TODO: do it asynchronously
                 time.sleep(interval)
 
-        chat_id = self._get_latest_chat_id(chat_id)
+        chat_id = self.chats_repo.get_latest_chat_id(chat_id)
 
         for _ in range(10):
             try:
