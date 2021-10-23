@@ -12,10 +12,11 @@ CREATE TABLE users (
 -- VALUES (59352582, 'Вячеслав', TRUE);
 
 CREATE TABLE chats (
-    tg_id        bigint PRIMARY KEY,
-    title        text,
-    chain_period int  DEFAULT 30,
-    joke         bool DEFAULT TRUE
+    tg_id          bigint PRIMARY KEY,
+    title          text,
+    chain_period   int  DEFAULT 30,
+    joke           bool DEFAULT TRUE,
+    next_tg_id     bigint
 );
 
 CREATE TABLE updates (

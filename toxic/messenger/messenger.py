@@ -1,9 +1,10 @@
+import logging
 import time
 from typing import Union
 
 import telegram
 from telegram.constants import MESSAGEENTITY_MENTION
-from telegram.error import BadRequest
+from telegram.error import BadRequest, ChatMigrated
 
 from toxic.db import Database
 from toxic.handlers.database import DatabaseUpdateSaver
@@ -22,6 +23,24 @@ class Messenger:
         self.dus = dus
         self.delayer_factory = delayer_factory
 
+    # TODO: move this (and other SQL queries) to repository, write integration tests
+    def _get_latest_chat_id(self, chat_id: int) -> int:
+        row = self.database.query_row('''
+            WITH RECURSIVE r AS (
+                SELECT tg_id, next_tg_id
+                FROM chats
+                WHERE tg_id=%s
+                UNION
+                SELECT chats.tg_id, chats.next_tg_id
+                FROM chats
+                    JOIN r ON r.next_tg_id=chats.tg_id
+            )
+            SELECT tg_id, next_tg_id
+            FROM r
+            WHERE next_tg_id IS NULL;
+        ''', (chat_id,))
+        return row[0]
+
     def reply(self, to: telegram.Message, msg: Union[str, Message], with_delay: bool = True) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
 
@@ -39,7 +58,23 @@ class Messenger:
                 # TODO: do it asynchronously
                 time.sleep(interval)
 
-        message = msg.send(self.bot, chat_id, reply_to)
+        chat_id = self._get_latest_chat_id(chat_id)
+
+        for i in range(10):
+            try:
+                message = msg.send(self.bot, chat_id, reply_to)
+                break
+            except ChatMigrated as ex:
+                logging.info('Chat migrated.', extra={
+                    'chat_id': chat_id,
+                    'new_chat_id': ex.new_chat_id,
+                })
+                self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (ex.new_chat_id, chat_id))
+                chat_id = ex.new_chat_id
+                continue
+            # TODO: other errors like Unauthorized (mark chats/users in database)
+        else:
+            raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))
 
         self.dus.handle_message(message)
         return message
