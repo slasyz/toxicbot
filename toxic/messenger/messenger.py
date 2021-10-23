@@ -6,11 +6,11 @@ import telegram
 from telegram.constants import MESSAGEENTITY_MENTION
 from telegram.error import BadRequest, ChatMigrated
 
-from toxic.db import Database
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
 from toxic.repositories.chats import CachedChatsRepository
+from toxic.repositories.users import UsersRepository
 
 SYMBOLS_PER_SECOND = 20
 MAX_DELAY = 4
@@ -18,10 +18,10 @@ DELAY_KEEPALIVE = 5
 
 
 class Messenger:
-    def __init__(self, bot: telegram.Bot, database: Database, chats_repo: CachedChatsRepository, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
+    def __init__(self, bot: telegram.Bot, chats_repo: CachedChatsRepository, users_repo: UsersRepository, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
         self.bot = bot
-        self.database = database
         self.chats_repo = chats_repo
+        self.users_repo = users_repo
         self.dus = dus
         self.delayer_factory = delayer_factory
 
@@ -53,7 +53,7 @@ class Messenger:
                     'chat_id': chat_id,
                     'new_chat_id': ex.new_chat_id,
                 })
-                self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (ex.new_chat_id, chat_id))
+                self.chats_repo.update_next_id(chat_id, ex.new_chat_id)
                 chat_id = ex.new_chat_id
                 continue
             # TODO: other errors like Unauthorized (mark chats/users in database)
@@ -64,8 +64,8 @@ class Messenger:
         return message
 
     def send_to_admins(self, msg: Union[str, Message]):
-        for row in self.database.query('SELECT tg_id FROM users WHERE admin'):
-            self.send(row[0], msg)
+        for id in self.users_repo.get_admins():
+            self.send(id, msg)
 
     def delete_message(self, chat_id: int, message_id: int, ignore_not_found: bool = True):
         try:

@@ -33,7 +33,7 @@ def __main__():
     app = FastAPI()
     app.add_middleware(PrometheusMiddleware)
 
-    html_dir = get_resource_subdir(config, 'html')
+    html_dir = get_resource_subdir('html')
 
     templates = Jinja2Templates(directory=html_dir)
 

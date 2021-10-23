@@ -2,6 +2,7 @@ import _thread
 import logging
 import threading
 import traceback
+from collections.abc import Set
 from datetime import datetime
 
 import psycopg2
@@ -20,7 +21,7 @@ class WorkerWrapper:
     def __init__(self, worker: Worker, messenger: Messenger):
         self.worker = worker
         self.messenger = messenger
-        self.counter = set()
+        self.counter: Set[datetime] = set()
 
     def _clean_counter(self):
         now = datetime.now()

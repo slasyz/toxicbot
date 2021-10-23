@@ -9,7 +9,7 @@ class Chain:
     def teach(self, feature: int):
         raise NotImplementedError()
 
-    def get_start(self, features: list[int, ...]) -> tuple:
+    def get_start(self, features: list[int]) -> tuple:
         raise NotImplementedError()
 
     def predict(self, current: tuple) -> Optional[int]:
@@ -54,7 +54,7 @@ class MarkovChain(Chain):
 
         self.current = self.current[1:] + (feature,)
 
-    def get_start(self, features: list[int, ...]) -> tuple:
+    def get_start(self, features: list[int]) -> tuple:
         if len(features) < self.window:
             return random.choice(list(self.data.keys()))
 

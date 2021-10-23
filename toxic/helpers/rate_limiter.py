@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,7 +20,7 @@ class RateLimiter:
         self.reply = reply
         self.messenger = messenger
 
-        self.buckets: dict[(int, int), Bucket] = {}
+        self.buckets: dict[tuple[int, int], Bucket] = {}
 
     def handle(self, message) -> bool:
         if self.discard(message.chat_id, message.from_user.id):

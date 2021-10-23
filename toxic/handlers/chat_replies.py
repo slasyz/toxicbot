@@ -5,10 +5,10 @@ import re
 
 import telegram
 
-from toxic.db import Database
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.users import UsersRepository
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
@@ -43,13 +43,13 @@ class KeywordsHandler(MessageHandler):
 
 
 class PrivateHandler(MessageHandler):
-    def __init__(self, replies: list[str], database: Database, messenger: Messenger):
+    def __init__(self, replies: list[str], users_repo: UsersRepository, messenger: Messenger):
         self.replies = replies
-        self.database = database
+        self.users_repo = users_repo
         self.messenger = messenger
 
     def handle(self, message: telegram.Message):
-        if self.database.is_admin(message.chat_id):
+        if self.users_repo.is_admin(message.chat_id):
             self.messenger.reply(message, 'Я запущен', with_delay=False)
         else:
             self.messenger.reply(message, random.choice(self.replies))
