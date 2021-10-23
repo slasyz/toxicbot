@@ -1,5 +1,5 @@
 import random
-from typing import Tuple, Optional
+from typing import Optional
 
 
 class Chain:
@@ -28,8 +28,8 @@ class MarkovChain(Chain):
     """
     def __init__(self, window: int):
         self.window = window
-        self.data: dict[Tuple[int, ...], dict[int, int]] = {}
-        self.current: Tuple[int, ...] = ()
+        self.data: dict[tuple[int, ...], dict[int, int]] = {}
+        self.current: tuple[int, ...] = ()
 
     @staticmethod
     def pick(stat: dict[int, int]) -> int:

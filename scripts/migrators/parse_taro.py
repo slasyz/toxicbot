@@ -119,7 +119,7 @@ def get_card_content(url: str):
     return result_map
 
 
-def convert_map_to_table_row(map: dict[Tuple[str, str], List[str]]) -> List[str]:
+def convert_map_to_table_row(map: dict[tuple[str, str], list[str]]) -> list[str]:
     row = CardData()
 
     if len(map) != 8:

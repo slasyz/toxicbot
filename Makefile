@@ -49,7 +49,7 @@ test:           ## run all tests (you can start dependencies using ./scripts/sta
 .PHONY: deps
 deps:           ## install all dependencies from requirements.txt to virtual environment
 	if [[ ! -d venv ]]; then \
-		virtualenv venv -p python3.9; \
+		virtualenv venv -p python3.10 --download; \
 	fi;
 	./venv/bin/python -m pip install -r requirements.txt
 

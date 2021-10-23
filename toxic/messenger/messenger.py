@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import Union
 
 import telegram
 from telegram.constants import MESSAGEENTITY_MENTION
@@ -25,10 +24,10 @@ class Messenger:
         self.dus = dus
         self.delayer_factory = delayer_factory
 
-    def reply(self, to: telegram.Message, msg: Union[str, Message], with_delay: bool = True) -> telegram.Message:
+    def reply(self, to: telegram.Message, msg: str | Message, with_delay: bool = True) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
 
-    def send(self, chat_id: int, msg: Union[str, Message], reply_to: int = None, with_delay: bool = True) -> telegram.Message:
+    def send(self, chat_id: int, msg: str | Message, reply_to: int = None, with_delay: bool = True) -> telegram.Message:
         if isinstance(msg, str):
             msg = TextMessage(msg)
 
@@ -63,7 +62,7 @@ class Messenger:
         self.dus.handle_message(message)
         return message
 
-    def send_to_admins(self, msg: Union[str, Message]):
+    def send_to_admins(self, msg: str | Message):
         for id in self.users_repo.get_admins():
             self.send(id, msg)
 

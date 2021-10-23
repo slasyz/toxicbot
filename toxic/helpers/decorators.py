@@ -1,4 +1,4 @@
-from typing import Callable, Tuple, Optional
+from typing import Callable, Optional
 
 import telegram
 
@@ -17,7 +17,7 @@ def non_empty(func: Callable) -> Callable:
     return wrapper
 
 
-def with_retry(max_attempts: int, exceptions: Tuple[type[Exception], ...]) -> Callable:
+def with_retry(max_attempts: int, exceptions: tuple[type[Exception], ...]) -> Callable:
     def decorator(f: Callable) -> Callable:
         def wrapper(*args, **kwargs):
             latest_exception: Optional[Exception] = None
