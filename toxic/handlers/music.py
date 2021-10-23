@@ -1,5 +1,4 @@
 import urllib.parse
-from typing import List, Tuple
 
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -20,7 +19,7 @@ HOSTS = [
 ]
 
 
-def get_message_and_buttons(info: Info) -> Tuple[str, List[Tuple[str, str]]]:
+def get_message_and_buttons(info: Info) -> tuple[str, list[tuple[str, str]]]:
     result = f'Исполнитель: <b>{info.artist_name}</b>'
     if info.type != Type.ARTIST:
         result += f'\n{info.type.value}: <b>{info.title}</b>'
@@ -47,7 +46,7 @@ def is_link_to_music(link: str) -> bool:
     return False
 
 
-def search_links(text: str) -> List[str]:
+def search_links(text: str) -> list[str]:
     links = LINK_REGEXP.findall(text)
     links = [link[0] for link in links if is_link_to_music(link[0])]
     return links

@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import re
 import traceback
-from typing import Tuple
 
 import requests
 from lxml import html
@@ -16,11 +15,7 @@ class Joker:
     def __init__(self, error_reply: str):
         self.error_reply = error_reply
 
-    @staticmethod
-    def create(error: str) -> Joker:
-        return Joker(error)
-
-    def get_random_joke(self) -> Tuple[str, bool]:
+    def get_random_joke(self) -> tuple[str, bool]:
         try:
             with requests.get(URL) as req:
                 data = req.content.decode('utf-8', 'ignore')

@@ -116,7 +116,7 @@ def __main__():
 
     reminders_repo = RemindersRepository(deps.database)
 
-    joker = Joker.create(deps.config['replies']['joker']['error'])
+    joker = Joker(deps.config['replies']['joker']['error'])
 
     worker_manager = WorkersManager(deps.messenger)
     worker_manager.start([

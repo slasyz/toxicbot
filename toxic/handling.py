@@ -2,7 +2,6 @@ import json
 import logging
 import re
 from dataclasses import dataclass
-from typing import Tuple
 
 import telegram
 
@@ -32,10 +31,10 @@ class CallbackDefinition:
 
 class HandlersManager:
     def __init__(self,
-                 handlers_private: Tuple[MessageHandler, ...],
-                 handlers_chats: Tuple[MessageHandler, ...],
-                 commands: Tuple[CommandDefinition, ...],
-                 callbacks: Tuple[CallbackDefinition, ...],
+                 handlers_private: tuple[MessageHandler, ...],
+                 handlers_chats: tuple[MessageHandler, ...],
+                 commands: tuple[CommandDefinition, ...],
+                 callbacks: tuple[CallbackDefinition, ...],
                  users_repo: UsersRepository,
                  messenger: Messenger,
                  dus: DatabaseUpdateSaver,

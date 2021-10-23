@@ -1,5 +1,4 @@
 import logging
-from typing import Union, Tuple, List
 
 import telegram
 from telegram import ReplyMarkup
@@ -9,7 +8,7 @@ from toxic.features.voice import NextUpService
 
 
 # TODO: fix problems with HTML tags
-def split_into_chunks(text: str, max_len: int, max_trimmed_len: int) -> Tuple[str, List[str]]:
+def split_into_chunks(text: str, max_len: int, max_trimmed_len: int) -> tuple[str, list[str]]:
     if len(text) <= max_len:
         return text, []
     text, rest = text[:max_len], text[max_len:]
@@ -91,7 +90,7 @@ class TextMessage(Message):
 
 
 class PhotoMessage(Message):
-    def __init__(self, photo: Union[bytes, str], text: str = None, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True):
+    def __init__(self, photo: bytes | str, text: str = None, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True):
         self.photo = photo
         self.text = text
         self.is_html = is_html
