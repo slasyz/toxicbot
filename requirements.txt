@@ -80,6 +80,10 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
+mypy-extensions==0.4.3
+    # via mypy
+mypy==0.910
+    # via -r requirements.in
 nodeenv==1.6.0
     # via pre-commit
 packaging==21.0
@@ -154,6 +158,7 @@ starlette==0.16.0
     #   starlette-exporter
 toml==0.10.2
     # via
+    #   mypy
     #   pre-commit
     #   pylint
     #   pytest
@@ -166,8 +171,12 @@ tox==3.24.4
     # via translate
 translate==3.5.0
     # via -r requirements.in
+types-requests==2.25.11
+    # via -r requirements.in
 typing-extensions==3.10.0.2
-    # via pydantic
+    # via
+    #   mypy
+    #   pydantic
 tzlocal==3.0
     # via apscheduler
 urllib3==1.26.7

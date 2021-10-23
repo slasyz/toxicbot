@@ -36,6 +36,9 @@ from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.repositories.chats import CachedChatsRepository
+from toxic.repositories.messages import MessagesRepository
+from toxic.repositories.reminders import RemindersRepository
+from toxic.repositories.users import UsersRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
 from toxic.workers.worker import WorkersManager
@@ -46,6 +49,8 @@ class BasicDependencies:
     config: Config
     database: Database
     chats_repo: CachedChatsRepository
+    messages_repo: MessagesRepository
+    users_repo: UsersRepository
     messenger: Messenger
     metrics: Metrics
     dus: DatabaseUpdateSaver
@@ -54,7 +59,7 @@ class BasicDependencies:
         return iter((self.config, self.database, self.chats_repo, self.messenger, self.metrics, self.dus))
 
 
-def get_resource_subdir(config: Config, name: str) -> str:
+def get_resource_subdir(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
 
@@ -74,6 +79,8 @@ def init(config_files: list) -> BasicDependencies:
     )
 
     chats_repo = CachedChatsRepository(database)
+    messages_repo = MessagesRepository(database)
+    users_repo = UsersRepository(database)
 
     metrics = Metrics()
 
@@ -82,9 +89,18 @@ def init(config_files: list) -> BasicDependencies:
     delayer_factory = DelayerFactory()
 
     bot = telegram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, database, chats_repo, dus, delayer_factory)
+    messenger = Messenger(bot, chats_repo, users_repo, dus, delayer_factory)
 
-    return BasicDependencies(config, database, chats_repo, messenger, metrics, dus)
+    return BasicDependencies(
+        config,
+        database,
+        chats_repo,
+        messages_repo,
+        users_repo,
+        messenger,
+        metrics,
+        dus,
+    )
 
 
 def init_sentry(config: Config):
@@ -94,78 +110,80 @@ def init_sentry(config: Config):
 
 
 def __main__():
-    config, database, chats_repo, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
+    deps = init(['./config.json', '/etc/toxic/config.json'])
 
-    init_sentry(config)
+    init_sentry(deps.config)
 
-    joker = Joker.create(config['replies']['joker']['error'])
+    reminders_repo = RemindersRepository(deps.database)
 
-    worker_manager = WorkersManager(messenger)
+    joker = Joker.create(deps.config['replies']['joker']['error'])
+
+    worker_manager = WorkersManager(deps.messenger)
     worker_manager.start([
-        JokesWorker(joker, database, messenger),
-        ReminderWorker(database, messenger),
+        JokesWorker(joker, deps.chats_repo, deps.messenger),
+        ReminderWorker(reminders_repo, deps.messenger),
     ])
 
     handlers_private = (
-        PrivateHandler(config['replies']['private'], database, messenger),
+        PrivateHandler(deps.config['replies']['private'], deps.users_repo, deps.messenger),
     )
 
     splitter = SpaceAdjoinSplitter()
-    textizer = Textizer(Featurizer(), splitter, metrics)
+    textizer = Textizer(Featurizer(), splitter, deps.metrics)
     chain_factory = ChainFactory(window=2)
 
     rate_limiter = RateLimiter(
         rate=5,
         per=120,
-        reply=config['replies']['rate_limiter'],
-        messenger=messenger,
+        reply=deps.config['replies']['rate_limiter'],
+        messenger=deps.messenger,
     )
 
-    taro_dir = get_resource_subdir(config, 'taro')
+    taro_dir = get_resource_subdir('taro')
 
     handlers_chats = (
-        MusicHandler(Odesli(), messenger),
-        KeywordsHandler.new(config['replies']['keywords'], messenger),
-        SorryHandler.new(config['replies']['sorry'], messenger),
-        StatsHandler.new(config['replies']['stats'], database, messenger),
-        ChainHandler.new(chain_factory, textizer, database, chats_repo, messenger),
+        MusicHandler(Odesli(), deps.messenger),
+        KeywordsHandler.new(deps.config['replies']['keywords'], deps.messenger),
+        SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
+        StatsHandler.new(deps.config['replies']['stats'], deps.chats_repo, deps.messenger),
+        ChainHandler.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger),
     )
 
     commands = (
-        CommandDefinition('dump', DumpCommand(database, messenger), True),
-        CommandDefinition('stat', StatCommand(database, messenger), False),
-        CommandDefinition('joke', JokeCommand(joker, messenger), False),
-        CommandDefinition('send', SendCommand(database, messenger), True),
-        CommandDefinition('chats', ChatsCommand(database, messenger), True),
-        CommandDefinition('voice', VoiceCommand(database, messenger), False),
-        CommandDefinition('taro', TaroCommand(taro_dir, messenger), False),
+        CommandDefinition('dump', DumpCommand(deps.messages_repo, deps.messenger), True),
+        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo, deps.messenger), False),
+        CommandDefinition('joke', JokeCommand(joker, deps.messenger), False),
+        CommandDefinition('send', SendCommand(deps.chats_repo, deps.messenger), True),
+        CommandDefinition('chats', ChatsCommand(deps.chats_repo, deps.messenger), True),
+        CommandDefinition('voice', VoiceCommand(deps.messages_repo, deps.messenger), False),
+        CommandDefinition('taro', TaroCommand(taro_dir, deps.messenger), False),
     )
     callbacks = (
-        CallbackDefinition('taro_first', TaroFirstCallbackHandler(taro_dir, messenger)),
-        CallbackDefinition('taro_second', TaroSecondCallbackHandler(Taro.new(taro_dir), messenger)),
+        CallbackDefinition('taro_first', TaroFirstCallbackHandler(taro_dir, deps.messenger)),
+        CallbackDefinition('taro_second', TaroSecondCallbackHandler(Taro.new(taro_dir), deps.messenger)),
     )
     handle_manager = HandlersManager(
         handlers_private,
         handlers_chats,
         commands,
         callbacks,
-        database,
-        messenger,
-        dus,
-        metrics,
+        deps.users_repo,
+        deps.messenger,
+        deps.dus,
+        deps.metrics,
         rate_limiter,
     )
 
-    messenger.send_to_admins('Я запустился.')
+    deps.messenger.send_to_admins('Я запустился.')
 
-    messages_total_row = database.query_row('''SELECT count(*) FROM messages''')
-    metrics.messages.set(messages_total_row[0])
+    messages_total_row = deps.database.query_row('''SELECT count(*) FROM messages''')
+    deps.metrics.messages.set(messages_total_row[0])
 
     # TODO: распутать это всё
     update_id = None
     while True:
         try:
-            for update in messenger.bot.get_updates(offset=update_id, timeout=10):
+            for update in deps.messenger.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
                 handle_manager.handle_update(update)
                 update_id = update.update_id + 1

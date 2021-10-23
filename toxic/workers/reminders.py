@@ -1,9 +1,9 @@
 import time
 from datetime import datetime
 
-from toxic.db import Database
 from toxic.helpers.log import print_sleep
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.reminders import RemindersRepository
 from toxic.workers.worker import Worker
 
 
@@ -12,22 +12,20 @@ def until(dt: datetime) -> float:
 
 
 class ReminderWorker(Worker):
-    def __init__(self, database: Database, messenger: Messenger):
-        self.database = database
+    def __init__(self, reminders_repo: RemindersRepository, messenger: Messenger):
+        self.reminders_repo = reminders_repo
         self.messenger = messenger
 
     def work(self):
         while True:
-            row = self.database.query_row('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
-            if row is None:
+            reminder = self.reminders_repo.get_latest_reminder()
+            if reminder is None:
                 break
-            id, chat_id, dt, text = row
 
-            seconds = until(dt)
+            seconds = until(reminder.dt)
             if seconds > 0:
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)
 
-            self.messenger.send(chat_id, text)
-
-            self.database.exec('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))
+            self.messenger.send(reminder.chat_id, reminder.text)
+            self.reminders_repo.deactivate_reminder(reminder.id)

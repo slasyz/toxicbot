@@ -6,13 +6,13 @@ from typing import Tuple
 
 import telegram
 
-from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.handler import MessageHandler, CallbackHandler
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
+from toxic.repositories.users import UsersRepository
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
 
@@ -36,7 +36,7 @@ class HandlersManager:
                  handlers_chats: Tuple[MessageHandler, ...],
                  commands: Tuple[CommandDefinition, ...],
                  callbacks: Tuple[CallbackDefinition, ...],
-                 database: Database,
+                 users_repo: UsersRepository,
                  messenger: Messenger,
                  dus: DatabaseUpdateSaver,
                  metrics: Metrics,
@@ -45,7 +45,7 @@ class HandlersManager:
         self.handlers_chats = handlers_chats
         self.commands = commands
         self.callbacks = callbacks
-        self.database = database
+        self.users_repo = users_repo
         self.messenger = messenger
         self.dus = dus
         self.metrics = metrics
@@ -80,7 +80,9 @@ class HandlersManager:
             if command_name != command.name:
                 continue
 
-            if command.admins_only and not self.database.is_admin(message.from_user.id):
+            if message.from_user is None:
+                break
+            if command.admins_only and not self.users_repo.is_admin(message.from_user.id):
                 break
 
             if self.rate_limiter.handle(message):
@@ -102,11 +104,13 @@ class HandlersManager:
             log_extra['chat_id'] = callback.message.chat_id
             log_extra['message_id'] = callback.message.message_id
 
-        try:
-            data = json.loads(callback.data)
-        except json.JSONDecodeError as ex:
-            logging.error('Caught exception when decoding callback data.', exc_info=ex, extra=log_extra)
-            return False
+        data = {}
+        if callback.data is not None:
+            try:
+                data = json.loads(callback.data)
+            except json.JSONDecodeError as ex:
+                logging.error('Caught exception when decoding callback data.', exc_info=ex, extra=log_extra)
+                return False
 
         try:
             name = data['name']

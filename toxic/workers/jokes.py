@@ -2,17 +2,17 @@ import logging
 import math
 import time
 
-from toxic.db import Database
 from toxic.features.joke import Joker
 from toxic.helpers.log import print_sleep
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.chats import ChatsRepository
 from toxic.workers.worker import Worker
 
 
 class JokesWorker(Worker):
-    def __init__(self, joker: Joker, database: Database, messenger: Messenger):
+    def __init__(self, joker: Joker, chats_repo: ChatsRepository, messenger: Messenger):
         self.joker = joker
-        self.database = database
+        self.chats_repo = chats_repo
         self.messenger = messenger
 
     def work(self):
@@ -23,18 +23,14 @@ class JokesWorker(Worker):
             print_sleep(seconds, 'next midnight joke')
             time.sleep(seconds)
 
-            rows = self.database.query('SELECT tg_id, joke FROM chats WHERE tg_id < 0;')
-            for row in rows:
-                if not row[1]:
-                    continue
-
-                logging.info('Sending joke to chat #%d', row[0])
+            for id in self.chats_repo.get_joker_chats():
+                logging.info('Sending joke to chat #%d', id)
                 joke, _ = self.joker.get_random_joke()
 
                 try:
-                    self.messenger.send(row[0], joke)
+                    self.messenger.send(id, joke)
                 except Exception as ex:
-                    logging.error('Cannot send joke to chat #%d.', row[0], exc_info=ex)
+                    logging.error('Cannot send joke to chat #%d.', id, exc_info=ex)
                     continue
 
             time.sleep(2)

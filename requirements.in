@@ -4,6 +4,7 @@ fastapi==0.70.0
 gunicorn==20.1.0
 Jinja2~=2.11.2
 lxml~=4.6.1
+mypy==0.910
 pip-tools==6.1.0
 prometheus-client==0.10.1
 psycopg2~=2.8.6
@@ -14,4 +15,5 @@ requests~=2.25.0
 sentry-sdk==1.1.0
 starlette-exporter==0.10.0
 translate~=3.5.0
+types-requests==2.25.11
 uvicorn[standard]==0.15.0

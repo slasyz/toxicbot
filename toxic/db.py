@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generator
+from typing import Iterator
 
 import psycopg2
 
@@ -26,7 +26,7 @@ class Database:
             cur.execute(query, vars)
             self.conn.commit()
 
-    def query(self, query, vars=None) -> Generator:
+    def query(self, query, vars=None) -> Iterator:
         with self.conn, self.conn.cursor() as cur:
             cur.execute(query, vars)
             # TODO: возможно, делать коммит и возвращать итератор с записями
@@ -43,7 +43,3 @@ class Database:
             return record
 
         return None
-
-    def is_admin(self, user_id: int) -> bool:
-        row = self.query_row('SELECT true FROM users WHERE tg_id=%s AND admin', (user_id,))
-        return row is not None

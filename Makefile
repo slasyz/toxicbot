@@ -14,6 +14,12 @@ help:           ## show this help
 	@sed -nE '/@sed/!s/##\s?//p' Makefile
 
 
+.PHONY: mypy
+mypy:           ## run mypy
+mypy:
+	MYPYPATH=. $(PYTHON_INTERPRETER) -m mypy --namespace-packages ./main.py || true
+
+
 .PHONY: lint
 lint:           ## run linter with less strict checks
 lint: DISABLE=invalid-name,unused-argument,too-many-instance-attributes
@@ -21,7 +27,9 @@ lint: pylint
 
 .PHONY: lint.all
 lint.all:       ## run linter with all usable checks
-lint.all: pylint
+lint.all:
+	make pylint || true
+	make mypy || true
 
 
 .PHONY: pylint

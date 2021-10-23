@@ -3,14 +3,14 @@ import logging
 
 import telegram
 
-from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.messages import MessagesRepository
 
 
 class DumpCommand(Command):
-    def __init__(self, database: Database, messenger: Messenger):
-        self.database = database
+    def __init__(self, messages_repo: MessagesRepository, messenger: Messenger):
+        self.messages_repo = messages_repo
         self.messenger = messenger
 
     def handle(self, message: telegram.Message, args: list[str]):
@@ -24,12 +24,11 @@ class DumpCommand(Command):
             self.messenger.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return
 
-        row = self.database.query_row('SELECT json FROM updates WHERE tg_id=%s', (update_id,))
-        if row is None:
+        dump = self.messages_repo.get_update_dump(update_id)
+        if dump is None:
             self.messenger.reply(message, 'В базе нет такого апдейта.')
             return
 
-        dump = row[0]
         try:
             self.messenger.reply(message, json.dumps(json.loads(dump), indent=2, ensure_ascii=False))
         except json.decoder.JSONDecodeError as ex:

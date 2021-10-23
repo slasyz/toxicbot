@@ -2,14 +2,14 @@ import re
 
 import telegram
 
-from toxic.db import Database
 from toxic.handlers.commands.command import Command
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.chats import ChatsRepository
 
 
 class SendCommand(Command):
-    def __init__(self, database: Database, messenger: Messenger):
-        self.database = database
+    def __init__(self, chats_repository: ChatsRepository, messenger: Messenger):
+        self.chats_repository = chats_repository
         self.messenger = messenger
 
     def handle(self, message: telegram.Message, args: list[str]):
@@ -23,8 +23,7 @@ class SendCommand(Command):
             self.messenger.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE')
             return
 
-        row = self.database.query('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
-        if row is None:
+        if not self.chats_repository.is_existing(chat_id):
             self.messenger.reply(message, f'Не могу найти такой чат ({chat_id}).')
             return
 
