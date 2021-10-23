@@ -60,7 +60,7 @@ class Messenger:
 
         chat_id = self._get_latest_chat_id(chat_id)
 
-        for i in range(10):
+        for _ in range(10):
             try:
                 message = msg.send(self.bot, chat_id, reply_to)
                 break

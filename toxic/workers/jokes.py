@@ -2,8 +2,6 @@ import logging
 import math
 import time
 
-from telegram.error import Unauthorized
-
 from toxic.db import Database
 from toxic.features.joke import Joker
 from toxic.helpers.log import print_sleep
