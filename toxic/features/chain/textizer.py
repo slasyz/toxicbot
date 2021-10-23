@@ -16,6 +16,7 @@ class Textizer:
 
     TODO: написать тесты для этого и других классов.  Зря что ли декомпозировал?
     """
+
     def __init__(self, featurizer: Featurizer, splitter: Splitter, metrics: Metrics):
         self.featurizer = featurizer
         self.splitter = splitter

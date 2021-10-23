@@ -13,6 +13,7 @@ class Splitter:
     """
     Splitter class implements a strategy of splitting and then joining tokens (words, punctuation marks, etc) back.
     """
+
     def split(self, message: str) -> list[str]:
         raise NotImplementedError()
 
@@ -24,6 +25,7 @@ class WordsOnlySplitter(Splitter):
     """
     WordsOnlySplitter is a straightforward splitter that picks only letters, hyphens and apostrophes.
     """
+
     def split(self, message: str) -> list[str]:
         res = NO_PUNCTUATION_SPLIT_REGEXP.split(message)
         if res == ['']:
@@ -40,6 +42,7 @@ class PunctuationSplitter(Splitter):
     PunctuationSplitter extracts each sequence of punctuation marks, series of spaces and series of letters as separate
     tokens.
     """
+
     def split(self, message: str) -> list[str]:
         return PUNCTUATION_SPLIT_REGEXP.findall(message)
 
@@ -71,6 +74,7 @@ class SpaceAdjoinSplitter(Splitter):
     Unlike PunctuationSplitter, spaces are not picked out as separate tokens, so single "window" can hold more
     meaningful tokens.
     """
+
     def split(self, message: str) -> list[str]:
         return [x for x, y, z in SPACE_ADJOIN_SPLIT_REGEXP.findall(message)]
 

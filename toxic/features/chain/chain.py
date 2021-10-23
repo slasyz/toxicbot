@@ -6,6 +6,7 @@ class Chain:
     """
     Chain class learns a sequence of features to be able to predict next feature using given input.
     """
+
     def teach(self, feature: int):
         raise NotImplementedError()
 
@@ -26,6 +27,7 @@ class MarkovChain(Chain):
       - 4 with 25%
       - 5 with 25%
     """
+
     def __init__(self, window: int):
         self.window = window
         self.data: dict[tuple[int, ...], dict[int, int]] = {}

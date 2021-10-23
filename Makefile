@@ -14,10 +14,9 @@ help:           ## show this help
 	@sed -nE '/@sed/!s/##\s?//p' Makefile
 
 
-.PHONY: mypy
-mypy:           ## run mypy
-mypy:
-	MYPYPATH=. $(PYTHON_INTERPRETER) -m mypy --namespace-packages ./main.py || true
+.PHONY: fmt
+fmt:            ## run autopep8
+	find ./toxic main.py -name '*.py' -exec $(PYTHON_INTERPRETER) -m autopep8 --in-place --global-config pycodestyle '{}' \;
 
 
 .PHONY: lint
@@ -30,6 +29,12 @@ lint.all:       ## run linter with all usable checks
 lint.all:
 	make pylint || true
 	make mypy || true
+
+
+.PHONY: mypy
+mypy:           ## run mypy
+mypy:
+	MYPYPATH=. $(PYTHON_INTERPRETER) -m mypy --namespace-packages ./main.py || true
 
 
 .PHONY: pylint
