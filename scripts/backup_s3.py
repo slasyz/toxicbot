@@ -6,8 +6,8 @@ from subprocess import PIPE, Popen
 import boto3
 from botocore.exceptions import ClientError
 
-from main import init_sentry
 from toxic.config import Config
+from toxic.helpers.log import init_sentry
 
 BUCKET_NAME = "toxicbot"
 
@@ -24,7 +24,7 @@ def dump_table(hostname, port, dbname, username, password, filename):
 
     rc = p.wait()
     if rc != 0:
-        raise Exception('return code {}'.format(rc))
+        raise Exception('Return code {}.'.format(rc))
 
 
 def upload_file(filename, bucket, object_name=None):
@@ -47,7 +47,7 @@ def __main__():
     config_files = ['config.json', '/etc/toxic/config.json']
     config = Config.load(config_files)
 
-    init_sentry(config)
+    init_sentry(config['sentry']['dsn'])
 
     print('-> pg_dump', file=sys.stderr)
     dump_table(

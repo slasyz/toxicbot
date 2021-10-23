@@ -1,11 +1,11 @@
 import json
-import logging
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 from urllib.parse import urlencode
 
 import requests
+from loguru import logger
 
 
 class UnknownTypeException(Exception):
@@ -79,15 +79,11 @@ class Odesli:
             try:
                 parsed = json.loads(resp.content)
             except json.JSONDecodeError as ex:
-                logging.error('Cannot parse Odesli response.', exc_info=ex, extra={
-                    'result': resp.content,
-                })
+                logger.opt(exception=ex).error('Cannot parse Odesli response.', result=resp.content)
                 return None
 
             try:
                 return self.parse_result(parsed)
             except Exception as ex:
-                logging.error('Cannot get music info.', exc_info=ex, extra={
-                    'result': parsed
-                })
+                logger.opt(exception=ex).error('Cannot get music info.', exc_info=ex, result=parsed)
                 return None

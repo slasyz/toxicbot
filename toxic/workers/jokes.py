@@ -1,6 +1,7 @@
-import logging
 import math
 import time
+
+from loguru import logger
 
 from toxic.features.joke import Joker
 from toxic.helpers.log import print_sleep
@@ -24,13 +25,13 @@ class JokesWorker(Worker):
             time.sleep(seconds)
 
             for id in self.chats_repo.get_joker_chats():
-                logging.info('Sending joke to chat #%d', id)
+                logger.info('Sending joke to chat #{}.', id)
                 joke, _ = self.joker.get_random_joke()
 
                 try:
                     self.messenger.send(id, joke)
                 except Exception as ex:
-                    logging.error('Cannot send joke to chat #%d.', id, exc_info=ex)
+                    logger.opt(exception=ex).error('Cannot send joke to chat #%d.', id)
                     continue
 
             time.sleep(2)

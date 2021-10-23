@@ -1,5 +1,4 @@
-import logging
-
+from loguru import logger
 from translate import Translator
 
 
@@ -8,6 +7,6 @@ def do(text: str, lang_from: str = 'ru', lang_to: str = 'uk') -> str:
         translator = Translator(lang_to, lang_from)
         return translator.translate(text)
     except Exception as ex:
-        logging.error('Translate error.', exc_info=ex)
+        logger.opt(exception=ex).error('Translate error.')
 
     return text

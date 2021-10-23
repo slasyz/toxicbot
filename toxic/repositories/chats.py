@@ -1,8 +1,9 @@
-import logging
 from datetime import datetime, timedelta
 from collections.abc import Iterator
 
 from dataclasses import dataclass
+
+from loguru import logger
 
 from toxic.db import Database
 
@@ -92,7 +93,7 @@ class CachedChatsRepository(ChatsRepository):
         if entry is not None and entry.valid_until > datetime.now():
             return entry.latest_chat_id
 
-        logging.debug('Cache miss for chat_id=%s', chat_id)
+        logger.debug('Cache miss for chat_id=%s.', chat_id)
         latest_chat_id = super().get_latest_chat_id(chat_id)
         self.latest_id_cache[chat_id] = CachedEntry(latest_chat_id, datetime.now() + CACHE_DURATION)
         return latest_chat_id

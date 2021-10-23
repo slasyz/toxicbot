@@ -105,7 +105,7 @@ def get_card_content(url: str):
             break
         else:
             if current_h1 == '':
-                raise Exception('h1 is empty')
+                raise Exception('h1 is empty.')
 
             key = (current_h1, current_h2)
             txt = result_map.get(key, [])
@@ -123,7 +123,7 @@ def convert_map_to_table_row(map: dict[tuple[str, str], list[str]]) -> list[str]
     row = CardData()
 
     if len(map) != 8:
-        raise Exception('map length is not 8, but {}'.format(len(map)))
+        raise Exception('map length is not 8, but {}.'.format(len(map)))
 
     row.general_forwards = map[('general', 'forwards')]
     row.general_backwards = map[('general', 'backwards')]

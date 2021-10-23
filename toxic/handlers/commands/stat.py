@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import logging
 import re
 
 import telegram
+from loguru import logger
 
 from toxic.handlers.commands.command import Command
 from toxic.handlers.handler import MessageHandler
@@ -52,10 +52,7 @@ class StatCommand(Command):
             return
 
         if message.from_user is None:
-            logging.error('Empty from_user in /stat command.', extra={
-                'message_id': message.message_id,
-                'chat_id': message.chat_id,
-            })
+            logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat_id)
             return
 
         if not self.users_repo.is_admin(message.from_user.id):

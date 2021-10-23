@@ -8,4 +8,4 @@ then
     exit 1;
 fi
 
-ssh "$1" "tail -fn 50 /home/sl/logs/ToxicTgBot/log.log"
+ssh "$1" "tail -fn 50 /home/sl/logs/ToxicTgBot/main-stderr.log"

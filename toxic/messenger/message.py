@@ -1,7 +1,7 @@
-import logging
 from typing import Optional
 
 import telegram
+from loguru import logger
 from telegram import ReplyMarkup
 from telegram.constants import CHATACTION_TYPING, CHATACTION_RECORD_VOICE
 
@@ -45,7 +45,7 @@ class VoiceMessage(Message):
         try:
             f = self.service.load(self.text)
         except Exception as ex:
-            logging.error('Error sending voice message.', exc_info=ex)
+            logger.opt(exception=ex).error('Error sending voice message.')
             return bot.send_message(chat_id,
                                     f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 

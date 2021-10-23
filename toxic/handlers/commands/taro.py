@@ -1,8 +1,8 @@
 import json
-import logging
 import os
 
 import telegram
+from loguru import logger
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 
 from toxic.features.taro import Taro, CardData
@@ -110,7 +110,7 @@ class TaroSecondCallbackHandler(CallbackHandler):
     def handle(self, callback: telegram.CallbackQuery, data: dict):
         card = self.taro.get_random_card()
 
-        logging.info('Handling taro callback: %s', data)
+        logger.info('Handling taro callback: {}.', data)
 
         message = callback.message
         if message is None:

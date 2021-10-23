@@ -1,6 +1,7 @@
-import logging
 from dataclasses import dataclass
 from datetime import datetime
+
+from loguru import logger
 
 from toxic.messenger.messenger import Messenger
 
@@ -46,7 +47,7 @@ class RateLimiter:
             bucket.allowance = self.rate
 
         if bucket.allowance < 1:
-            logging.info('Discarding command from (%d, %d), bucket: %s', chat, user, bucket)
+            logger.info('Discarding command from ({}, {}), bucket: {}.', chat, user, bucket)
             return True
 
         bucket.allowance -= 1

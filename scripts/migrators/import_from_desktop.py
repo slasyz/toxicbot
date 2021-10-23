@@ -20,19 +20,19 @@ def handle_text(s) -> str:
         return ''.join(handle_text(x) for x in s)
     if isinstance(s, dict):
         return s['text']
-    raise Exception('unknown type: {}'.format(s))
+    raise Exception('Unknown type: {}.'.format(s))
 
 
 def get_user_id(message: dict) -> int:
     try:
         from_id = message['from_id']
     except KeyError:
-        raise Exception('no from_id in message: {}'.format(message))
+        raise Exception('No from_id in message: {}.'.format(message))
 
     if from_id.startswith('user'):
         return int(from_id[4:])
 
-    raise Exception('unknown from_id: {}'.format(from_id))
+    raise Exception('Unknown from_id: {}.'.format(from_id))
 
 
 def get_date(message: dict) -> str:

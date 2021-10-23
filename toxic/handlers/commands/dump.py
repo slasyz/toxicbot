@@ -1,7 +1,7 @@
 import json
-import logging
 
 import telegram
+from loguru import logger
 
 from toxic.handlers.commands.command import Command
 from toxic.messenger.messenger import Messenger
@@ -32,5 +32,5 @@ class DumpCommand(Command):
         try:
             self.messenger.reply(message, json.dumps(json.loads(dump), indent=2, ensure_ascii=False))
         except json.decoder.JSONDecodeError as ex:
-            logging.error('Caught exception when decoding dump.', exc_info=ex)
+            logger.opt(exception=ex).error('Caught exception when decoding dump.')
             self.messenger.reply(message, dump)

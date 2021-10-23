@@ -18,7 +18,7 @@ class Config:
 
             return Config(data)
 
-        raise Exception('cannot load config: no files found')
+        raise Exception('Cannot load config: no files found.')
 
     def __getitem__(self, item):
         return self.data[item]

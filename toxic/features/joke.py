@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import logging
 import re
 import traceback
 
 import requests
+from loguru import logger
 from lxml import html
 
 URL = 'https://baneks.ru/random'
@@ -27,13 +27,11 @@ class Joker:
                 text = element.text_content().strip().replace('            ', '')
         except requests.HTTPError as ex:  # обрабатывать нормально
             traceback.print_stack()
-            logging.error('HTTP error when getting joke', exc_info=ex)
+            logger.opt(exception=ex).error('HTTP error when getting joke.')
             return self.error_reply, False
 
         if not text.startswith('Анек #'):
-            logging.error('Invalid joke format', extra={
-                'data': data,
-            })
+            logger.error('Invalid joke format.', data=data)
             return self.error_reply, False
 
         text = PREFIX_REGEXP.sub('', text)

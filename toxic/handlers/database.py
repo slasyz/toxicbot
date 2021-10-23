@@ -1,7 +1,7 @@
-import logging
 from typing import Optional
 
 import telegram
+from loguru import logger
 
 from toxic.db import Database
 from toxic.metrics import Metrics
@@ -121,10 +121,10 @@ class DatabaseUpdateSaver:
     def handle(self, update: telegram.Update):
         row = self.database.query_row('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
         if row is not None:
-            logging.info('Ignoring update #%d.', update.update_id)
+            logger.info('Ignoring update #{}.', update.update_id)
             return
 
-        logging.info(update)
+        logger.info('Handling update.', **update.to_dict())
 
         message = update.message or update.edited_message
         chat_id = 0

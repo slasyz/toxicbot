@@ -72,6 +72,8 @@ jmespath==0.10.0
     #   botocore
 lazy-object-proxy==1.6.0
     # via astroid
+loguru==0.5.3
+    # via -r requirements.in
 lxml==4.6.3
     # via
     #   -r requirements.in

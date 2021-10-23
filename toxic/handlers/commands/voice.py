@@ -1,6 +1,5 @@
-import logging
-
 import telegram
+from loguru import logger
 
 from toxic.handlers.commands.command import Command
 from toxic.messenger.message import VoiceMessage
@@ -22,10 +21,11 @@ class VoiceCommand(Command):
 
         text_to_voice = self.messages_repository.get_text(message.chat_id, message.reply_to_message.message_id)
         if text_to_voice is None:
-            logging.error('Error trying to voice message: message not found.', extra={
-                'chat_id': message.chat_id,
-                'reply_to': message.reply_to_message.message_id,
-            })
+            logger.error(
+                'Error trying to voice message: message not found.',
+                chat_id=message.chat_id,
+                reply_to=message.reply_to_message.message_id,
+            )
             self.messenger.reply(message, 'Нет.')
             return
 

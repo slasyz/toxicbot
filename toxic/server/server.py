@@ -6,7 +6,8 @@ from fastapi import FastAPI
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 from starlette.templating import Jinja2Templates
 
-from main import init, init_sentry, get_resource_subdir
+from main import init, get_resource_subdir
+from toxic.helpers.log import init_sentry
 from toxic.server import messages
 
 
@@ -28,7 +29,7 @@ def __main__():
         [os.path.join(os.path.dirname(__file__), '..', '..', 'config.json'), '/etc/toxic/config.json']
     )
 
-    init_sentry(deps.config)
+    init_sentry(deps.config['sentry']['dsn'])
 
     app = FastAPI()
     app.add_middleware(PrometheusMiddleware)

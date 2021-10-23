@@ -1,9 +1,9 @@
 import json
-import logging
 import re
 from dataclasses import dataclass
 
 import telegram
+from loguru import logger
 
 from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
@@ -90,7 +90,7 @@ class HandlersManager:
             try:
                 command.handler.handle(text, message, args)
             except Exception as ex:
-                logging.error('Caught exception when handling command.', exc_info=ex)
+                logger.opt(exception=ex).error('Caught exception when handling command.')
             return True
 
         return False
@@ -108,13 +108,13 @@ class HandlersManager:
             try:
                 data = json.loads(callback.data)
             except json.JSONDecodeError as ex:
-                logging.error('Caught exception when decoding callback data.', exc_info=ex, extra=log_extra)
+                logger.opt(exception=ex).error('Caught exception when decoding callback data.', **log_extra)
                 return False
 
         try:
             name = data['name']
         except KeyError as ex:
-            logging.error('Callback data does not contain "name" key.', exc_info=ex, extra=log_extra)
+            logger.opt(exception=ex).error('Callback data does not contain "name" key.', **log_extra)
             return False
 
         for callback_definition in self.callbacks:
@@ -124,7 +124,7 @@ class HandlersManager:
             try:
                 callback_definition.handler.handle(callback, data)
             except Exception as ex:
-                logging.error('Caught exception when handling callback.', exc_info=ex)
+                logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
             return True
 
     def _handle_update_inner(self, update: telegram.Update):
@@ -162,7 +162,7 @@ class HandlersManager:
                     return
             except Exception as ex:
                 self.messenger.reply(update.message, 'Ошибка.')
-                logging.error('Caught exception when handling update.', exc_info=ex)
+                logger.opt(exception=ex).error('Caught exception when handling update.')
 
     def handle_update(self, update: telegram.Update):
         with self.metrics.update_time.time():  # TODO: do with decorator

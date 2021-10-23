@@ -1,11 +1,10 @@
 import _thread
-import logging
 import threading
 import traceback
-from collections.abc import Set
 from datetime import datetime
 
 import psycopg2
+from loguru import logger
 
 from toxic.messenger.messenger import Messenger
 
@@ -21,7 +20,7 @@ class WorkerWrapper:
     def __init__(self, worker: Worker, messenger: Messenger):
         self.worker = worker
         self.messenger = messenger
-        self.counter: Set[datetime] = set()
+        self.counter: set[datetime] = set()
 
     def _clean_counter(self):
         now = datetime.now()
@@ -33,15 +32,14 @@ class WorkerWrapper:
                 self.worker.work()
             except Exception as ex:
                 traceback.print_stack()
-                logging.error('Exception in worker %s', self.__class__.__name__, exc_info=ex)
+                logger.opt(exception=ex).error('Exception in worker %s.', self.__class__.__name__)
 
                 self._clean_counter()
                 self.counter.add(datetime.now())
                 if len(self.counter) >= MAX_ERRORS_PER_MINUTE:
-                    logging.error(
+                    logger.opt(exception=ex).error(
                         'Got %d errors in worker %s in last minute, stopping.',
                         len(self.counter), self.__class__.__name__,
-                        exc_info=ex,
                     )
                     try:
                         self.messenger.send_to_admins(f'Воркер {type(self.worker).__name__} бросил исключение {len(self.counter)} раз. Выход.')

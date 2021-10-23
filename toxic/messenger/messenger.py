@@ -1,7 +1,7 @@
-import logging
 import time
 
 import telegram
+from loguru import logger
 from telegram.constants import MESSAGEENTITY_MENTION
 from telegram.error import BadRequest, ChatMigrated
 
@@ -48,10 +48,7 @@ class Messenger:
                 message = msg.send(self.bot, chat_id, reply_to)
                 break
             except ChatMigrated as ex:
-                logging.info('Chat migrated.', extra={
-                    'chat_id': chat_id,
-                    'new_chat_id': ex.new_chat_id,
-                })
+                logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.new_chat_id)
                 self.chats_repo.update_next_id(chat_id, ex.new_chat_id)
                 chat_id = ex.new_chat_id
                 continue
