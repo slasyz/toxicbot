@@ -13,7 +13,7 @@ class DumpCommand(Command):
         self.messages_repo = messages_repo
         self.messenger = messenger
 
-    def handle(self, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         if len(args) != 2:
             self.messenger.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
             return

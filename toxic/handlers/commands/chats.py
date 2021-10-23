@@ -10,7 +10,7 @@ class ChatsCommand(Command):
         self.chats_repo = chats_repo
         self.messenger = messenger
 
-    def handle(self, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         response = []
 
         for id, title in self.chats_repo.list():

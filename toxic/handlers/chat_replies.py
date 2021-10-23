@@ -29,11 +29,13 @@ class KeywordsHandler(MessageHandler):
         return KeywordsHandler(map, messenger)
 
     @decorators.non_empty
-    def handle(self, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> bool:
+        # pylint: disable=W0221
+        # Because of the decorator
         for key, val in self.map.items():
-            if isinstance(key, str) and key not in message.text.lower():
+            if isinstance(key, str) and key not in text.lower():
                 continue
-            if isinstance(key, re.Pattern) and key.search(message.text.lower()) is None:
+            if isinstance(key, re.Pattern) and key.search(text.lower()) is None:
                 continue
 
             self.messenger.reply(message, val)
@@ -67,16 +69,18 @@ class SorryHandler(MessageHandler):
         return SorryHandler(config['sorry'], config['not_sorry'], messenger)
 
     @decorators.non_empty
-    def handle(self, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> bool:
+        # pylint: disable=W0221
+        # Because of the decorator
         if message.chat_id > 0:
             self.messenger.send(message.chat_id, self.reply_not_sorry)
             return True
 
-        if SORRY_REGEXP.search(message.text.lower()) is not None:
+        if SORRY_REGEXP.search(text.lower()) is not None:
             self.messenger.send(message.chat_id, self.reply_sorry)
             return True
 
-        if self.messenger.is_reply_or_mention(message) and 'извинись' in message.text.lower():
+        if self.messenger.is_reply_or_mention(message) and 'извинись' in text.lower():
             self.messenger.send(message.chat_id, self.reply_sorry)
             return True
 

@@ -53,16 +53,18 @@ class Textizer:
         result_features = []
 
         while True:
-            feature = chain.predict(current)
-            if feature is None or feature == FEATURE_NONE:
+            feature_or_none = chain.predict(current)
+            if feature_or_none is None or feature_or_none == FEATURE_NONE:
                 break
-            result_features.append(feature)
-            current = current[1:] + (feature,)
+            result_features.append(feature_or_none)
+            current = current[1:] + (feature_or_none,)
 
         result_words = []
         for feature in result_features:
-            word = self.featurizer.get_value(feature)
-            result_words.append(word)
+            word_or_none = self.featurizer.get_value(feature)
+            if word_or_none is None:  # impossible, but let's check to please linter
+                break
+            result_words.append(word_or_none)
 
         result_message = self.splitter.join(result_words)
         if result_message != '':

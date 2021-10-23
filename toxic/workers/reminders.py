@@ -7,8 +7,8 @@ from toxic.repositories.reminders import RemindersRepository
 from toxic.workers.worker import Worker
 
 
-def until(dt: datetime) -> float:
-    return time.mktime(dt.timetuple()) - datetime.utcnow().timestamp()
+def until(when: datetime) -> float:
+    return time.mktime(when.timetuple()) - datetime.utcnow().timestamp()
 
 
 class ReminderWorker(Worker):
@@ -22,7 +22,7 @@ class ReminderWorker(Worker):
             if reminder is None:
                 break
 
-            seconds = until(reminder.dt)
+            seconds = until(reminder.when)
             if seconds > 0:
                 print_sleep(seconds, f'reminder #{id}')
                 time.sleep(seconds)

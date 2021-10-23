@@ -12,7 +12,7 @@ class SendCommand(Command):
         self.chats_repository = chats_repository
         self.messenger = messenger
 
-    def handle(self, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         if len(args) < 3:
             self.messenger.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE')
             return
@@ -28,5 +28,5 @@ class SendCommand(Command):
             return
 
         prefix_regexp = re.compile(r'^/' + args[0] + r'\s+' + args[1] + r'\s+')
-        text = prefix_regexp.sub('', message.text)
+        text = prefix_regexp.sub('', text)
         self.messenger.send(chat_id, text)

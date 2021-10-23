@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 
 import telegram
@@ -41,13 +42,20 @@ class StatCommand(Command):
         response = self._get_response(chat_id)
         self.messenger.reply(message, response)
 
-    def handle(self, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
                 self.messenger.reply(message, response, with_delay=False)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
+            return
+
+        if message.from_user is None:
+            logging.error('Empty from_user in /stat command.', extra={
+                'message_id': message.message_id,
+                'chat_id': message.chat_id,
+            })
             return
 
         if not self.users_repo.is_admin(message.from_user.id):
@@ -78,9 +86,11 @@ class StatsHandler(MessageHandler):
         return StatsHandler(replies_regexes, chats_repo, messenger)
 
     @decorators.non_empty
-    def handle(self, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> bool:
+        # pylint: disable=W0221
+        # Because of the decorator
         for key, value in self.replies.items():
-            if key.search(message.text.lower()) is None:
+            if key.search(text.lower()) is None:
                 continue
 
             response = value + ':\n'

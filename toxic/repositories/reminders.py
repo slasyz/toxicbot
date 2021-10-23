@@ -9,7 +9,7 @@ from toxic.db import Database
 class Reminder:
     id: int
     chat_id: int
-    dt: datetime
+    when: datetime
     text: str
 
 

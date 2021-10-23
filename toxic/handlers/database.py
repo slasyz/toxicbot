@@ -86,8 +86,12 @@ class DatabaseUpdateSaver:
         elif message.caption is not None:
             text = message.caption
         elif message.sticker is not None:
-            text = message.sticker.emoji
+            text = message.sticker.emoji or ''
             sticker = message.sticker.file_id
+
+        from_user_id = None
+        if message.from_user is not None:
+            from_user_id = message.from_user.id
 
         self.database.exec('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
@@ -100,7 +104,7 @@ class DatabaseUpdateSaver:
         ''', (
             message.chat_id,
             message.message_id,
-            message.from_user.id,
+            from_user_id,
             update_id,
             text,
             message.date,

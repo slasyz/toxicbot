@@ -50,30 +50,30 @@ class HandlersManager:
         self.metrics = metrics
         self.rate_limiter = rate_limiter
 
-    def handle_command(self, message: telegram.Message) -> bool:
-        command_name = ''
-
+    def _get_command_name(self, text: str, message: telegram.Message) -> str:
         # Проходимся по всем сущностям, если на первом месте в сообщении есть сущность типа 'bot_command', то записываем
         # название команды.
         for entity in message.entities:
-            if entity['offset'] != 0:
+            if entity.offset != 0:
                 continue
 
-            if entity['type'] != telegram.MessageEntity.BOT_COMMAND:
+            if entity.type != telegram.MessageEntity.BOT_COMMAND:
                 continue
 
-            command_name = message.text[1:entity['length']]
+            command_name = text[1:entity.length]  # trim leading slash
             if '@' in command_name:
                 command_name, command_target = command_name.split('@', 2)
                 if command_target != self.messenger.bot.username:
                     continue
 
-            break
+            return command_name
 
+    def handle_command(self, text: str, message: telegram.Message) -> bool:
+        command_name = self._get_command_name(text, message)
         if command_name == '':
             return False
 
-        args = ARGS_SPLIT_REGEXP.split(message.text[1:])
+        args = ARGS_SPLIT_REGEXP.split(text[1:])
 
         for command in self.commands:
             if command_name != command.name:
@@ -88,7 +88,7 @@ class HandlersManager:
                 return True
 
             try:
-                command.handler.handle(message, args)
+                command.handler.handle(text, message, args)
             except Exception as ex:
                 logging.error('Caught exception when handling command.', exc_info=ex)
             return True
@@ -142,8 +142,9 @@ class HandlersManager:
             return
 
         # Обрабатываем команду
-        if update.message.text is not None:
-            if self.handle_command(update.message):
+        text = update.message.text
+        if text is not None:
+            if self.handle_command(text, update.message):
                 return
 
         # Обрабатываем сообщение

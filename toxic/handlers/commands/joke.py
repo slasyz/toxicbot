@@ -10,6 +10,6 @@ class JokeCommand(Command):
         self.joker = joker
         self.messenger = messenger
 
-    def handle(self, message: telegram.Message, args: list[str]):
-        text, _ = self.joker.get_random_joke()
-        self.messenger.reply(message, text)
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
+        joke_text, _ = self.joker.get_random_joke()
+        self.messenger.reply(message, joke_text)

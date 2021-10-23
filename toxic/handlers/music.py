@@ -7,7 +7,7 @@ from toxic.features.odesli import Info, Type, Odesli
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
-from toxic.messenger.message import PhotoMessage
+from toxic.messenger.message import PhotoMessage, TextMessage
 from toxic.messenger.messenger import Messenger
 
 HOSTS = [
@@ -40,6 +40,8 @@ def get_message_and_buttons(info: Info) -> tuple[str, list[tuple[str, str]]]:
 
 def is_link_to_music(link: str) -> bool:
     parsed = urllib.parse.urlparse(link)
+    if parsed.hostname is None:
+        return False
     for host in HOSTS:
         if parsed.hostname == host or parsed.hostname.endswith('.' + host):
             return True
@@ -62,8 +64,10 @@ class MusicHandler(MessageHandler):
         self.messenger = messenger
 
     @decorators.non_empty
-    def handle(self, message: telegram.Message) -> bool:
-        links = search_links(message.text)
+    def handle(self, text: str, message: telegram.Message) -> bool:
+        # pylint: disable=W0221
+        # Because of the decorator
+        links = search_links(text)
         if not links:
             return False
 
@@ -81,11 +85,18 @@ class MusicHandler(MessageHandler):
                     buttons.append([button])
                 else:
                     buttons[-1].append(button)
+            markup = InlineKeyboardMarkup(buttons)
 
-            self.messenger.reply(message, PhotoMessage(
-                photo=info.thumbnail_url,
-                text=text,
-                markup=InlineKeyboardMarkup(buttons),
-            ), with_delay=False)
+            if info.thumbnail_url is not None:
+                self.messenger.reply(message, PhotoMessage(
+                    photo=info.thumbnail_url,
+                    text=text,
+                    markup=markup,
+                ), with_delay=False)
+            else:
+                self.messenger.reply(message, TextMessage(
+                    text=text,
+                    markup=markup,
+                ), with_delay=False)
 
         return False

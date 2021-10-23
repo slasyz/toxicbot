@@ -1,9 +1,11 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Type
 
 import telegram
 
+from toxic.handlers.handler import MessageHandler
 
-def non_empty(func: Callable) -> Callable:
+
+def non_empty(func: Callable[[Type[MessageHandler], str, telegram.Message], bool]) -> Callable[[Type[MessageHandler], telegram.Message], bool]:
     """
     Checks if message contains text before calling wrapping function.  If it does not contain it, returns False.
     """
@@ -12,7 +14,7 @@ def non_empty(func: Callable) -> Callable:
         if message.text is None:
             return False
 
-        return func(self, message)
+        return func(self, message.text, message)
 
     return wrapper
 

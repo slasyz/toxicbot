@@ -75,8 +75,13 @@ class Messenger:
             raise
 
     def is_reply_or_mention(self, message: telegram.Message) -> bool:
-        if message.reply_to_message is not None and message.reply_to_message.from_user.id == self.bot.id:
+        if message.reply_to_message is not None and \
+                message.reply_to_message.from_user is not None and \
+                message.reply_to_message.from_user.id == self.bot.id:
             return True
+
+        if message.text is None:
+            return False
 
         for entity in message.entities:
             if entity.type == MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + self.bot.username:

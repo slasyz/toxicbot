@@ -17,7 +17,7 @@ class TaroCommand(Command):
         self.res_dir = res_dir
         self.messenger = messenger
 
-    def handle(self, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         goals = ['general', 'love', 'question', 'daily', 'advice']
         buttons = []
         for goal in goals:
@@ -83,7 +83,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
         goal = data.get('goal', '')
         mention = get_mention(callback.from_user)
 
-        self.messenger.send(callback.message.chat_id, PhotoMessage(
+        self.messenger.send(message.chat_id, PhotoMessage(
             photo=photo,
             text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
             is_html=True,
@@ -98,7 +98,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
                 ]
             ])
         ), with_delay=False)
-        self.messenger.delete_message(callback.message.chat_id, callback.message.message_id)
+        self.messenger.delete_message(message.chat_id, message.message_id)
         return True
 
 
