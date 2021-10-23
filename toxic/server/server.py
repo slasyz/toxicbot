@@ -24,7 +24,7 @@ LOGGING_CONFIG: dict = {
 
 
 def __main__():
-    config, database, _, _, _ = init(
+    config, database, _, _, _, _ = init(
         [os.path.join(os.path.dirname(__file__), '..', '..', 'config.json'), '/etc/toxic/config.json']
     )
 

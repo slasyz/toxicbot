@@ -35,6 +35,7 @@ from toxic.helpers.delayer import DelayerFactory
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
+from toxic.repositories.chats import CachedChatsRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
 from toxic.workers.worker import WorkersManager
@@ -44,12 +45,13 @@ from toxic.workers.worker import WorkersManager
 class BasicDependencies:
     config: Config
     database: Database
+    chats_repo: CachedChatsRepository
     messenger: Messenger
     metrics: Metrics
     dus: DatabaseUpdateSaver
 
     def __iter__(self):
-        return iter((self.config, self.database, self.messenger, self.metrics, self.dus))
+        return iter((self.config, self.database, self.chats_repo, self.messenger, self.metrics, self.dus))
 
 
 def get_resource_subdir(config: Config, name: str) -> str:
@@ -71,6 +73,8 @@ def init(config_files: list) -> BasicDependencies:
         config['database']['pass'],
     )
 
+    chats_repo = CachedChatsRepository(database)
+
     metrics = Metrics()
 
     dus = DatabaseUpdateSaver(database, metrics)
@@ -78,9 +82,9 @@ def init(config_files: list) -> BasicDependencies:
     delayer_factory = DelayerFactory()
 
     bot = telegram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, database, dus, delayer_factory)
+    messenger = Messenger(bot, database, chats_repo, dus, delayer_factory)
 
-    return BasicDependencies(config, database, messenger, metrics, dus)
+    return BasicDependencies(config, database, chats_repo, messenger, metrics, dus)
 
 
 def init_sentry(config: Config):
@@ -90,17 +94,14 @@ def init_sentry(config: Config):
 
 
 def __main__():
-    config, database, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
+    config, database, chats_repo, messenger, metrics, dus = init(['./config.json', '/etc/toxic/config.json'])
 
     init_sentry(config)
 
     joker = Joker.create(config['replies']['joker']['error'])
 
-    # server = Server(config['server']['host'], config['server']['port'], database)
-
     worker_manager = WorkersManager(messenger)
     worker_manager.start([
-        # ServerWorker(server),
         JokesWorker(joker, database, messenger),
         ReminderWorker(database, messenger),
     ])
@@ -127,7 +128,7 @@ def __main__():
         KeywordsHandler.new(config['replies']['keywords'], messenger),
         SorryHandler.new(config['replies']['sorry'], messenger),
         StatsHandler.new(config['replies']['stats'], database, messenger),
-        ChainHandler.new(chain_factory, textizer, database, messenger),
+        ChainHandler.new(chain_factory, textizer, database, chats_repo, messenger),
     )
 
     commands = (
