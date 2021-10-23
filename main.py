@@ -55,9 +55,6 @@ class BasicDependencies:
     metrics: Metrics
     dus: DatabaseUpdateSaver
 
-    def __iter__(self):
-        return iter((self.config, self.database, self.chats_repo, self.messenger, self.metrics, self.dus))
-
 
 def get_resource_subdir(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)

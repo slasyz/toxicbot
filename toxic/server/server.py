@@ -24,11 +24,11 @@ LOGGING_CONFIG: dict = {
 
 
 def __main__():
-    config, database, _, _, _, _ = init(
+    deps = init(
         [os.path.join(os.path.dirname(__file__), '..', '..', 'config.json'), '/etc/toxic/config.json']
     )
 
-    init_sentry(config)
+    init_sentry(deps.config)
 
     app = FastAPI()
     app.add_middleware(PrometheusMiddleware)
@@ -38,7 +38,7 @@ def __main__():
     templates = Jinja2Templates(directory=html_dir)
 
     routes = [
-        messages.get_router(templates, database),
+        messages.get_router(templates, deps.database),
     ]
 
     for route in routes:
@@ -47,7 +47,12 @@ def __main__():
     app.add_route("/metrics", handle_metrics)
 
     try:
-        uvicorn.run(app, host=config['server']['host'], port=config['server']['port'], log_config=LOGGING_CONFIG)
+        uvicorn.run(
+            app,
+            host=deps.config['server']['host'],
+            port=deps.config['server']['port'],
+            log_config=LOGGING_CONFIG,
+        )
     except CancelledError:
         pass
 
