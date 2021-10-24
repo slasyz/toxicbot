@@ -3,7 +3,7 @@ import time
 import telegram
 from loguru import logger
 from telegram.constants import MESSAGEENTITY_MENTION
-from telegram.error import BadRequest, ChatMigrated
+from telegram.error import BadRequest, ChatMigrated, Unauthorized
 
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.helpers.delayer import DelayerFactory
@@ -46,18 +46,20 @@ class Messenger:
         for _ in range(10):
             try:
                 message = msg.send(self.bot, chat_id, reply_to)
-                break
+                self.dus.handle_message(message)
+                return message
             except ChatMigrated as ex:
                 logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.new_chat_id)
                 self.chats_repo.update_next_id(chat_id, ex.new_chat_id)
+                self.chats_repo.disable_joke(chat_id)
                 chat_id = ex.new_chat_id
                 continue
-            # TODO: other errors like Unauthorized (mark chats/users in database)
+            except Unauthorized as ex:
+                logger.opt(exception=ex).info('Unauthorized.', chat_id=chat_id)
+                self.chats_repo.disable_joke(chat_id)
+            break
         else:
             raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))
-
-        self.dus.handle_message(message)
-        return message
 
     def send_to_admins(self, msg: str | Message):
         for id in self.users_repo.get_admins():

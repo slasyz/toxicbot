@@ -71,6 +71,9 @@ class ChatsRepository:
     def update_next_id(self, chat_id: int, new_chat_id: int):
         self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (new_chat_id, chat_id))
 
+    def disable_joke(self, chat_id):
+        self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
+
     def get_joker_chats(self) -> Iterator[int]:
         rows = self.database.query('SELECT tg_id FROM chats WHERE tg_id < 0 AND joke;')
         for row in rows:
