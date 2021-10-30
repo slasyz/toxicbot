@@ -23,7 +23,7 @@ from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.send import SendCommand
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
-from toxic.handlers.chat_replies import PrivateHandler, KeywordsHandler, SorryHandler
+from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler
 from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallbackHandler, TaroFirstCallbackHandler
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
@@ -116,7 +116,8 @@ def __main__():
     ])
 
     handlers_private = (
-        PrivateHandler(deps.config['replies']['private'], deps.users_repo, deps.messenger),
+        MusicHandler(Odesli(), deps.messenger),
+        # PrivateHandler(deps.config['replies']['private'], deps.users_repo, deps.messenger),
     )
 
     splitter = SpaceAdjoinSplitter()

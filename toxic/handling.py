@@ -157,7 +157,12 @@ class HandlersManager:
         for handler in handlers:
             try:
                 handler.pre_handle(update.message)
+            except Exception as ex:
+                self.messenger.reply(update.message, 'Ошибка.')
+                logger.opt(exception=ex).error('Caught exception when handling update.')
 
+        for handler in handlers:
+            try:
                 if handler.handle(update.message):
                     return
             except Exception as ex:

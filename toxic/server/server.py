@@ -8,8 +8,7 @@ from starlette.templating import Jinja2Templates
 
 from main import init, get_resource_subdir
 from toxic.helpers.log import init_sentry
-from toxic.server import messages
-
+from toxic.server import messages, api
 
 LOGGING_CONFIG: dict = {
     "version": 1,
@@ -40,6 +39,7 @@ def __main__():
 
     routes = [
         messages.get_router(templates, deps.database),
+        api.get_router(),
     ]
 
     for route in routes:
