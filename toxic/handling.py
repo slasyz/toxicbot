@@ -1,4 +1,3 @@
-import json
 import re
 from dataclasses import dataclass
 
@@ -11,6 +10,7 @@ from toxic.handlers.handler import MessageHandler, CallbackHandler
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
+from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.users import UsersRepository
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
@@ -27,6 +27,7 @@ class CommandDefinition:
 class CallbackDefinition:
     name: str
     handler: CallbackHandler
+    admins_only: bool
 
 
 class HandlersManager:
@@ -36,6 +37,7 @@ class HandlersManager:
                  commands: tuple[CommandDefinition, ...],
                  callbacks: tuple[CallbackDefinition, ...],
                  users_repo: UsersRepository,
+                 callback_data_repo: CallbackDataRepository,
                  messenger: Messenger,
                  dus: DatabaseUpdateSaver,
                  metrics: Metrics,
@@ -45,6 +47,7 @@ class HandlersManager:
         self.commands = commands
         self.callbacks = callbacks
         self.users_repo = users_repo
+        self.callback_data_repo = callback_data_repo
         self.messenger = messenger
         self.dus = dus
         self.metrics = metrics
@@ -67,6 +70,7 @@ class HandlersManager:
                     continue
 
             return command_name
+        return ''
 
     def handle_command(self, text: str, message: telegram.Message) -> bool:
         command_name = self._get_command_name(text, message)
@@ -103,16 +107,16 @@ class HandlersManager:
             log_extra['chat_id'] = callback.message.chat_id
             log_extra['message_id'] = callback.message.message_id
 
-        data = {}
-        if callback.data is not None:
-            try:
-                data = json.loads(callback.data)
-            except json.JSONDecodeError as ex:
-                logger.opt(exception=ex).error('Caught exception when decoding callback data.', **log_extra)
-                return False
+        if callback.data is None:
+            return False
+        args_id = int(callback.data)
+
+        args = self.callback_data_repo.get_value(args_id)
+        if args is None:
+            return False
 
         try:
-            name = data['name']
+            name = args['name']
         except KeyError as ex:
             logger.opt(exception=ex).error('Callback data does not contain "name" key.', **log_extra)
             return False
@@ -121,8 +125,12 @@ class HandlersManager:
             if callback_definition.name != name:
                 continue
 
+            if callback_definition.admins_only and not self.users_repo.is_admin(callback.from_user.id):
+                # TODO: log
+                continue
+
             try:
-                callback_definition.handler.handle(callback, data)
+                callback_definition.handler.handle(callback, args)
             except Exception as ex:
                 logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
             return True

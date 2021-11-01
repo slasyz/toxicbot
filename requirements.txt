@@ -139,6 +139,7 @@ pyyaml==5.4.1
 requests==2.25.1
     # via
     #   -r requirements.in
+    #   spotipy
     #   translate
 s3transfer==0.5.0
     # via boto3
@@ -148,10 +149,13 @@ six==1.16.0
     # via
     #   apscheduler
     #   python-dateutil
+    #   spotipy
     #   tox
     #   virtualenv
 sniffio==1.2.0
     # via anyio
+spotipy==2.19.0
+    # via -r requirements.in
 starlette-exporter==0.10.0
     # via -r requirements.in
 starlette==0.16.0
@@ -186,6 +190,7 @@ urllib3==1.26.7
     #   botocore
     #   requests
     #   sentry-sdk
+    #   spotipy
 uvicorn[standard]==0.15.0
     # via -r requirements.in
 uvloop==0.16.0

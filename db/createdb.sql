@@ -48,3 +48,14 @@ CREATE TABLE reminders (
     isactive bool        NOT NULL
 );
 CREATE INDEX ON reminders(datetime);
+
+CREATE TABLE settings (
+    id    serial4 PRIMARY KEY,
+    key   text    NOT NULL UNIQUE,
+    value text
+);
+
+CREATE TABLE callback_data (
+    id    serial4 PRIMARY KEY,
+    value jsonb   UNIQUE
+);

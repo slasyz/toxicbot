@@ -16,6 +16,10 @@
   "telegram": {
     "token": "*** PUT TELEGRAM TOKEN HERE ***"
   },
+  "spotify": {
+    "client_id": "*** PUT SPOTIFY ID HERE ***",
+    "client_secret": "*** PUT SPOTIFY SECRET HERE ***"
+  },
   "replies": {
     "keywords": {
       "(матерное_слово|другое_матерное_слово|третье_матерное_слово|вставьте_сюда_слово_хуй)": "Мои ушки вянут от таких грубостей."

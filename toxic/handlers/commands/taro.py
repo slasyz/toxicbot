@@ -1,4 +1,3 @@
-import json
 import os
 
 import telegram
@@ -10,12 +9,14 @@ from toxic.handlers.commands.command import Command
 from toxic.handlers.handler import CallbackHandler
 from toxic.messenger.message import TextMessage, PhotoMessage
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.callback_data import CallbackDataRepository
 
 
 class TaroCommand(Command):
-    def __init__(self, res_dir: str, messenger: Messenger):
+    def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
         self.res_dir = res_dir
         self.messenger = messenger
+        self.callback_data_repo = callback_data_repo
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         goals = ['general', 'love', 'question', 'daily', 'advice']
@@ -24,7 +25,7 @@ class TaroCommand(Command):
             buttons.append([
                 InlineKeyboardButton(
                     GOALS_EMOJI[goal] + ' ' + GOALS[goal],
-                    callback_data=json.dumps({'name': 'taro_first', 'goal': goal})
+                    callback_data=self.callback_data_repo.insert_value({'name': '/taro/first', 'goal': goal}),
                 ),
             ])
         self.messenger.reply(message, TextMessage(
@@ -68,19 +69,20 @@ def get_mention(user: User):
 
 
 class TaroFirstCallbackHandler(CallbackHandler):
-    def __init__(self, res_dir: str, messenger: Messenger):
+    def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
         self.res_dir = res_dir
         self.messenger = messenger
+        self.callback_data_repo = callback_data_repo
 
-    def handle(self, callback: telegram.CallbackQuery, data: dict):
+    def handle(self, callback: telegram.CallbackQuery, args: dict):
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
 
         message = callback.message
         if message is None:
-            return False
+            return
 
-        goal = data.get('goal', '')
+        goal = args.get('goal', '')
         mention = get_mention(callback.from_user)
 
         self.messenger.send(message.chat_id, PhotoMessage(
@@ -89,17 +91,16 @@ class TaroFirstCallbackHandler(CallbackHandler):
             is_html=True,
             markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton('1️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
-                    InlineKeyboardButton('2️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('1️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('2️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
                 ],
                 [
-                    InlineKeyboardButton('3️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
-                    InlineKeyboardButton('4️⃣', callback_data=json.dumps({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('3️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
                 ]
             ])
         ), with_delay=False)
         self.messenger.delete_message(message.chat_id, message.message_id)
-        return True
 
 
 class TaroSecondCallbackHandler(CallbackHandler):
@@ -107,16 +108,16 @@ class TaroSecondCallbackHandler(CallbackHandler):
         self.taro = taro
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, data: dict):
+    def handle(self, callback: telegram.CallbackQuery, args: dict):
         card = self.taro.get_random_card()
 
-        logger.info('Handling taro callback: {}.', data)
+        logger.info('Handling taro callback: {}.', args)
 
         message = callback.message
         if message is None:
-            return False
+            return
 
-        goal = data.get('goal', '')
+        goal = args.get('goal', '')
         description = get_description_by_goal(card.data, goal)
 
         mention = get_mention(callback.from_user)
@@ -127,5 +128,3 @@ class TaroSecondCallbackHandler(CallbackHandler):
             is_html=True,
         ))
         self.messenger.delete_message(message.chat_id, message.message_id)
-
-        return True

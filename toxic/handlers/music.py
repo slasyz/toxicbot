@@ -9,6 +9,8 @@ from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
 from toxic.messenger.message import PhotoMessage, TextMessage
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.callback_data import CallbackDataRepository
+from toxic.repositories.settings import SettingsRepository
 
 HOSTS = [
     'music.yandex.ru',
@@ -59,8 +61,10 @@ def get_button(text: str, url: str) -> InlineKeyboardButton:
 
 
 class MusicHandler(MessageHandler):
-    def __init__(self, service: Odesli, messenger: Messenger):
+    def __init__(self, service: Odesli, settings_repo: SettingsRepository, callback_data_repo: CallbackDataRepository, messenger: Messenger):
         self.service = service
+        self.settings_repo = settings_repo
+        self.callback_data_repo = callback_data_repo
         self.messenger = messenger
 
     @decorators.non_empty
@@ -79,12 +83,22 @@ class MusicHandler(MessageHandler):
             text, services = get_message_and_buttons(info)
 
             buttons = []
+            spotify_url = None
             for i, service in enumerate(services):
                 button = get_button(service[0], service[1])
                 if i % 2 == 0:
                     buttons.append([button])
                 else:
                     buttons[-1].append(button)
+                if service[0] == 'Spotify':
+                    spotify_url = service[1]
+
+            if self.settings_repo.spotify_get_device() is not None and spotify_url is not None:
+                buttons.append([InlineKeyboardButton(
+                    '➡️ 🪗',
+                    callback_data=self.callback_data_repo.insert_value({'name': '/spotify/enqueue', 'url': spotify_url}),
+                )])
+
             markup = InlineKeyboardMarkup(buttons)
 
             if info.thumbnail_url is not None:

@@ -137,7 +137,7 @@ def convert_map_to_table_row(map: dict[tuple[str, str], list[str]]) -> list[str]
     return list(dataclasses.astuple(row))
 
 
-def main():
+def __main__():
     names = get_cards_links()
     texts = {}
     for name, link in names.items():
@@ -163,4 +163,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    __main__()

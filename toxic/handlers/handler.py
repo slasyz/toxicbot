@@ -10,5 +10,5 @@ class MessageHandler:
 
 
 class CallbackHandler:
-    def handle(self, callback: telegram.CallbackQuery, data: dict):
+    def handle(self, callback: telegram.CallbackQuery, args: dict):
         raise NotImplementedError()
