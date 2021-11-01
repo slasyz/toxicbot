@@ -107,12 +107,12 @@ class MusicHandler(MessageHandler):
                     text=text,
                     markup=markup,
                     is_html=True,
-                ), with_delay=False)
+                ))
             else:
                 self.messenger.reply(message, TextMessage(
                     text=text,
                     markup=markup,
                     is_html=True,
-                ), with_delay=False)
+                ))
 
         return False

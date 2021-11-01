@@ -52,7 +52,7 @@ class PrivateHandler(MessageHandler):
 
     def handle(self, message: telegram.Message):
         if self.users_repo.is_admin(message.chat_id):
-            self.messenger.reply(message, 'Я запущен', with_delay=False)
+            self.messenger.reply(message, 'Я запущен')
         else:
             self.messenger.reply(message, random.choice(self.replies))
         return True

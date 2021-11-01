@@ -46,7 +46,7 @@ class StatCommand(Command):
         if message.chat_id < 0:
             if len(args) == 1:
                 response = self._get_response(message.chat_id)
-                self.messenger.reply(message, response, with_delay=False)
+                self.messenger.reply(message, response)
             elif len(args) == 2:
                 self._parse_args_and_send(message, args)
             return
@@ -92,7 +92,7 @@ class StatsHandler(MessageHandler):
 
             response = value + ':\n'
             response += get_stat(message.chat_id, self.chats_repo)
-            self.messenger.reply(message, response, with_delay=False)
+            self.messenger.reply(message, response)
 
             return True
 

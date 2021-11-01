@@ -31,7 +31,7 @@ class TaroCommand(Command):
         self.messenger.reply(message, TextMessage(
             text='🧙 🌟 Что хотим получить от Вселенной? 🪐 🪄',
             markup=InlineKeyboardMarkup(buttons),
-        ), with_delay=False)
+        ))
 
 
 GOALS_EMOJI = {
@@ -99,7 +99,7 @@ class TaroFirstCallbackHandler(CallbackHandler):
                     InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
                 ]
             ])
-        ), with_delay=False)
+        ))
         self.messenger.delete_message(message.chat_id, message.message_id)
 
 

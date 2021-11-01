@@ -56,7 +56,7 @@ class ChainHandler(MessageHandler):
         if self.messenger.is_reply_or_mention(message):
             chain = self.chats[message.chat_id]
             text = self.textizer.predict_not_empty(chain, message.text)
-            self.messenger.reply(message, text)
+            self.messenger.reply(message, text, with_delay=True)
             return True
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
@@ -66,7 +66,7 @@ class ChainHandler(MessageHandler):
         if count % self.chats_repo.get_period(message.chat_id) == 0:
             chain = self.chats[message.chat_id]
             text = self.textizer.predict_not_empty(chain, message.text)
-            self.messenger.send(message.chat_id, text)
+            self.messenger.send(message.chat_id, text, with_delay=True)
             return True
 
         return False
