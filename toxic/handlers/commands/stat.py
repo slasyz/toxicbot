@@ -5,8 +5,7 @@ import re
 import telegram
 from loguru import logger
 
-from toxic.handlers.commands.command import Command
-from toxic.handlers.handler import MessageHandler
+from toxic.handlers.handler import CommandHandler, MessageHandler
 from toxic.helpers import decorators
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.chats import ChatsRepository
@@ -21,7 +20,7 @@ def get_stat(chat_id: int, chats_repo: ChatsRepository) -> str:
     return response
 
 
-class StatCommand(Command):
+class StatCommand(CommandHandler):
     def __init__(self, users_repo: UsersRepository, chats_repo: ChatsRepository, messenger: Messenger):
         self.users_repo = users_repo
         self.chats_repo = chats_repo

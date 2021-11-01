@@ -9,6 +9,19 @@ class MessageHandler:
         raise NotImplementedError()
 
 
-class CallbackHandler:
-    def handle(self, callback: telegram.CallbackQuery, args: dict):
+class CommandHandler:
+    def handle(self, text: str, message: telegram.Message, args: list[str]):
         raise NotImplementedError()
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return False
+
+
+class CallbackHandler:
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
+        raise NotImplementedError()
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return False

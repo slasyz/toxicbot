@@ -1,13 +1,13 @@
 import telegram
 from loguru import logger
 
-from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import CommandHandler
 from toxic.messenger.message import VoiceMessage
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.messages import MessagesRepository
 
 
-class VoiceCommand(Command):
+class VoiceCommand(CommandHandler):
     def __init__(self, messages_repository: MessagesRepository, messenger: Messenger):
         self.messages_repository = messages_repository
         self.messenger = messenger

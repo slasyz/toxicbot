@@ -2,15 +2,19 @@ import re
 
 import telegram
 
-from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import CommandHandler
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.chats import ChatsRepository
 
 
-class SendCommand(Command):
+class SendCommand(CommandHandler):
     def __init__(self, chats_repository: ChatsRepository, messenger: Messenger):
         self.chats_repository = chats_repository
         self.messenger = messenger
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         if len(args) < 3:

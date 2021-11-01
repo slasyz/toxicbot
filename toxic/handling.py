@@ -4,9 +4,8 @@ from dataclasses import dataclass
 import telegram
 from loguru import logger
 
-from toxic.handlers.commands.command import Command
 from toxic.handlers.database import DatabaseUpdateSaver
-from toxic.handlers.handler import MessageHandler, CallbackHandler
+from toxic.handlers.handler import MessageHandler, CallbackHandler, CommandHandler
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
@@ -19,15 +18,13 @@ ARGS_SPLIT_REGEXP = re.compile(r'\s+')
 @dataclass
 class CommandDefinition:
     name: str
-    handler: Command
-    admins_only: bool
+    handler: CommandHandler
 
 
 @dataclass
 class CallbackDefinition:
     name: str
     handler: CallbackHandler
-    admins_only: bool
 
 
 class HandlersManager:
@@ -85,7 +82,7 @@ class HandlersManager:
 
             if message.from_user is None:
                 break
-            if command.admins_only and not self.users_repo.is_admin(message.from_user.id):
+            if command.handler.is_admins_only() and not self.users_repo.is_admin(message.from_user.id):
                 break
 
             if self.rate_limiter.handle(message):
@@ -100,12 +97,15 @@ class HandlersManager:
         return False
 
     def handle_callback(self, callback: telegram.CallbackQuery):
+        message = callback.message
+        if message is None:
+            return False
+
         log_extra = {
             'user_id': callback.from_user.id,
+            'chat_id': message.chat_id,
+            'message_id': message.message_id,
         }
-        if callback.message is not None:
-            log_extra['chat_id'] = callback.message.chat_id
-            log_extra['message_id'] = callback.message.message_id
 
         if callback.data is None:
             return False
@@ -125,12 +125,12 @@ class HandlersManager:
             if callback_definition.name != name:
                 continue
 
-            if callback_definition.admins_only and not self.users_repo.is_admin(callback.from_user.id):
+            if callback_definition.handler.is_admins_only() and not self.users_repo.is_admin(callback.from_user.id):
                 # TODO: log
                 continue
 
             try:
-                callback_definition.handler.handle(callback, args)
+                callback_definition.handler.handle(callback, message, args)
             except Exception as ex:
                 logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
             return True

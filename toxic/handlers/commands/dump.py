@@ -3,15 +3,19 @@ import json
 import telegram
 from loguru import logger
 
-from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import CommandHandler
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.messages import MessagesRepository
 
 
-class DumpCommand(Command):
+class DumpCommand(CommandHandler):
     def __init__(self, messages_repo: MessagesRepository, messenger: Messenger):
         self.messages_repo = messages_repo
         self.messenger = messenger
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         if len(args) != 2:

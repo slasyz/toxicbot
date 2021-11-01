@@ -1,11 +1,11 @@
 import telegram
 
-from toxic.handlers.commands.command import Command
+from toxic.handlers.handler import CommandHandler
 from toxic.features.joke import Joker
 from toxic.messenger.messenger import Messenger
 
 
-class JokeCommand(Command):
+class JokeCommand(CommandHandler):
     def __init__(self, joker: Joker, messenger: Messenger):
         self.joker = joker
         self.messenger = messenger

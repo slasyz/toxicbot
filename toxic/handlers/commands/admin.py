@@ -2,8 +2,7 @@ import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 from toxic.features.spotify import Spotify
-from toxic.handlers.commands.command import Command
-from toxic.handlers.handler import CallbackHandler
+from toxic.handlers.handler import CallbackHandler, CommandHandler
 from toxic.messenger.message import TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.callback_data import CallbackDataRepository
@@ -11,12 +10,16 @@ from toxic.repositories.chats import ChatsRepository
 from toxic.repositories.settings import SettingsRepository
 
 
-class AdminCommand(Command):
+class AdminCommand(CommandHandler):
     def __init__(self, messenger: Messenger, spotify: Spotify, callback_data_repo: CallbackDataRepository, settings_repo: SettingsRepository):
         self.messenger = messenger
         self.spotify = spotify
         self.callback_data_repo = callback_data_repo
         self.settings_repo = settings_repo
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         buttons = [
@@ -40,16 +43,16 @@ class AdminCommand(Command):
         ))
 
 
-class AdminChatsHandler(CallbackHandler):
+class AdminChatsCallback(CallbackHandler):
     def __init__(self, chats_repo: ChatsRepository, messenger: Messenger):
         self.chats_repo = chats_repo
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, _args: dict):
-        message = callback.message
-        if message is None:
-            return
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
         response = []
         for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')
@@ -57,18 +60,18 @@ class AdminChatsHandler(CallbackHandler):
         self.messenger.send(message.chat_id, '\n'.join(response))
 
 
-class AdminSpotifyAuth(CallbackHandler):
+class AdminSpotifyAuthCallback(CallbackHandler):
     def __init__(self, spotify: Spotify, messenger: Messenger):
         self.spotify = spotify
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, _args: dict):
-        if self.spotify.is_authenticated():
-            callback.answer('Уже авторизован.')
-            return
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
-        message = callback.message
-        if message is None:
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
+        if self.spotify.is_authenticated():
+            self.messenger.reply_callback(callback, 'Уже авторизован.', show_alert=True)
             return
 
         self.messenger.send(message.chat_id, TextMessage(
@@ -79,10 +82,14 @@ class AdminSpotifyAuth(CallbackHandler):
         ))
 
 
-class AdminSpotifyAuthCommand(Command):
+class AdminSpotifyAuthCommand(CommandHandler):
     def __init__(self, messenger: Messenger, spotify: Spotify):
         self.messenger = messenger
         self.spotify = spotify
+
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         if len(args) != 2:
@@ -94,18 +101,18 @@ class AdminSpotifyAuthCommand(Command):
         self.messenger.reply(message, 'Успешно авторизован.')
 
 
-class AdminSpotifySetDevice(CallbackHandler):
+class AdminSpotifySetDeviceCallback(CallbackHandler):
     def __init__(self, settings_repo: SettingsRepository, callback_data_repo: CallbackDataRepository, messenger: Messenger, spotify: Spotify):
         self.settings_repo = settings_repo
         self.callback_data_repo = callback_data_repo
         self.messenger = messenger
         self.spotify = spotify
 
-    def handle(self, callback: telegram.CallbackQuery, args: dict):
-        message = callback.message
-        if message is None:
-            return
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
         device_id = args.get('device_id')
         if device_id is None:
             devices = self.spotify.get_devices()
@@ -127,16 +134,16 @@ class AdminSpotifySetDevice(CallbackHandler):
         self.messenger.send(message.chat_id, 'Устройство установлено в Spotify.')
 
 
-class AdminSpotifyState(CallbackHandler):
+class AdminSpotifyStateCallback(CallbackHandler):
     def __init__(self, settings_repo: SettingsRepository, messenger: Messenger):
         self.settings_repo = settings_repo
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, args: dict):
-        message = callback.message
-        if message is None:
-            return
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
 
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
         action = args.get('action')
         if action is None:
             return

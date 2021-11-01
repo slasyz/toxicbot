@@ -5,14 +5,13 @@ from loguru import logger
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 
 from toxic.features.taro import Taro, CardData
-from toxic.handlers.commands.command import Command
-from toxic.handlers.handler import CallbackHandler
+from toxic.handlers.handler import CallbackHandler, CommandHandler
 from toxic.messenger.message import TextMessage, PhotoMessage
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.callback_data import CallbackDataRepository
 
 
-class TaroCommand(Command):
+class TaroCommand(CommandHandler):
     def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
         self.res_dir = res_dir
         self.messenger = messenger
@@ -68,19 +67,15 @@ def get_mention(user: User):
     return '<a href="tg://user?id={}">{}</a>'.format(user.id, user.first_name)
 
 
-class TaroFirstCallbackHandler(CallbackHandler):
+class TaroFirstCallback(CallbackHandler):
     def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
         self.res_dir = res_dir
         self.messenger = messenger
         self.callback_data_repo = callback_data_repo
 
-    def handle(self, callback: telegram.CallbackQuery, args: dict):
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
-
-        message = callback.message
-        if message is None:
-            return
 
         goal = args.get('goal', '')
         mention = get_mention(callback.from_user)
@@ -103,19 +98,15 @@ class TaroFirstCallbackHandler(CallbackHandler):
         self.messenger.delete_message(message.chat_id, message.message_id)
 
 
-class TaroSecondCallbackHandler(CallbackHandler):
+class TaroSecondCallback(CallbackHandler):
     def __init__(self, taro: Taro, messenger: Messenger):
         self.taro = taro
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, args: dict):
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
         card = self.taro.get_random_card()
 
         logger.info('Handling taro callback: {}.', args)
-
-        message = callback.message
-        if message is None:
-            return
 
         goal = args.get('goal', '')
         description = get_description_by_goal(card.data, goal)

@@ -27,6 +27,9 @@ class Messenger:
     def reply(self, to: telegram.Message, msg: str | Message, with_delay: bool = False) -> telegram.Message:
         return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
 
+    def reply_callback(self, to: telegram.CallbackQuery, text: str, show_alert: bool = False):
+        self.bot.answer_callback_query(to.id, text=text, show_alert=show_alert)
+
     def send(self, chat_id: int, msg: str | Message, reply_to: int = None, with_delay: bool = False) -> telegram.Message:
         if isinstance(msg, str):
             msg = TextMessage(msg)

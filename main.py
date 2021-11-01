@@ -19,16 +19,16 @@ from toxic.features.spotify import Spotify
 from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
-from toxic.handlers.commands.admin import AdminCommand, AdminChatsHandler, AdminSpotifyAuth, AdminSpotifySetDevice, \
-    AdminSpotifyState, AdminSpotifyAuthCommand
+from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifySetDeviceCallback, \
+    AdminSpotifyStateCallback, AdminSpotifyAuthCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.send import SendCommand
-from toxic.handlers.commands.spotify import SpotifyEnqueue
+from toxic.handlers.commands.spotify import SpotifyEnqueueCallback
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
 from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler
-from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallbackHandler, TaroFirstCallbackHandler
+from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallback, TaroFirstCallback
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.music import MusicHandler
@@ -152,24 +152,24 @@ def __main__():
     )
 
     commands = (
-        CommandDefinition('admin', AdminCommand(deps.messenger, spotify, callback_data_repo, settings_repo), True),
-        CommandDefinition('dump', DumpCommand(deps.messages_repo, deps.messenger), True),
-        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo, deps.messenger), False),
-        CommandDefinition('joke', JokeCommand(joker, deps.messenger), False),
-        CommandDefinition('send', SendCommand(deps.chats_repo, deps.messenger), True),
-        CommandDefinition('chats', ChatsCommand(deps.chats_repo, deps.messenger), True),
-        CommandDefinition('voice', VoiceCommand(deps.messages_repo, deps.messenger), False),
-        CommandDefinition('taro', TaroCommand(taro_dir, deps.messenger, callback_data_repo), False),
-        CommandDefinition('spotify', AdminSpotifyAuthCommand(deps.messenger, spotify), True),
+        CommandDefinition('admin', AdminCommand(deps.messenger, spotify, callback_data_repo, settings_repo)),
+        CommandDefinition('dump', DumpCommand(deps.messages_repo, deps.messenger)),
+        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo, deps.messenger)),
+        CommandDefinition('joke', JokeCommand(joker, deps.messenger)),
+        CommandDefinition('send', SendCommand(deps.chats_repo, deps.messenger)),
+        CommandDefinition('chats', ChatsCommand(deps.chats_repo, deps.messenger)),
+        CommandDefinition('voice', VoiceCommand(deps.messages_repo, deps.messenger)),
+        CommandDefinition('taro', TaroCommand(taro_dir, deps.messenger, callback_data_repo)),
+        CommandDefinition('spotify', AdminSpotifyAuthCommand(deps.messenger, spotify)),
     )
     callbacks = (
-        CallbackDefinition('/taro/first', TaroFirstCallbackHandler(taro_dir, deps.messenger, callback_data_repo), False),
-        CallbackDefinition('/taro/second', TaroSecondCallbackHandler(Taro.new(taro_dir), deps.messenger), False),
-        CallbackDefinition('/admin/chats', AdminChatsHandler(deps.chats_repo, deps.messenger), True),
-        CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuth(spotify, deps.messenger), True),
-        CallbackDefinition('/admin/spotify/set_device', AdminSpotifySetDevice(settings_repo, callback_data_repo, deps.messenger, spotify), True),
-        CallbackDefinition('/admin/spotify/state', AdminSpotifyState(settings_repo, deps.messenger), True),
-        CallbackDefinition('/spotify/enqueue', SpotifyEnqueue(settings_repo, deps.messenger, spotify), True),
+        CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
+        CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
+        CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo, deps.messenger)),
+        CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify, deps.messenger)),
+        CallbackDefinition('/admin/spotify/set_device', AdminSpotifySetDeviceCallback(settings_repo, callback_data_repo, deps.messenger, spotify)),
+        CallbackDefinition('/admin/spotify/state', AdminSpotifyStateCallback(settings_repo, deps.messenger)),
+        CallbackDefinition('/spotify/enqueue', SpotifyEnqueueCallback(settings_repo, deps.messenger, spotify)),
     )
     handle_manager = HandlersManager(
         handlers_private,
