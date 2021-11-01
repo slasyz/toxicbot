@@ -30,8 +30,14 @@ class SettingsRepository:
     def spotify_set_device(self, device_id: str):
         self._set_value('spotify_device_id', device_id)
 
+    def spotify_enable(self):
+        self._set_value('spotify_enabled', 'yes')
+
     def spotify_disable(self):
-        self._set_value('spotify_device_id', None)
+        self._set_value('spotify_enabled', None)
+
+    def is_spotify_enabled(self) -> bool:
+        return self._get_value('spotify_enabled') is not None
 
     def spotify_get_device(self) -> Optional[str]:
         return self._get_value('spotify_device_id')

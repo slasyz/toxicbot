@@ -21,7 +21,7 @@ HOSTS = [
 ]
 
 
-def get_message_and_buttons(info: Info) -> tuple[str, list[tuple[str, str]]]:
+def get_message_and_buttons(info: Info) -> tuple[str, bool, list[tuple[str, str]]]:
     result = f'Исполнитель: <b>{info.artist_name}</b>'
     if info.type != Type.ARTIST:
         result += f'\n{info.type.value}: <b>{info.title}</b>'
@@ -37,7 +37,7 @@ def get_message_and_buttons(info: Info) -> tuple[str, list[tuple[str, str]]]:
     if info.youtube is not None:
         services.append(('YouTube', info.youtube))
 
-    return result, services
+    return result, info.type == Type.SONG, services
 
 
 def is_link_to_music(link: str) -> bool:
@@ -80,7 +80,7 @@ class MusicHandler(MessageHandler):
             if info is None:
                 continue
 
-            text, services = get_message_and_buttons(info)
+            text, is_song, services = get_message_and_buttons(info)
 
             buttons = []
             spotify_url = None
@@ -93,9 +93,9 @@ class MusicHandler(MessageHandler):
                 if service[0] == 'Spotify':
                     spotify_url = service[1]
 
-            if self.settings_repo.spotify_get_device() is not None and spotify_url is not None:
+            if is_song and self.settings_repo.is_spotify_enabled() and spotify_url is not None:
                 buttons.append([InlineKeyboardButton(
-                    '➡️ 🪗',
+                    '➡️ 🎷',
                     callback_data=self.callback_data_repo.insert_value({'name': '/spotify/enqueue', 'url': spotify_url}),
                 )])
 

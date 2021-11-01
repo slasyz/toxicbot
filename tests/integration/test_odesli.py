@@ -20,7 +20,7 @@ from toxic.handlers.music import get_message_and_buttons
                 ('Яндекс.Музыка', 'https://music.yandex.ru/track/50671259'),
                 ('YouTube', 'https://youtube.com/watch?v=fDEYWPvq_GQ'),
             )
-         ),
+        ),
         (
             'https://music.yandex.ru/album/3491806',
             '''Исполнитель: <b>Architects</b>
@@ -48,7 +48,7 @@ from toxic.handlers.music import get_message_and_buttons
 def test_odesli(url, message, services):
     odesli = Odesli()
     info = odesli.get_info(url)
-    message_actual, _ = get_message_and_buttons(info)
+    message_actual, _, _ = get_message_and_buttons(info)
     assert message_actual == message
 
 

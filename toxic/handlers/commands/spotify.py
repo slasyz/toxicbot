@@ -13,9 +13,13 @@ class SpotifyEnqueue(CallbackHandler):
         self.spotify = spotify
 
     def handle(self, callback: telegram.CallbackQuery, args: dict):
+        if not self.settings_repo.is_spotify_enabled():
+            callback.answer('Spotify выключен.', show_alert=True)
+            return
+
         device_id = self.settings_repo.spotify_get_device()
         if device_id is None:
-            callback.answer('Spotify выключен.', show_alert=True)
+            callback.answer('Нужно сначала выбрать устройство.', show_alert=True)
             return
 
         uri = args.get('url')

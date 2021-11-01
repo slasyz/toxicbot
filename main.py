@@ -20,7 +20,7 @@ from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.admin import AdminCommand, AdminChatsHandler, AdminSpotifyAuth, AdminSpotifySetDevice, \
-    AdminSpotifyDisable, AdminSpotifyAuthCommand
+    AdminSpotifyState, AdminSpotifyAuthCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
@@ -152,7 +152,7 @@ def __main__():
     )
 
     commands = (
-        CommandDefinition('admin', AdminCommand(deps.messenger, spotify, callback_data_repo), True),
+        CommandDefinition('admin', AdminCommand(deps.messenger, spotify, callback_data_repo, settings_repo), True),
         CommandDefinition('dump', DumpCommand(deps.messages_repo, deps.messenger), True),
         CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo, deps.messenger), False),
         CommandDefinition('joke', JokeCommand(joker, deps.messenger), False),
@@ -168,7 +168,7 @@ def __main__():
         CallbackDefinition('/admin/chats', AdminChatsHandler(deps.chats_repo, deps.messenger), True),
         CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuth(spotify, deps.messenger), True),
         CallbackDefinition('/admin/spotify/set_device', AdminSpotifySetDevice(settings_repo, callback_data_repo, deps.messenger, spotify), True),
-        CallbackDefinition('/admin/spotify/disable', AdminSpotifyDisable(settings_repo, deps.messenger), True),
+        CallbackDefinition('/admin/spotify/state', AdminSpotifyState(settings_repo, deps.messenger), True),
         CallbackDefinition('/spotify/enqueue', SpotifyEnqueue(settings_repo, deps.messenger, spotify), True),
     )
     handle_manager = HandlersManager(

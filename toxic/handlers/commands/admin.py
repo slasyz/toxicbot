@@ -12,23 +12,27 @@ from toxic.repositories.settings import SettingsRepository
 
 
 class AdminCommand(Command):
-    def __init__(self, messenger: Messenger, spotify: Spotify, callback_data_repo: CallbackDataRepository):
+    def __init__(self, messenger: Messenger, spotify: Spotify, callback_data_repo: CallbackDataRepository, settings_repo: SettingsRepository):
         self.messenger = messenger
         self.spotify = spotify
         self.callback_data_repo = callback_data_repo
+        self.settings_repo = settings_repo
 
     def handle(self, text: str, message: telegram.Message, args: list[str]):
         buttons = [
-            [InlineKeyboardButton('Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
+            [InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
         ]
         if not self.spotify.is_authenticated():
             buttons.append(
-                [InlineKeyboardButton('Spotify Authenticate', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
+                [InlineKeyboardButton('🎶 Spotify 🔑 Authenticate', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
             )
-        buttons.append([
-            InlineKeyboardButton('Spotify Set Device', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/set_device'})),
-            InlineKeyboardButton('Spotify Disable', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/disable'})),
-        ])
+
+        buttons_spotify = [InlineKeyboardButton('🎶 Spotify 🎧 Set Device', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/set_device'}))]
+        if self.settings_repo.is_spotify_enabled():
+            buttons_spotify.append(InlineKeyboardButton('🎶 Spotify 🔇 Disable', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/state', 'action': 'disable'})))
+        else:
+            buttons_spotify.append(InlineKeyboardButton('🎶 Spotify 🔈 Enable', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/state', 'action': 'enable'})))
+        buttons.append(buttons_spotify)
 
         self.messenger.reply(message, TextMessage(
             text='Доступные команды',
@@ -123,7 +127,7 @@ class AdminSpotifySetDevice(CallbackHandler):
         self.messenger.send(message.chat_id, 'Устройство установлено в Spotify.')
 
 
-class AdminSpotifyDisable(CallbackHandler):
+class AdminSpotifyState(CallbackHandler):
     def __init__(self, settings_repo: SettingsRepository, messenger: Messenger):
         self.settings_repo = settings_repo
         self.messenger = messenger
@@ -133,5 +137,13 @@ class AdminSpotifyDisable(CallbackHandler):
         if message is None:
             return
 
-        self.settings_repo.spotify_disable()
-        self.messenger.send(message.chat_id, 'Отключил Spotify.')
+        action = args.get('action')
+        if action is None:
+            return
+
+        if action == 'enable':
+            self.settings_repo.spotify_enable()
+            self.messenger.send(message.chat_id, 'Включил Spotify.')
+        else:
+            self.settings_repo.spotify_disable()
+            self.messenger.send(message.chat_id, 'Отключил Spotify.')
