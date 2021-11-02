@@ -14,6 +14,7 @@ from toxic.features.chain.chain import ChainFactory
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.features.joke import Joker
+from toxic.features.music.boom import Boom
 from toxic.features.music.linker import Linker
 from toxic.features.music.odesli import Odesli
 from toxic.features.music.spotify import Spotify
@@ -118,8 +119,13 @@ def __main__():
 
     joker = Joker(deps.config['replies']['joker']['error'])
 
-    odesli = Odesli()
-    linker = Linker(odesli)
+    spotify = Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo)
+    spotify_searcher = spotify.create_searcher()
+
+    linker = Linker(
+        infoers=[Odesli(), Boom()],
+        searchers=[spotify_searcher]
+    )
 
     worker_manager = WorkersManager(deps.messenger)
     worker_manager.start([
@@ -144,8 +150,6 @@ def __main__():
     )
 
     taro_dir = get_resource_subdir('taro')
-
-    spotify = Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo)
 
     handlers_chats = (
         MusicHandler(linker, settings_repo, callback_data_repo, deps.messenger),

@@ -21,7 +21,21 @@ def __main__():
     else:
         print('Already authenticated.')
 
-    print(spotify.get_devices())
+    spotify_searcher = spotify.create_searcher()
+
+    # TODO: move these tests to a bot command
+
+    soad_link = spotify_searcher._get_link_artist('System Of A Down')
+    print(soad_link)
+
+    soad_toxicity_link = spotify_searcher._get_link_album('System Of A Down', 'toxicity')
+    print(soad_toxicity_link)
+
+    soad_chop_suey_link = spotify_searcher._get_link_song('System Of A Down', 'chop suey')
+    print(soad_chop_suey_link)
+
+    scriptonite_link = spotify_searcher._get_link_artist('Скриптонит')
+    print(scriptonite_link)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import urllib.parse
 
 import telegram
+from loguru import logger
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from toxic.features.music.linker import Linker
@@ -19,6 +20,7 @@ HOSTS = [
     'youtube.com',
     'spotify.com',
     'apple.com',
+    'boom.ru',
 ]
 
 
@@ -27,6 +29,7 @@ SERVICES_ORDER = [
     Service.SPOTIFY,
     Service.YANDEX,
     Service.YOUTUBE,
+    Service.BOOM,
 ]
 
 
@@ -89,13 +92,16 @@ class MusicHandler(MessageHandler):
             buttons = []
             spotify_url = None
             for i, service in enumerate(services):
-                button = get_button(service[0], service[1])
+                service_name, link = service
+
+                button = get_button(service_name, link)
                 if i % 2 == 0:
                     buttons.append([button])
                 else:
                     buttons[-1].append(button)
-                if service[0] == 'Spotify':
-                    spotify_url = service[1]
+
+                if service_name == Service.SPOTIFY.value:
+                    spotify_url = link
 
             if is_song and self.settings_repo.is_spotify_enabled() and spotify_url is not None:
                 buttons.append([InlineKeyboardButton(

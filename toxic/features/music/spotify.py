@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 import spotipy
+from loguru import logger
 from spotipy import SpotifyOAuth, CacheHandler
 
+from toxic.features.music.structs import Searcher, Type, Service
 from toxic.repositories.settings import SettingsRepository
 
 SCOPES = [
@@ -48,6 +51,9 @@ class Spotify:
         client = spotipy.Spotify(auth_manager=auth)
         return Spotify(auth, client)
 
+    def create_searcher(self):
+        return SpotifySearcher(self.auth, self.client)
+
     def get_auth_url(self):
         return self.auth.get_authorize_url()
 
@@ -68,3 +74,43 @@ class Spotify:
 
     def add_to_queue(self, uri: str, device_id: str):
         self.client.add_to_queue(uri, device_id)
+
+
+class SpotifySearcher(Searcher):
+    def __init__(self, auth: SpotifyOAuth, client: spotipy.Spotify):
+        self.auth = auth
+        self.client = client
+
+    def _search(self, query: str, type: str, key: str) -> Optional[str]:
+        res = self.client.search(query, type=type, market='RU')
+        if res is None:
+            return None
+
+        try:
+            return res[key]['items'][0]['external_urls']['spotify']
+        except (IndexError, KeyError, TypeError):
+            # TODO: log
+            return None
+
+    def _get_link_artist(self, name: str) -> Optional[str]:
+        return self._search('{}'.format(name), 'artist', 'artists')
+
+    def _get_link_album(self, artist_name: str, title: str) -> Optional[str]:
+        return self._search('{} {}'.format(artist_name, title), 'album', 'albums')
+
+    def _get_link_song(self, artist_name: str, title: str) -> Optional[str]:
+        return self._search('{} {}'.format(artist_name, title), 'track', 'tracks')
+
+    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[tuple[Service, str]]:
+        res = None
+        if type == Type.ARTIST:
+            res = self._get_link_artist(artist_name)
+        elif type == Type.ALBUM:
+            res = self._get_link_album(artist_name, title)
+        elif type == Type.SONG:
+            res = self._get_link_song(artist_name, title)
+
+        if res is not None:
+            return Service.SPOTIFY, res
+
+        return None

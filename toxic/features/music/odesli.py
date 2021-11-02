@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import requests
 from loguru import logger
 
-from toxic.features.music.structs import Type, Service, Info
+from toxic.features.music.structs import Type, Service, Info, MusicInfoer
 
 
 class UnknownTypeException(Exception):
@@ -20,7 +20,7 @@ ODESLI_KEY_TO_SERVICE = {
 }
 
 
-class Odesli:
+class Odesli(MusicInfoer):
     @staticmethod
     def str_to_type(src: str) -> Type:
         if src == 'artist':
@@ -32,8 +32,10 @@ class Odesli:
         raise UnknownTypeException()
 
     @classmethod
-    def parse_result(cls, data: dict) -> Info:
-        entity_id = data['entityUniqueId']
+    def parse_result(cls, data: dict) -> Optional[Info]:
+        entity_id = data.get('entityUniqueId')
+        if entity_id is None:
+            return None
         raw_info = data['entitiesByUniqueId'][entity_id]
 
         result = Info(

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -19,9 +19,19 @@ class Service(Enum):
 
 @dataclass
 class Info:
-    type: Type
-    artist_name: str
-    title: str
+    type: Type = None
+    artist_name: str = None
+    title: str = None
 
-    links: dict[Service, str]
-    thumbnail_url: Optional[str]
+    links: dict[Service, str] = field(default_factory=dict)
+    thumbnail_url: Optional[str] = None
+
+
+class MusicInfoer:
+    def get_info(self, url: str) -> Optional[Info]:
+        raise NotImplementedError()
+
+
+class Searcher:
+    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[tuple[Service, str]]:
+        raise NotImplementedError()
