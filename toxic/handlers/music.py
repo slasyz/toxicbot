@@ -3,7 +3,7 @@ import urllib.parse
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from toxic.features.odesli import Info, Type, Odesli
+from toxic.features.music.odesli import Info, Type, Odesli
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP

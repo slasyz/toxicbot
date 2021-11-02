@@ -14,8 +14,8 @@ from toxic.features.chain.chain import ChainFactory
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.features.joke import Joker
-from toxic.features.odesli import Odesli
-from toxic.features.spotify import Spotify
+from toxic.features.music.odesli import Odesli
+from toxic.features.music.spotify import Spotify
 from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter

@@ -1,6 +1,6 @@
 import pytest
 
-from toxic.features.odesli import Odesli
+from toxic.features.music.odesli import Odesli
 from toxic.handlers.music import get_message_and_buttons
 
 
