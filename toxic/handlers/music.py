@@ -3,7 +3,8 @@ import urllib.parse
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from toxic.features.music.odesli import Info, Type, Odesli
+from toxic.features.music.linker import Linker
+from toxic.features.music.structs import Service, Info, Type
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
 from toxic.helpers.consts import LINK_REGEXP
@@ -21,21 +22,24 @@ HOSTS = [
 ]
 
 
+SERVICES_ORDER = [
+    Service.APPLE_MUSIC,
+    Service.SPOTIFY,
+    Service.YANDEX,
+    Service.YOUTUBE,
+]
+
+
 def get_message_and_buttons(info: Info) -> tuple[str, bool, list[tuple[str, str]]]:
     result = f'Исполнитель: <b>{info.artist_name}</b>'
     if info.type != Type.ARTIST:
         result += f'\n{info.type.value}: <b>{info.title}</b>'
 
     services = []
-
-    if info.apple_music is not None:
-        services.append(('Apple Music', info.apple_music))
-    if info.spotify is not None:
-        services.append(('Spotify', info.spotify))
-    if info.yandex is not None:
-        services.append(('Яндекс.Музыка', info.yandex))
-    if info.youtube is not None:
-        services.append(('YouTube', info.youtube))
+    for service in SERVICES_ORDER:
+        link = info.links.get(service)
+        if link is not None:
+            services.append((service.value, link))
 
     return result, info.type == Type.SONG, services
 
@@ -61,8 +65,8 @@ def get_button(text: str, url: str) -> InlineKeyboardButton:
 
 
 class MusicHandler(MessageHandler):
-    def __init__(self, service: Odesli, settings_repo: SettingsRepository, callback_data_repo: CallbackDataRepository, messenger: Messenger):
-        self.service = service
+    def __init__(self, linker: Linker, settings_repo: SettingsRepository, callback_data_repo: CallbackDataRepository, messenger: Messenger):
+        self.linker = linker
         self.settings_repo = settings_repo
         self.callback_data_repo = callback_data_repo
         self.messenger = messenger
@@ -76,7 +80,7 @@ class MusicHandler(MessageHandler):
             return False
 
         for link in links:
-            info = self.service.get_info(link)
+            info = self.linker.get_info(link)
             if info is None:
                 continue
 

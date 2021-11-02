@@ -1,35 +1,23 @@
 import json
-from dataclasses import dataclass
-from enum import Enum
 from typing import Optional
 from urllib.parse import urlencode
 
 import requests
 from loguru import logger
 
+from toxic.features.music.structs import Type, Service, Info
+
 
 class UnknownTypeException(Exception):
     pass
 
 
-class Type(Enum):
-    ARTIST = 'Исполнитель'
-    ALBUM = 'Альбом'
-    SONG = 'Трек'
-
-
-@dataclass
-class Info:
-    type: Type
-    artist_name: str
-    title: str
-
-    apple_music: Optional[str]
-    spotify: Optional[str]
-    yandex: Optional[str]
-    youtube: Optional[str]
-
-    thumbnail_url: Optional[str]
+ODESLI_KEY_TO_SERVICE = {
+    'appleMusic': Service.APPLE_MUSIC,
+    'spotify': Service.SPOTIFY,
+    'yandex': Service.YANDEX,
+    'youtube': Service.YOUTUBE,
+}
 
 
 class Odesli:
@@ -48,30 +36,26 @@ class Odesli:
         entity_id = data['entityUniqueId']
         raw_info = data['entitiesByUniqueId'][entity_id]
 
-        links = data['linksByPlatform']
-
-        apple_music = links.get('appleMusic')
-        spotify = links.get('spotify')
-        yandex = links.get('yandex')
-        youtube = links.get('youtube')
-
-        return Info(
+        result = Info(
             type=cls.str_to_type(raw_info['type']),
             artist_name=raw_info['artistName'],
             title=raw_info['title'],
-
-            apple_music=apple_music['url'] if apple_music else None,
-            spotify=spotify['url'] if spotify else None,
-            yandex=yandex['url'] if yandex else None,
-            youtube=youtube['url'] if youtube else None,
-
+            links={},
             thumbnail_url=raw_info.get('thumbnailUrl')
         )
 
-    def get_info(self, link: str) -> Optional[Info]:
+        links = data['linksByPlatform']
+        for key, service in ODESLI_KEY_TO_SERVICE.items():
+            el = links.get(key)
+            if el is not None:
+                result.links[service] = el['url']
+
+        return result
+
+    def get_info(self, url: str) -> Optional[Info]:
         basepath = 'https://api.song.link/v1-alpha.1/links'
         params = {
-            'url': link
+            'url': url
         }
         url = '{}?{}'.format(basepath, urlencode(params))
 
