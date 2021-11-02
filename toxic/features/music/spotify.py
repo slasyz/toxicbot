@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Optional
 
@@ -14,6 +15,10 @@ SCOPES = [
     'user-read-playback-state',
     'user-modify-playback-state'
 ]
+
+
+# TODO: I am very tired right now and probably fix this later
+CLEAN_REGEXP = re.compile(r"([^\w'-]\s)+")
 
 
 @dataclass
@@ -81,7 +86,12 @@ class SpotifySearcher(Searcher):
         self.auth = auth
         self.client = client
 
+    def clean(self, query: str) -> str:
+        return CLEAN_REGEXP.sub('', query)
+
     def _search(self, query: str, type: str, key: str) -> Optional[str]:
+        query = self.clean(query)
+
         res = self.client.search(query, type=type, market='RU')
         if res is None:
             return None

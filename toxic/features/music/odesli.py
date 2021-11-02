@@ -20,6 +20,14 @@ ODESLI_KEY_TO_SERVICE = {
 }
 
 
+PREFIXES = [
+    'ITUNES_SONG::',
+    'DEEZER_SONG::',
+    'AMAZON_SONG::',
+    'YANDEX_SONG::',
+]
+
+
 class Odesli(MusicInfoer):
     @staticmethod
     def str_to_type(src: str) -> Type:
@@ -31,12 +39,25 @@ class Odesli(MusicInfoer):
             return Type.SONG
         raise UnknownTypeException()
 
+    @staticmethod
+    def change_entity_id(entity_id: str, entities: list[str]) -> str:
+        for el in entities:
+            for prefix in PREFIXES:
+                if el.startswith(prefix):
+                    return el
+
+        return entity_id
+
     @classmethod
     def parse_result(cls, data: dict) -> Optional[Info]:
         entity_id = data.get('entityUniqueId')
         if entity_id is None:
             return None
-        raw_info = data['entitiesByUniqueId'][entity_id]
+
+        entities_by_id = data['entitiesByUniqueId']
+
+        entity_id = cls.change_entity_id(entity_id, entities_by_id.keys())
+        raw_info = entities_by_id[entity_id]
 
         result = Info(
             type=cls.str_to_type(raw_info['type']),
