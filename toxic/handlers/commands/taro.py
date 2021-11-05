@@ -86,12 +86,12 @@ class TaroFirstCallback(CallbackHandler):
             is_html=True,
             markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton('1️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
-                    InlineKeyboardButton('2️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('1️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    InlineKeyboardButton('2️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ],
                 [
-                    InlineKeyboardButton('3️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
-                    InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': 'taro_second', 'goal': goal})),
+                    InlineKeyboardButton('3️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ]
             ])
         ))

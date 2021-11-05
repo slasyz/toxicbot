@@ -1,7 +1,7 @@
 import pytest
 
 from toxic.features.music.boom import Boom
-from toxic.features.music.structs import Info, Type
+from toxic.features.music.structs import Info, Type, Service
 
 
 @pytest.mark.parametrize(
@@ -36,6 +36,7 @@ def test_get_json(url, test_func):
                 type=Type.SONG,
                 artist_name='Грязь',
                 title='Холода',
+                links={Service.BOOM: 'https://share.boom.ru/album/6470022/?share_auth=025425f555c2c834c6811a61816080'}
             )
         ),
         (
@@ -44,6 +45,7 @@ def test_get_json(url, test_func):
                 type=Type.ALBUM,
                 artist_name='Скриптонит',
                 title='Дом с нормальными явлениями',
+                links={Service.BOOM: 'https://share.boom.ru/album/6470022/?share_auth=025425f555c2c834c6811a61816080'}
             ),
         ),
         (
@@ -51,6 +53,7 @@ def test_get_json(url, test_func):
             Info(
                 type=Type.ARTIST,
                 artist_name='Скриптонит',
+                links={Service.BOOM: 'https://share.boom.ru/artist/66721/?share_auth=02b256a0b5e773bfad811a61816080'}
             ),
         )
     ]

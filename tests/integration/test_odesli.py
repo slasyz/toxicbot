@@ -12,7 +12,7 @@ from toxic.handlers.music import get_message_and_buttons
     [
         (
             'https://open.spotify.com/track/0XauTwcR4Y44zdIS7yV2Jf?si=99dc49931ec14dcc',
-            '''Исполнитель: <b>Он Юн, Александр Смородинов</b>
+            '''Исполнитель: <b>Он Юн feat. Александр Смородинов</b>
 Трек: <b>Больше нет</b>''',
             (
                 ('Apple Music', 'https://geo.music.apple.com/us/album/_/1454338948?i=1454338968&mt=1&app=music&ls=1&at=1000lHKX'),
