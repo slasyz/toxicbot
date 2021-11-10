@@ -14,6 +14,8 @@ astroid==2.6.6
     # via pylint
 attrs==21.2.0
     # via pytest
+autopep8==1.6.0
+    # via -r requirements.in
 backports.entry-points-selectable==1.1.0
     # via virtualenv
 boto3==1.18.58
@@ -114,6 +116,8 @@ py==1.10.0
     # via
     #   pytest
     #   tox
+pycodestyle==2.8.0
+    # via autopep8
 pydantic==1.8.2
     # via fastapi
 pylint==2.8.2
@@ -164,6 +168,7 @@ starlette==0.16.0
     #   starlette-exporter
 toml==0.10.2
     # via
+    #   autopep8
     #   mypy
     #   pre-commit
     #   pylint
