@@ -113,6 +113,7 @@ def init(config_files: list) -> BasicDependencies:
     )
 
 
+# pylint: disable=too-many-statements
 def __main__():
     deps = init(['./config.json', '/etc/toxic/config.json'])
 

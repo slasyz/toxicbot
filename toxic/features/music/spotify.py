@@ -38,38 +38,45 @@ class Cache(CacheHandler):
 
 
 class Spotify:
-    def __init__(self, auth: SpotifyOAuth, client: spotipy.Spotify):
-        self.auth = auth
+    def __init__(self, auth_manager: SpotifyOAuth, cache_handler: CacheHandler, client: spotipy.Spotify):
+        self.auth_manager = auth_manager
+        self.cache_handler = cache_handler
         self.client = client
 
     @staticmethod
     def new(client_id: str, client_secret: str, settings_repo: SettingsRepository) -> Spotify:
-        auth = SpotifyOAuth(
+        cache_handler = Cache(settings_repo)
+
+        auth_manager = SpotifyOAuth(
             client_id=client_id,
             client_secret=client_secret,
             redirect_uri='https://slasyz.ru/',
             scope=' '.join(SCOPES),
             open_browser=False,
-            cache_handler=Cache(settings_repo),
+            cache_handler=cache_handler,
         )
-        client = spotipy.Spotify(auth_manager=auth)
-        return Spotify(auth, client)
+
+        client = spotipy.Spotify(
+            auth_manager=auth_manager,
+        )
+
+        return Spotify(auth_manager, cache_handler, client)
 
     def create_searcher(self):
-        return SpotifySearcher(self.auth, self.client)
+        return SpotifySearcher(self.auth_manager, self.client)
 
     def get_auth_url(self):
-        return self.auth.get_authorize_url()
+        return self.auth_manager.get_authorize_url()
 
     def authenticate(self, redirect_url: str):
-        code = self.auth.parse_response_code(redirect_url)
-        return self.auth.get_access_token(code=code)
+        code = self.auth_manager.parse_response_code(redirect_url)
+        return self.auth_manager.get_access_token(code=code)
 
     def is_authenticated(self):
-        token = self.auth.cache_handler.get_cached_token()
+        token = self.cache_handler.get_cached_token()
         if token is None:
             return None
-        token = self.auth.refresh_access_token(token['refresh_token'])
+        token = self.auth_manager.refresh_access_token(token['refresh_token'])
         return token is not None
 
     def get_devices(self) -> list[Device]:
