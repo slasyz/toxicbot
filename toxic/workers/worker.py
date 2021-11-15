@@ -30,6 +30,7 @@ class WorkerWrapper:
         while True:
             try:
                 self.worker.work()
+                return
             except Exception as ex:
                 traceback.print_stack()
                 logger.opt(exception=ex).error('Exception in worker %s.', self.__class__.__name__)

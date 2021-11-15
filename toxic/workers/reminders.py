@@ -20,7 +20,7 @@ class ReminderWorker(Worker):
         while True:
             reminder = self.reminders_repo.get_latest_reminder()
             if reminder is None:
-                break
+                return
 
             seconds = until(reminder.when)
             if seconds > 0:
