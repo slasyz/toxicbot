@@ -36,7 +36,7 @@ def test_get_json(url, test_func):
                 type=Type.SONG,
                 artist_name='Грязь',
                 title='Холода',
-                links={Service.BOOM: 'https://share.boom.ru/album/6470022/?share_auth=025425f555c2c834c6811a61816080'}
+                links={Service.BOOM: 'https://share.boom.ru/track/f0bd036dab646273eb22e93a03227165/?share_auth=026fcd42eda5b460b9831a617ff2e01a10651e6c1a00631872'}
             )
         ),
         (

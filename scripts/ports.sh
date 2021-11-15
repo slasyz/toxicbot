@@ -8,7 +8,6 @@ then
     exit 1;
 fi
 
-#echo "http://localhost:8000/messages"
+echo "http://localhost:8000/messages"
 echo "$ pgcli -h localhost -p 5432 -U toxic -d toxic"
-#ssh -L 5432:localhost:5432 -L 8000:localhost:8000 "$1" "sleep infinity"
-ssh -L 5432:localhost:5432 "$1" "sleep infinity"
+ssh -L 5432:localhost:5432 -L 8000:localhost:8000 "$1" "sleep infinity"
