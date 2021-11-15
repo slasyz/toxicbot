@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 from starlette.templating import Jinja2Templates
 
-from main import init, get_resource_subdir
+from main import init, get_resource_path
 from toxic.helpers.log import init_sentry
 from toxic.server import messages, api
 
@@ -33,7 +33,7 @@ def __main__():
     app = FastAPI()
     app.add_middleware(PrometheusMiddleware)
 
-    html_dir = get_resource_subdir('html')
+    html_dir = get_resource_path('html')
 
     templates = Jinja2Templates(directory=html_dir)
 

@@ -6,6 +6,8 @@ from dataclasses import dataclass
 
 import telegram
 from loguru import logger
+from pymorphy2 import MorphAnalyzer
+from ruwordnet import RuWordNet
 from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxic.config import Config
@@ -13,6 +15,7 @@ from toxic.db import Database
 from toxic.features.chain.chain import ChainFactory
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
+from toxic.features.emojifier import Emojifier, Russian
 from toxic.features.joke import Joker
 from toxic.features.music.boom import Boom
 from toxic.features.music.linker import Linker
@@ -23,6 +26,7 @@ from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifySetDeviceCallback, \
     AdminSpotifyStateCallback, AdminSpotifyAuthCommand
+from toxic.handlers.commands.hookah import HookahCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
@@ -64,7 +68,7 @@ class BasicDependencies:
     dus: DatabaseUpdateSaver
 
 
-def get_resource_subdir(name: str) -> str:
+def get_resource_path(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
 
@@ -149,7 +153,12 @@ def __main__():
         messenger=deps.messenger,
     )
 
-    taro_dir = get_resource_subdir('taro')
+    taro_dir = get_resource_path('taro')
+
+    wn = RuWordNet()
+    morph = MorphAnalyzer()
+    russian = Russian(wn, morph)
+    emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
 
     handlers_chats = (
         MusicHandler(linker, settings_repo, callback_data_repo, deps.messenger),
@@ -169,6 +178,7 @@ def __main__():
         CommandDefinition('voice', VoiceCommand(deps.messages_repo, deps.messenger)),
         CommandDefinition('taro', TaroCommand(taro_dir, deps.messenger, callback_data_repo)),
         CommandDefinition('spotify', AdminSpotifyAuthCommand(deps.messenger, spotify)),
+        CommandDefinition('hookah', HookahCommand(emojifier, deps.messenger)),
     )
     callbacks = (
         CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
