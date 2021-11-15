@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 import spotipy
-from loguru import logger
 from spotipy import SpotifyOAuth, CacheHandler
 
 from toxic.features.music.structs import Searcher, Type, Service

@@ -1,7 +1,6 @@
 import urllib.parse
 
 import telegram
-from loguru import logger
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from toxic.features.music.linker import Linker
