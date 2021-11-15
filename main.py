@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import telegram
 from loguru import logger
+from psycopg2 import InterfaceError
 from pymorphy2 import MorphAnalyzer
 from ruwordnet import RuWordNet
 from telegram.error import NetworkError, Unauthorized, Conflict
@@ -228,6 +229,9 @@ def __main__():
             sys.exit(1)
         except KeyboardInterrupt:
             sys.exit(0)
+        except InterfaceError as ex:
+            logger.opt(exception=ex).error('Get psycopg2.InterfaceError, stopping.')
+            sys.exit(1)
         except Exception as ex:
             logger.opt(exception=ex).error('Caught an exception while handling an update.')
 
