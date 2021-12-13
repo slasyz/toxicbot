@@ -13,15 +13,14 @@ fi
 SRC="./"
 DEST="$1:~/deployments/ToxicTgBot/"
 
+echo "-> Copying files"
+
 rsync -avz --delete \
   --exclude='/.git' --exclude='/venv' --filter="dir-merge,- .gitignore" \
   "$SRC" "$DEST"
 scp "$SRC/config.json" "$1:/etc/toxic/config.json"
 scp "$SRC/systemd/toxic-main.service" "$SRC/systemd/toxic-server.service" "$1:~/.config/systemd/user/"
 
-ssh "$1" "make -C ~/deployments/ToxicTgBot deps &&
-  systemctl --user daemon-reload
-  systemctl --user restart toxic-main &&
-  systemctl --user restart toxic-server"
+ssh "$1" "/bin/bash ~/deployments/ToxicTgBot/scripts/install.sh"
 
-echo "-> Done."
+echo "-> Deployment is done"

@@ -6,8 +6,8 @@ StartLimitIntervalSec=20s
 
 [Service]
 Type=simple
-WorkingDirectory=/home/sl/deployments/ToxicTgBot
+WorkingDirectory=${PROJECT_DIR}
 ExecStart=/bin/sh -c "make server"
 Restart=always
-StandardOutput=append:/home/sl/logs/ToxicTgBot/server-stdout.log
-StandardError=append:/home/sl/logs/ToxicTgBot/server-stderr.log
+StandardOutput=append:${PROJECT_LOG_DIR}/server-stdout.log
+StandardError=append:${PROJECT_LOG_DIR}/server-stderr.log
