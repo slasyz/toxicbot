@@ -82,7 +82,7 @@ lazy-object-proxy==1.6.0
     # via astroid
 loguru==0.5.3
     # via -r requirements.in
-lxml==4.6.3
+lxml==4.6.5
     # via
     #   -r requirements.in
     #   translate
@@ -90,10 +90,10 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via pylint
-mypy-extensions==0.4.3
-    # via mypy
 mypy==0.910
     # via -r requirements.in
+mypy-extensions==0.4.3
+    # via mypy
 nodeenv==1.6.0
     # via pre-commit
 packaging==21.0
@@ -128,12 +128,12 @@ pydantic==1.8.2
     # via fastapi
 pylint==2.8.2
     # via -r requirements.in
+pymorphy2==0.9.1
+    # via -r requirements.in
 pymorphy2-dicts-ru==2.4.417127.4579844
     # via
     #   -r requirements.in
     #   pymorphy2
-pymorphy2==0.9.1
-    # via -r requirements.in
 pyparsing==2.4.7
     # via packaging
 pytest==6.2.4
@@ -176,12 +176,12 @@ spotipy==2.19.0
     # via -r requirements.in
 sqlalchemy==1.4.26
     # via ruwordnet
-starlette-exporter==0.10.0
-    # via -r requirements.in
 starlette==0.16.0
     # via
     #   fastapi
     #   starlette-exporter
+starlette-exporter==0.10.0
+    # via -r requirements.in
 toml==0.10.2
     # via
     #   autopep8
