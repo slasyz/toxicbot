@@ -18,7 +18,7 @@ echo "-> Copying files"
 rsync -avz --delete \
   --exclude='/.git' --exclude='/venv' --filter="dir-merge,- .gitignore" \
   "$SRC" "$DEST"
-scp "$SRC/config.json" "$1:/etc/toxic/config.json"
+scp "$SRC/config.json" "$DEST/config.json"
 scp "$SRC/systemd/toxic-main.service" "$SRC/systemd/toxic-server.service" "$1:~/.config/systemd/user/"
 
 ssh "$1" "/bin/bash ~/deployments/ToxicTgBot/scripts/install.sh"
