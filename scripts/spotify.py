@@ -1,7 +1,7 @@
 import os
 
 from main import init
-from toxic.features.music.spotify import Spotify
+from toxic.features.music.services.spotify import Spotify
 from toxic.repositories.settings import SettingsRepository
 
 

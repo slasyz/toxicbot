@@ -27,11 +27,17 @@ class Info:
     thumbnail_url: Optional[str] = None
 
 
-class MusicInfoer:
+class Infoer:
     def get_info(self, url: str) -> Optional[Info]:
         raise NotImplementedError()
 
 
+@dataclass
+class SearchResult:
+    service: Service
+    link: str
+
+
 class Searcher:
-    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[tuple[Service, str]]:
+    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[SearchResult]:
         raise NotImplementedError()

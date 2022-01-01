@@ -2,6 +2,7 @@ import time
 
 import telegram
 from loguru import logger
+from telegram import ReplyMarkup
 from telegram.constants import MESSAGEENTITY_MENTION
 from telegram.error import BadRequest, ChatMigrated, Unauthorized
 
@@ -90,6 +91,28 @@ class Messenger:
                 return True
 
         return False
+
+    def edit_text(self, chat_id: int, message_id: int, text: str, markup: ReplyMarkup, is_html: bool = False):
+        if len(text) > telegram.constants.MAX_MESSAGE_LENGTH:
+            text = text[:telegram.constants.MAX_MESSAGE_LENGTH]
+        self.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,
+            text=text,
+            reply_markup=markup,
+            parse_mode=telegram.ParseMode.HTML if is_html else None
+        )
+
+    def edit_caption(self, chat_id: int, message_id: int, text: str, markup: ReplyMarkup, is_html: bool = False):
+        if len(text) > telegram.constants.MAX_CAPTION_LENGTH:
+            text = text[:telegram.constants.MAX_CAPTION_LENGTH]
+        self.bot.edit_message_caption(
+            chat_id=chat_id,
+            message_id=message_id,
+            caption=text,
+            reply_markup=markup,
+            parse_mode=telegram.ParseMode.HTML if is_html else None
+        )
 
 
 def __main__():

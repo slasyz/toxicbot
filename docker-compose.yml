@@ -8,7 +8,7 @@ services:
       - POSTGRES_USER=toxic
       - POSTGRES_PASSWORD=toxic
     ports:
-      - 127.0.0.1:30131:5432/tcp
+      - "127.0.0.1:30131:5432/tcp"
     volumes:
       - data:/var/lib/postgresql/data
     healthcheck:

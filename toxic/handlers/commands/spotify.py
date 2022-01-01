@@ -1,6 +1,6 @@
 import telegram
 
-from toxic.features.music.spotify import Spotify
+from toxic.features.music.services.spotify import Spotify
 from toxic.handlers.handler import CallbackHandler
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.settings import SettingsRepository

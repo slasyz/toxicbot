@@ -5,10 +5,10 @@ import requests
 from loguru import logger
 from lxml import html
 
-from toxic.features.music.structs import MusicInfoer, Info, Type, Service
+from toxic.features.music.services.structs import Infoer, Info, Type, Service
 
 
-class Boom(MusicInfoer):
+class Boom(Infoer):
     def get_info(self, url: str) -> Optional[Info]:
         try:
             return self._get_info(url)

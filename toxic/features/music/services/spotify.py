@@ -7,7 +7,7 @@ from typing import Optional
 import spotipy
 from spotipy import SpotifyOAuth, CacheHandler
 
-from toxic.features.music.structs import Searcher, Type, Service
+from toxic.features.music.services.structs import Searcher, Type, Service, SearchResult
 from toxic.repositories.settings import SettingsRepository
 
 SCOPES = [
@@ -117,7 +117,7 @@ class SpotifySearcher(Searcher):
     def _get_link_song(self, artist_name: str, title: str) -> Optional[str]:
         return self._search('{} {}'.format(artist_name, title), 'track', 'tracks')
 
-    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[tuple[Service, str]]:
+    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[SearchResult]:
         res = None
         if type == Type.ARTIST:
             res = self._get_link_artist(artist_name)
@@ -127,6 +127,6 @@ class SpotifySearcher(Searcher):
             res = self._get_link_song(artist_name, title)
 
         if res is not None:
-            return Service.SPOTIFY, res
+            return SearchResult(Service.SPOTIFY, res)
 
         return None

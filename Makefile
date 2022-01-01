@@ -50,6 +50,10 @@ test.unit:      ## run unit tests
 test:           ## run all tests (you can start dependencies using ./scripts/start-deps.sh)
 	$(PYTHON_INTERPRETER) -m pytest tests
 
+.PHONY: test.detailed
+test.detailed:  ## run all tests (you can start dependencies using ./scripts/start-deps.sh)
+	$(PYTHON_INTERPRETER) -m pytest -vv tests
+
 
 .PHONY: deps
 deps:           ## install all dependencies from requirements.txt to virtual environment

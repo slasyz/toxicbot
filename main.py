@@ -18,10 +18,11 @@ from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
 from toxic.features.emojifier import Emojifier, Russian
 from toxic.features.joke import Joker
-from toxic.features.music.boom import Boom
-from toxic.features.music.linker import Linker
-from toxic.features.music.odesli import Odesli
-from toxic.features.music.spotify import Spotify
+from toxic.features.music.generator.generator import MusicMessageGenerator
+from toxic.features.music.services.boom import Boom
+from toxic.features.music.services.collector import MusicInfoCollector
+from toxic.features.music.services.odesli import Odesli
+from toxic.features.music.services.spotify import Spotify
 from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
@@ -31,6 +32,7 @@ from toxic.handlers.commands.hookah import HookahCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
+from toxic.handlers.commands.music import MusicPlaintextCallback
 from toxic.handlers.commands.send import SendCommand
 from toxic.handlers.commands.spotify import SpotifyEnqueueCallback
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
@@ -128,10 +130,11 @@ def __main__():
     spotify = Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo)
     spotify_searcher = spotify.create_searcher()
 
-    linker = Linker(
+    music_info_collector = MusicInfoCollector(
         infoers=[Odesli(), Boom()],
         searchers=[spotify_searcher]
     )
+    music_formatter = MusicMessageGenerator(music_info_collector, settings_repo, callback_data_repo)
 
     worker_manager = WorkersManager(deps.messenger)
     worker_manager.start([
@@ -140,7 +143,7 @@ def __main__():
     ])
 
     handlers_private = (
-        MusicHandler(linker, settings_repo, callback_data_repo, deps.messenger),
+        MusicHandler(music_formatter, deps.messenger),
         # PrivateHandler(deps.config['replies']['private'], deps.users_repo, deps.messenger),
     )
 
@@ -163,7 +166,7 @@ def __main__():
     emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
 
     handlers_chats = (
-        MusicHandler(linker, settings_repo, callback_data_repo, deps.messenger),
+        MusicHandler(music_formatter, deps.messenger),
         KeywordsHandler.new(deps.config['replies']['keywords'], deps.messenger),
         SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
         StatsHandler.new(deps.config['replies']['stats'], deps.chats_repo, deps.messenger),
@@ -190,6 +193,7 @@ def __main__():
         CallbackDefinition('/admin/spotify/set_device', AdminSpotifySetDeviceCallback(settings_repo, callback_data_repo, deps.messenger, spotify)),
         CallbackDefinition('/admin/spotify/state', AdminSpotifyStateCallback(settings_repo, deps.messenger)),
         CallbackDefinition('/spotify/enqueue', SpotifyEnqueueCallback(settings_repo, deps.messenger, spotify)),
+        CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger))
     )
     handle_manager = HandlersManager(
         handlers_private,

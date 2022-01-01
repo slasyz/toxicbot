@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import requests
 from loguru import logger
 
-from toxic.features.music.structs import Type, Service, Info, MusicInfoer
+from toxic.features.music.services.structs import Type, Service, Info, Infoer
 
 
 class UnknownTypeException(Exception):
@@ -28,9 +28,9 @@ PREFIXES = [
 ]
 
 
-class Odesli(MusicInfoer):
+class Odesli(Infoer):
     @staticmethod
-    def str_to_type(src: str) -> Type:
+    def _str_to_type(src: str) -> Type:
         if src == 'artist':
             return Type.ARTIST
         if src == 'album':
@@ -40,7 +40,7 @@ class Odesli(MusicInfoer):
         raise UnknownTypeException()
 
     @staticmethod
-    def change_entity_id(entity_id: str, entities: list[str]) -> str:
+    def _change_entity_id(entity_id: str, entities: list[str]) -> str:
         for el in entities:
             for prefix in PREFIXES:
                 if el.startswith(prefix):
@@ -49,18 +49,18 @@ class Odesli(MusicInfoer):
         return entity_id
 
     @classmethod
-    def parse_result(cls, data: dict) -> Optional[Info]:
+    def _parse_result(cls, data: dict) -> Optional[Info]:
         entity_id = data.get('entityUniqueId')
         if entity_id is None:
             return None
 
         entities_by_id = data['entitiesByUniqueId']
 
-        entity_id = cls.change_entity_id(entity_id, entities_by_id.keys())
+        entity_id = cls._change_entity_id(entity_id, entities_by_id.keys())
         raw_info = entities_by_id[entity_id]
 
         result = Info(
-            type=cls.str_to_type(raw_info['type']),
+            type=cls._str_to_type(raw_info['type']),
             artist_name=raw_info['artistName'],
             title=raw_info['title'],
             links={},
@@ -90,7 +90,7 @@ class Odesli(MusicInfoer):
                 return None
 
             try:
-                return self.parse_result(parsed)
+                return self._parse_result(parsed)
             except Exception as ex:
                 logger.opt(exception=ex).error('Cannot get music info.', exc_info=ex, result=parsed)
                 return None

@@ -1,7 +1,7 @@
 import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-from toxic.features.music.spotify import Spotify
+from toxic.features.music.services.spotify import Spotify
 from toxic.handlers.handler import CallbackHandler, CommandHandler
 from toxic.messenger.message import TextMessage
 from toxic.messenger.messenger import Messenger
