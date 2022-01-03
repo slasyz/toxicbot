@@ -24,7 +24,7 @@ jobs:
       run: /bin/bash $GITHUB_WORKSPACE/scripts/start-deps.sh
     - name: Run tests
       run: |
-        make test
+        make test.detailed
     - name: Run linter
       run: |
         make lint

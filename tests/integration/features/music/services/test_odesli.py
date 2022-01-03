@@ -19,7 +19,7 @@ from toxic.features.music.services.structs import Info, Type, Service
                 artist_name='Он Юн feat. Александр Смородинов',
                 title='Больше нет',
                 links={
-                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1454338948?i=1454338968&mt=1&app=music&ls=1&at=1000lHKX',
+                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1454338948?i=1454338968&mt=1&app=music&ls=1',
                     Service.SPOTIFY: 'https://open.spotify.com/track/0XauTwcR4Y44zdIS7yV2Jf',
                     Service.YANDEX: 'https://music.yandex.ru/track/50671259',
                     Service.YOUTUBE: 'https://www.youtube.com/watch?v=fDEYWPvq_GQ',
@@ -49,7 +49,7 @@ from toxic.features.music.services.structs import Info, Type, Service
                 artist_name='Aikko',
                 title='Тёмные делишки',
                 links={
-                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1582455767?mt=1&app=music&ls=1&at=1000lHKX',
+                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1582455767?mt=1&app=music&ls=1',
                     Service.SPOTIFY: 'https://open.spotify.com/album/7qEap2Ip3FeBPEPLr9YaJc',
                     Service.YANDEX: 'https://music.yandex.ru/album/17877728',
                     Service.YOUTUBE: 'https://www.youtube.com/playlist?list=OLAK5uy_l2KCVd6twQ-4KJAq5yUp1rut5w5KvpDp4',
