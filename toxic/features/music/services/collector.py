@@ -57,7 +57,7 @@ class MusicInfoCollector:
             more_urls[res.service] = res.link
 
         # Third step — get even more urls using new URLs
-        for service, new_url in more_urls.items():
+        for new_url in more_urls.values():
             info = self._collect_info_by_url(info, new_url)
 
         info.links = more_urls | info.links

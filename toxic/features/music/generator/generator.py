@@ -5,7 +5,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyMarkup
 
 from toxic.features.music.generator.content import get_content
 from toxic.features.music.services.collector import MusicInfoCollector
-from toxic.features.music.services.structs import Info, Type, Service
+from toxic.features.music.services.structs import Type, Service
 from toxic.messenger.message import Message
 from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.settings import SettingsRepository
