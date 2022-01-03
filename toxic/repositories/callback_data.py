@@ -8,16 +8,16 @@ class CallbackDataRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def insert_value(self, value: Optional[dict]) -> int:
+    def insert_value(self, value: Optional[dict]) -> str:
         return self.database.query_row('''
             INSERT INTO callback_data(value)
             VALUES(%s)
             ON CONFLICT (value) DO UPDATE set value=callback_data.value
-            RETURNING id
+            RETURNING uuid
         ''', (json.dumps(value),))[0]
 
-    def get_value(self, id: int) -> Optional[dict]:
-        row = self.database.query_row('SELECT value FROM callback_data WHERE id=%s', (id,))
+    def get_value(self, uuid: str) -> Optional[dict]:
+        row = self.database.query_row('SELECT value FROM callback_data WHERE uuid=%s', (uuid,))
         if row is None:
             return None
 

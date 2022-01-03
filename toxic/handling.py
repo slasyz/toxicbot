@@ -109,7 +109,7 @@ class HandlersManager:
 
         if callback.data is None:
             return False
-        args_id = int(callback.data)
+        args_id = callback.data
 
         args = self.callback_data_repo.get_value(args_id)
         if args is None:

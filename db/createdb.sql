@@ -1,5 +1,7 @@
 -- TODO: add NOT NULL constraints.
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";  -- Run as superuser
+
 CREATE TABLE users (
     tg_id       bigint PRIMARY KEY,
     first_name  text,
