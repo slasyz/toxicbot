@@ -64,6 +64,8 @@ class Textizer:
             word_or_none = self.featurizer.get_value(feature)
             if word_or_none is None:  # impossible, but let's check to please linter
                 break
+            if '\n' in word_or_none:
+                break
             result_words.append(word_or_none)
 
         result_message = self.splitter.join(result_words)
