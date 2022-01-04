@@ -16,7 +16,7 @@ class HookahCommand(CommandHandler):
             self.messenger.reply(message, 'Эту команду нужно присылать в ответ на сообщение.')
             return
 
-        text = text or message.caption or ''
+        text = message_src.text or message_src.caption or ''
         if text is None or text == '':
             self.messenger.reply(message, '???')
             return
