@@ -41,10 +41,18 @@ class ChatsRepository:
 
     def get_stat(self, chat_id: int) -> Iterator[tuple[str, int]]:
         rows = self.database.query('''
+                WITH RECURSIVE ch(id) AS (
+                    SELECT %s::bigint
+                    UNION
+                    SELECT c.tg_id
+                    FROM chats c
+                        JOIN ch ON c.next_tg_id=ch.id OR
+                                   (c.tg_id=ch.id AND c.next_tg_id IS NOT NULL)
+                )
                 SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.*) as c
                 FROM messages m
-                    JOIN users u on m.user_id = u.tg_id
-                WHERE chat_id=%s
+                    JOIN users u ON m.user_id = u.tg_id
+                    JOIN ch ON chat_id=ch.id
                 GROUP BY user_id, u.first_name, u.last_name
                 ORDER BY c DESC
                 LIMIT 10;

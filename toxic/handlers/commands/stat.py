@@ -27,7 +27,7 @@ class StatCommand(CommandHandler):
         self.messenger = messenger
 
     def _get_response(self, chat_id) -> str:
-        response = 'Кто сколько сообщений написал:\n'
+        response = 'Статистика чата:\n'
         response += get_stat(chat_id, self.chats_repo)
         return response
 
