@@ -10,7 +10,7 @@ from toxic.features.chain.splitters import WordsOnlySplitter, PunctuationSplitte
         ('', []),
     ]
 )
-def test_no_punctuation_splitter(message, tokens):
+def test_no_punctuation_splitter(message: str, tokens: list[str]):
     splitter = WordsOnlySplitter()
     assert splitter.split(message) == tokens
 
@@ -23,7 +23,7 @@ def test_no_punctuation_splitter(message, tokens):
         ('', []),
     ]
 )
-def test_punctuation_splitter(message, tokens):
+def test_punctuation_splitter(message: str, tokens: list[str]):
     splitter = PunctuationSplitter()
     assert splitter.split(message) == tokens
 
@@ -39,7 +39,7 @@ def test_punctuation_splitter(message, tokens):
         ('', []),
     ]
 )
-def test_space_adjoin_splitter_split(message, tokens):
+def test_space_adjoin_splitter_split(message: str, tokens: list[str]):
     splitter = SpaceAdjoinSplitter()
     assert splitter.split(message) == tokens
 
@@ -55,6 +55,6 @@ def test_space_adjoin_splitter_split(message, tokens):
         ([], ''),
     ]
 )
-def test_space_adjoin_splitter_join(tokens, message):
+def test_space_adjoin_splitter_join(tokens: list[str], message: str):
     splitter = SpaceAdjoinSplitter()
     assert splitter.join(tokens) == message

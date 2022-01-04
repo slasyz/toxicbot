@@ -26,7 +26,7 @@ def database():
         ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', telegram.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
     ]
 )
-def test_database_query(query, vars, expected, database: Database):
+def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
     rows = list(database.query(query, vars))
     assert rows == expected
 

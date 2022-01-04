@@ -58,7 +58,7 @@ def test_get_json(url, test_func):
         )
     ]
 )
-def test_get_info(url, expected_info):
+def test_get_info(url: str, expected_info: Info):
     boom = Boom()
     info = boom.get_info(url)
     assert info == expected_info

@@ -9,7 +9,7 @@ from toxic.features.chain.chain import MarkovChain
         ([1, 2, 3], [1, 2], 3),
     ]
 )
-def test_markov_chain(source, input, result):
+def test_markov_chain(source: list[int], input: list[int], result: int):
     chain = MarkovChain(window=2)
     for el in source:
         chain.teach(el)
