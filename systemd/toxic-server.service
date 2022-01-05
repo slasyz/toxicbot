@@ -6,8 +6,8 @@ StartLimitIntervalSec=20s
 
 [Service]
 Type=simple
-WorkingDirectory=${PROJECT_DIR}
+WorkingDirectory={{ .ProjectDir }}
 ExecStart=/bin/sh -c "make server"
 Restart=always
-StandardOutput=append:${PROJECT_LOG_DIR}/server-stdout.log
-StandardError=append:${PROJECT_LOG_DIR}/server-stderr.log
+StandardOutput=append:{{ .ProjectLogDir }}/server-stdout.log
+StandardError=append:{{ .ProjectLogDir }}/server-stderr.log

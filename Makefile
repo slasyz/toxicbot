@@ -61,7 +61,7 @@ deps:           ## install all dependencies from requirements.txt to virtual env
 		virtualenv venv -p python3.10 --download; \
 	fi;
 	./venv/bin/python -m pip install -r requirements.txt
-	if [[ ! -f venv/lib/python3.10/site-packages/ruwordnet/ruwordnet.db ]]; then \
+	if [[ ! -f venv/lib/python3.10/site-packages/ruwordnet/static/ruwordnet.db ]]; then \
 		./venv/bin/ruwordnet download; \
 	fi;
 
