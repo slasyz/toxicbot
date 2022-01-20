@@ -16,7 +16,7 @@ from toxic.features.music.services.structs import Info, Type, Service
             'https://open.spotify.com/track/0XauTwcR4Y44zdIS7yV2Jf?si=99dc49931ec14dcc',
             Info(
                 type=Type.SONG,
-                artist_name='Он Юн feat. Александр Смородинов',
+                artist_name='Он Юн, Александр Смородинов',
                 title='Больше нет',
                 links={
                     Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1454338948?i=1454338968&mt=1&app=music&ls=1',
@@ -24,7 +24,7 @@ from toxic.features.music.services.structs import Info, Type, Service
                     Service.YANDEX: 'https://music.yandex.ru/track/50671259',
                     Service.YOUTUBE: 'https://www.youtube.com/watch?v=fDEYWPvq_GQ',
                 },
-                thumbnail_url='https://m.media-amazon.com/images/I/61h-+dzapJL._AA500.jpg',
+                thumbnail_url='https://m.media-amazon.com/images/I/61h-+dzapJL.jpg',
             )
         ),
 
