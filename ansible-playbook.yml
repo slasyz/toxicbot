@@ -1,0 +1,62 @@
+- name: Set host variables
+  hosts: slasyz.ru
+  tasks:
+    - name: Set directories
+      add_host:
+        name: DIRECTORIES
+        project: "{{ ansible_env.HOME }}/deployments/ToxicTgBot"
+        logs: "{{ ansible_env.HOME }}/logs/ToxicTgBot"
+
+
+- name: Copy files
+  hosts: slasyz.ru
+  tasks:
+    - name: Copy sources
+      synchronize:
+        src: ./toxic
+        dest: "{{ hostvars['DIRECTORIES']['project'] }}/toxic/"
+    - name: Copy main.py
+      copy:
+        src: ./main.py
+        dest: "{{ hostvars['DIRECTORIES']['project'] }}/main.py"
+    - name: Copy resources
+      synchronize:
+        src: ./resources
+        dest: "{{ hostvars['DIRECTORIES']['project'] }}/resources/"
+    - name: Copy config
+      copy:
+        src: ./config.json
+        dest: "{{ hostvars['DIRECTORIES']['project'] }}/config.json"
+    - name: Copy main systemd service
+      template:
+        src: ./systemd/toxic-main.service
+        dest: ~/.config/systemd/user/toxic-main.service
+        mode: 0644
+    - name: Copy server systemd service
+      template:
+        src: ./systemd/toxic-server.service
+        dest: ~/.config/systemd/user/toxic-server.service
+        mode: 0644
+
+
+- name: Restart
+  hosts: slasyz.ru
+  tasks:
+    - name: Install dependencies
+      make:
+        chdir: "{{ hostvars['DIRECTORIES']['project'] }}"
+        target: deps
+    - name: Restart main service
+      systemd:
+        name: toxic-main
+        state: restarted
+        daemon_reload: yes
+        scope: user
+        enabled: true
+    - name: Restart server service
+      systemd:
+        name: toxic-server
+        state: restarted
+        daemon_reload: yes
+        scope: user
+        enabled: true

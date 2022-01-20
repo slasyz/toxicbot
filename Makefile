@@ -14,6 +14,11 @@ help:           ## show this help
 	@sed -nE '/@sed/!s/##\s?//p' Makefile
 
 
+.PHONY: deploy
+deploy:         ## deploy using ansible
+	ansible-playbook ansible-playbook.yml
+
+
 .PHONY: fmt
 fmt:            ## run autopep8
 	find ./toxic main.py -name '*.py' -exec $(PYTHON_INTERPRETER) -m autopep8 --in-place --global-config pycodestyle '{}' \;
