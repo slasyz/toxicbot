@@ -62,6 +62,10 @@ class MusicInfoCollector:
 
         info.links = more_urls | info.links
 
+        if len(info.links) == 1 and Service.YOUTUBE in info.links:
+            # That's just a YouTube video.
+            return None
+
         if info.type is None:
             return None
 

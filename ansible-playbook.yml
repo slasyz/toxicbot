@@ -13,7 +13,7 @@
   tasks:
     - name: Copy sources
       synchronize:
-        src: ./toxic
+        src: ./toxic/
         dest: "{{ hostvars['DIRECTORIES']['project'] }}/toxic/"
     - name: Copy main.py
       copy:
@@ -21,7 +21,7 @@
         dest: "{{ hostvars['DIRECTORIES']['project'] }}/main.py"
     - name: Copy resources
       synchronize:
-        src: ./resources
+        src: ./resources/
         dest: "{{ hostvars['DIRECTORIES']['project'] }}/resources/"
     - name: Copy config
       copy:
