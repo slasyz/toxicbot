@@ -26,15 +26,13 @@ from toxic.features.music.services.spotify import Spotify
 from toxic.features.taro import Taro
 from toxic.handlers.chain import ChainHandler
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
-from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifySetDeviceCallback, \
-    AdminSpotifyStateCallback, AdminSpotifyAuthCommand
+from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifyAuthCommand
 from toxic.handlers.commands.hookah import HookahCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
 from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.music import MusicPlaintextCallback
 from toxic.handlers.commands.send import SendCommand
-from toxic.handlers.commands.spotify import SpotifyEnqueueCallback
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
 from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler
 from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallback, TaroFirstCallback
@@ -190,9 +188,6 @@ def __main__():
         CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
         CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo, deps.messenger)),
         CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify, deps.messenger)),
-        CallbackDefinition('/admin/spotify/set_device', AdminSpotifySetDeviceCallback(settings_repo, callback_data_repo, deps.messenger, spotify)),
-        CallbackDefinition('/admin/spotify/state', AdminSpotifyStateCallback(settings_repo, deps.messenger)),
-        CallbackDefinition('/spotify/enqueue', SpotifyEnqueueCallback(settings_repo, deps.messenger, spotify)),
         CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger))
     )
     handle_manager = HandlersManager(

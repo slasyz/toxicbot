@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 import spotipy
-from spotipy import SpotifyOAuth, CacheHandler
+from loguru import logger
+from spotipy import SpotifyOAuth, CacheHandler, SpotifyException
 
 from toxic.features.music.services.structs import Searcher, Type, Service, SearchResult
 from toxic.repositories.settings import SettingsRepository
@@ -62,29 +63,28 @@ class Spotify:
 
         return Spotify(auth_manager, cache_handler, client)
 
-    def create_searcher(self):
+    def create_searcher(self) -> SpotifySearcher:
         return SpotifySearcher(self.auth_manager, self.client)
 
-    def get_auth_url(self):
+    def get_auth_url(self) -> str:
         return self.auth_manager.get_authorize_url()
 
     def authenticate(self, redirect_url: str):
         code = self.auth_manager.parse_response_code(redirect_url)
         return self.auth_manager.get_access_token(code=code)
 
-    def is_authenticated(self):
+    def is_authenticated(self) -> bool:
         token = self.cache_handler.get_cached_token()
         if token is None:
-            return None
-        token = self.auth_manager.refresh_access_token(token['refresh_token'])
+            return False
+
+        try:
+            token = self.auth_manager.refresh_access_token(token['refresh_token'])
+        except SpotifyException as ex:
+            logger.opt(exception=ex).error('Error refreshing access token.')
+            return False
+
         return token is not None
-
-    def get_devices(self) -> list[Device]:
-        devices = self.client.devices()
-        return [Device(device['name'], device['id']) for device in devices['devices']]
-
-    def add_to_queue(self, uri: str, device_id: str):
-        self.client.add_to_queue(uri, device_id)
 
 
 class SpotifySearcher(Searcher):
@@ -98,7 +98,11 @@ class SpotifySearcher(Searcher):
     def _search(self, query: str, type: str, key: str) -> Optional[str]:
         query = self.clean(query)
 
-        res = self.client.search(query, type=type, market='RU')
+        try:
+            res = self.client.search(query, type=type)
+        except SpotifyException as ex:
+            logger.opt(exception=ex).error('Error searching in Spotify.')
+            return None
         if res is None:
             return None
 

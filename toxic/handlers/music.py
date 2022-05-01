@@ -1,5 +1,4 @@
 import telegram
-from loguru import logger
 
 from toxic.features.music.generator.generator import MusicMessageGenerator
 from toxic.features.music.generator.links import extract_music_links
@@ -25,7 +24,7 @@ class MusicHandler(MessageHandler):
         for source_link in links:
             music_message = self.music_formatter.get_message(source_link, include_plaintext_links=False)
             if music_message is None:
-                logger.warning('Got no link music info in MusicHandler.', source_link=source_link)
+                self.messenger.reply(message, 'Вижу ссылку, но мне нечего ответить.')
                 continue
             response_message: Message
 
