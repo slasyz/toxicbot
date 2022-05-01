@@ -16,10 +16,10 @@ from toxic.features.music.services.structs import Info, Type, Service
             'https://open.spotify.com/track/0XauTwcR4Y44zdIS7yV2Jf?si=99dc49931ec14dcc',
             Info(
                 type=Type.SONG,
-                artist_name='Он Юн, Александр Смородинов',
+                artist_name='Александр Смородинов, Он Юн',
                 title='Больше нет',
                 links={
-                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1454338948?i=1454338968&mt=1&app=music&ls=1',
+                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1454338948',
                     Service.SPOTIFY: 'https://open.spotify.com/track/0XauTwcR4Y44zdIS7yV2Jf',
                     Service.YANDEX: 'https://music.yandex.ru/track/50671259',
                     Service.YOUTUBE: 'https://www.youtube.com/watch?v=fDEYWPvq_GQ',
@@ -49,7 +49,7 @@ from toxic.features.music.services.structs import Info, Type, Service
                 artist_name='Aikko',
                 title='Тёмные делишки',
                 links={
-                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1582455767?mt=1&app=music&ls=1',
+                    Service.APPLE_MUSIC: 'https://geo.music.apple.com/us/album/_/1582455767',
                     Service.SPOTIFY: 'https://open.spotify.com/album/7qEap2Ip3FeBPEPLr9YaJc',
                     Service.YANDEX: 'https://music.yandex.ru/album/17877728',
                     Service.YOUTUBE: 'https://www.youtube.com/playlist?list=OLAK5uy_l2KCVd6twQ-4KJAq5yUp1rut5w5KvpDp4',
@@ -76,4 +76,18 @@ from toxic.features.music.services.structs import Info, Type, Service
 )
 def test_get_info(url: str, expected: Optional[Info]):
     odesli = Odesli()
-    assert odesli.get_info(url) == expected
+    actual = odesli.get_info(url)
+
+    if expected is None:
+        assert actual is None
+        return
+
+    assert actual.type == expected.type
+    assert actual.artist_name == expected.artist_name
+    assert actual.title == expected.title
+    assert actual.thumbnail_url == expected.thumbnail_url
+
+    assert len(actual.links) == len(expected.links)
+    for key, val in actual.links.items():
+        expected_val = expected.links[key]
+        assert val.startswith(expected_val)
