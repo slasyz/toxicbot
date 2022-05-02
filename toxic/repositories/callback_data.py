@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 from toxic.db import Database
 
@@ -8,7 +7,7 @@ class CallbackDataRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def insert_value(self, value: Optional[dict]) -> str:
+    def insert_value(self, value: dict | None) -> str:
         return self.database.query_row('''
             INSERT INTO callback_data(value)
             VALUES(%s)
@@ -16,7 +15,7 @@ class CallbackDataRepository:
             RETURNING uuid
         ''', (json.dumps(value),))[0]
 
-    def get_value(self, uuid: str) -> Optional[dict]:
+    def get_value(self, uuid: str) -> dict | None:
         row = self.database.query_row('SELECT value FROM callback_data WHERE uuid=%s', (uuid,))
         if row is None:
             return None

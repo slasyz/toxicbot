@@ -100,7 +100,7 @@ class HandlersManager:
     def handle_callback(self, callback: telegram.CallbackQuery):
         message = callback.message
         if message is None:
-            return False
+            return
 
         log_extra = {
             'user_id': callback.from_user.id,
@@ -109,32 +109,39 @@ class HandlersManager:
         }
 
         if callback.data is None:
-            return False
+            return
         args_id = callback.data
 
         args = self.callback_data_repo.get_value(args_id)
         if args is None:
-            return False
+            return
 
         try:
             name = args['name']
         except KeyError as ex:
             logger.opt(exception=ex).error('Callback data does not contain "name" key.', **log_extra)
-            return False
+            return
 
         for callback_definition in self.callbacks:
             if callback_definition.name != name:
                 continue
 
             if callback_definition.handler.is_admins_only() and not self.users_repo.is_admin(callback.from_user.id):
-                # TODO: log
+                callback.answer('Где ваши документы?', True)
+                logger.error('Regular user sent admin-only callback.', user=callback.from_user.id, username=callback.from_user.username, callback=callback.id, data=callback.data)
                 continue
 
             try:
-                callback_definition.handler.handle(callback, message, args)
+                reply = callback_definition.handler.handle(callback, message, args)
+                if reply is None:
+                    return
+                if isinstance(reply, Message):
+                    self.messenger.send(message.chat_id, reply)
+                    return
+                callback.answer(text=reply.text, show_alert=reply.show_alert)
             except Exception as ex:
                 logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
-            return True
+            return
 
     @staticmethod
     def _convert_handler_response(replies: list[Message] | str | None) -> list[Message]:
