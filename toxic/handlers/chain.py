@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 import telegram
 
@@ -10,30 +9,27 @@ from toxic.features.chain.textizer import Textizer
 from toxic.handlers.handler import MessageHandler
 from toxic.features.chain.chain import Chain, ChainFactory
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
+from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.chats import CachedChatsRepository
 from toxic.repositories.messages import MessagesRepository
 
 
-class ChainHandler(MessageHandler):
+class ChainTeachingHandler(MessageHandler):
     def __init__(self, chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger):
         self.chain_factory = chain_factory
         self.textizer = textizer
         self.chats_repo = chats_repo
-        self.messages_repo = messages_repo
-        self.messenger = messenger
         self.chats: dict[int, Chain] = {}
 
-    @staticmethod
-    def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger) -> ChainHandler:
-        chain_handler = ChainHandler(chain_factory, textizer, chats_repo, messages_repo, messenger)
+    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+        if message.chat_id > 0:
+            return None
 
-        for chat_id, text in messages_repo.get_all_groups_messages():
-            chain_handler._teach(chat_id, text)
+        self.teach(message.chat_id, text)
+        return None
 
-        return chain_handler
-
-    def _teach(self, chat_id: int, text: Optional[str]):
+    def teach(self, chat_id: int, text: str):
         chat_id = self.chats_repo.get_latest_chat_id(chat_id)
         try:
             chain = self.chats[chat_id]
@@ -43,33 +39,49 @@ class ChainHandler(MessageHandler):
 
         self.textizer.teach(chain, text)
 
-    def pre_handle(self, message: telegram.Message):
-        if message.chat_id > 0:
-            return
 
-        self._teach(message.chat_id, message.text)
+class ChainFloodHandler(MessageHandler):
+    def __init__(self, textizer: Textizer, chats_repo: CachedChatsRepository, messenger: Messenger):
+        self.textizer = textizer
+        self.chats_repo = chats_repo
+        self.messenger = messenger
+        self.chats: dict[int, Chain] = {}
 
-    def handle(self, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         if message.chat_id > 0:
-            return False
+            return None
 
         if self.messenger.is_reply_or_mention(message):
             chain = self.chats[message.chat_id]
-            text = self.textizer.predict_not_empty(chain, message.text)
-            self.messenger.reply(message, text, with_delay=True)
-            return True
+            return [TextMessage(
+                self.textizer.predict_not_empty(chain, text),
+                with_delay=True,
+            )]
 
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
-            return False
+            return None
 
         count = self.chats_repo.count_messages(message.chat_id)
         if count % self.chats_repo.get_period(message.chat_id) == 0:
             chain = self.chats[message.chat_id]
-            text = self.textizer.predict_not_empty(chain, message.text)
-            self.messenger.send(message.chat_id, text, with_delay=True)
-            return True
+            return [TextMessage(
+                self.textizer.predict_not_empty(chain, message.text),
+                with_delay=True,
+            )]
 
-        return False
+        return None
+
+
+def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
+    chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, messages_repo, messenger)
+    chain_flood_handler = ChainFloodHandler(textizer, chats_repo, messenger)
+
+    for chat_id, text in messages_repo.get_all_groups_messages():
+        if text is None:
+            continue
+        chain_teaching_handler.teach(chat_id, text)
+
+    return chain_teaching_handler, chain_flood_handler
 
 
 def __main__():
@@ -81,13 +93,13 @@ def __main__():
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, deps.metrics)
     chain_factory = ChainFactory(window=2)
-    handler = ChainHandler.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
+    teaching_handler, _ = new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)
 
     for x in range(20):  # pylint: disable=unused-variable
-        chain = handler.chats[-362750796]
+        chain = teaching_handler.chats[-362750796]
         print('[' + textizer.predict_not_empty(chain, '') + ']')
 
 

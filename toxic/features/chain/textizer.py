@@ -22,8 +22,8 @@ class Textizer:
         self.splitter = splitter
         self.metrics = metrics
 
-    def teach(self, chain: Chain, message: Optional[str]):
-        if message is None or message == '':
+    def teach(self, chain: Chain, message: str):
+        if message == '':
             return
 
         message = LINK_REGEXP.sub('', message)

@@ -7,7 +7,7 @@ from loguru import logger
 
 from toxic.handlers.handler import CommandHandler, MessageHandler
 from toxic.helpers import decorators
-from toxic.messenger.messenger import Messenger
+from toxic.messenger.message import Message
 from toxic.repositories.chats import ChatsRepository
 from toxic.repositories.users import UsersRepository
 
@@ -21,68 +21,61 @@ def get_stat(chat_id: int, chats_repo: ChatsRepository) -> str:
 
 
 class StatCommand(CommandHandler):
-    def __init__(self, users_repo: UsersRepository, chats_repo: ChatsRepository, messenger: Messenger):
+    def __init__(self, users_repo: UsersRepository, chats_repo: ChatsRepository):
         self.users_repo = users_repo
         self.chats_repo = chats_repo
-        self.messenger = messenger
 
     def _get_response(self, chat_id) -> str:
         response = 'Статистика чата:\n'
         response += get_stat(chat_id, self.chats_repo)
         return response
 
-    def _parse_args_and_send(self, message: telegram.Message, args: list[str]):
+    def _parse_args_and_send(self, args: list[str]) -> str:
         try:
             chat_id = int(args[1])
         except ValueError:
-            self.messenger.reply(message, f'Нужно писать так: /{args[0]} CHAT_ID')
-            return
+            return f'Нужно писать так: /{args[0]} CHAT_ID'
 
-        response = self._get_response(chat_id)
-        self.messenger.reply(message, response)
+        return self._get_response(chat_id)
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if message.chat_id < 0:
             if len(args) == 1:
-                response = self._get_response(message.chat_id)
-                self.messenger.reply(message, response)
-            elif len(args) == 2:
-                self._parse_args_and_send(message, args)
-            return
+                return self._get_response(message.chat_id)
+            if len(args) == 2:
+                return self._parse_args_and_send(args)
+            return None
 
         if message.from_user is None:
             logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat_id)
-            return
+            return 'Что-то не то.'
 
         if not self.users_repo.is_admin(message.from_user.id):
-            self.messenger.reply(message, 'Это нужно делать в общем чате.')
-            return
+            return 'Это нужно делать в общем чате.'
 
         if len(args) != 2:
-            self.messenger.reply(message, f'Нужно писать так: /{args[0]} [CHAT_ID]')
-            return
+            return f'Нужно писать так: /{args[0]} [CHAT_ID]'
 
-        self._parse_args_and_send(message, args)
+        return self._parse_args_and_send(args)
 
 
 class StatsHandler(MessageHandler):
-    def __init__(self, replies: dict[re.Pattern, str], chats_repo: ChatsRepository, messenger: Messenger):
+    def __init__(self, replies: dict[re.Pattern, str], chats_repo: ChatsRepository):
         self.replies = replies
         self.chats_repo = chats_repo
-        self.messenger = messenger
 
     @staticmethod
-    def new(replies: dict[str, str], chats_repo: ChatsRepository, messenger: Messenger) -> StatsHandler:
+    def new(replies: dict[str, str], chats_repo: ChatsRepository) -> StatsHandler:
         replies_regexes: dict[re.Pattern, str] = {}
 
         for key, value in replies.items():
             regexp = re.compile(key)
             replies_regexes[regexp] = value
 
-        return StatsHandler(replies_regexes, chats_repo, messenger)
+        return StatsHandler(replies_regexes, chats_repo)
 
     @decorators.non_empty
-    def handle(self, text: str, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         for key, value in self.replies.items():
@@ -91,8 +84,7 @@ class StatsHandler(MessageHandler):
 
             response = value + ':\n'
             response += get_stat(message.chat_id, self.chats_repo)
-            self.messenger.reply(message, response)
 
-            return True
+            return response
 
-        return False
+        return None

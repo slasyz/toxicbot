@@ -25,17 +25,11 @@ class Messenger:
         self.dus = dus
         self.delayer_factory = delayer_factory
 
-    def reply(self, to: telegram.Message, msg: str | Message, with_delay: bool = False) -> telegram.Message:
-        return self.send(to.chat_id, msg, reply_to=to.message_id, with_delay=with_delay)
-
-    def reply_callback(self, to: telegram.CallbackQuery, text: str, show_alert: bool = False):
-        self.bot.answer_callback_query(to.id, text=text, show_alert=show_alert)
-
-    def send(self, chat_id: int, msg: str | Message, reply_to: int = None, with_delay: bool = False) -> telegram.Message:
+    def send(self, chat_id: int, msg: str | Message, reply_to: int = None):
         if isinstance(msg, str):
             msg = TextMessage(msg)
 
-        if with_delay:
+        if msg.get_with_delay():
             length = msg.get_length()
             total_delay = min(length // SYMBOLS_PER_SECOND, MAX_DELAY)
 
@@ -51,7 +45,7 @@ class Messenger:
             try:
                 message = msg.send(self.bot, chat_id, reply_to)
                 self.dus.handle_message(message)
-                return message
+                return
             except ChatMigrated as ex:
                 logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.new_chat_id)
                 self.chats_repo.update_next_id(chat_id, ex.new_chat_id)

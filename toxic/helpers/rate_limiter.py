@@ -3,8 +3,6 @@ from datetime import datetime
 
 from loguru import logger
 
-from toxic.messenger.messenger import Messenger
-
 
 @dataclass
 class Bucket:
@@ -13,20 +11,18 @@ class Bucket:
 
 
 class RateLimiter:
-    def __init__(self, rate: int, per: int, reply: str, messenger: Messenger):
+    def __init__(self, rate: int, per: int, reply: str):
         self.rate = rate
         self.per = per
         self.reply = reply
-        self.messenger = messenger
 
         self.buckets: dict[tuple[int, int], Bucket] = {}
 
-    def handle(self, message) -> bool:
+    def handle(self, message) -> str | None:
         if self.discard(message.chat_id, message.from_user.id):
-            self.messenger.reply(message, self.reply)
-            return True
+            return self.reply
 
-        return False
+        return None
 
     def discard(self, chat: int, user: int) -> bool:
         now = datetime.now()

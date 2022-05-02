@@ -7,6 +7,8 @@ from loguru import logger
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.handler import MessageHandler, CallbackHandler, CommandHandler
 from toxic.helpers.rate_limiter import RateLimiter
+
+from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.repositories.callback_data import CallbackDataRepository
@@ -29,24 +31,26 @@ class CallbackDefinition:
 
 class HandlersManager:
     def __init__(self,
-                 handlers_private: tuple[MessageHandler, ...],
-                 handlers_chats: tuple[MessageHandler, ...],
-                 commands: tuple[CommandDefinition, ...],
-                 callbacks: tuple[CallbackDefinition, ...],
+                 update_handlers: list[DatabaseUpdateSaver],  # TODO: replace with interface
+                 callbacks: list[CallbackDefinition],
+                 commands: list[CommandDefinition],
+                 useful_message_handlers: list[MessageHandler],
+                 flood_message_handlers: list[MessageHandler],
+
                  users_repo: UsersRepository,
                  callback_data_repo: CallbackDataRepository,
                  messenger: Messenger,
-                 dus: DatabaseUpdateSaver,
                  metrics: Metrics,
                  rate_limiter: RateLimiter):
-        self.handlers_private = handlers_private
-        self.handlers_chats = handlers_chats
-        self.commands = commands
+        self.update_handlers = update_handlers
         self.callbacks = callbacks
+        self.commands = commands
+        self.useful_message_handlers = useful_message_handlers
+        self.flood_message_handlers = flood_message_handlers
+
         self.users_repo = users_repo
         self.callback_data_repo = callback_data_repo
         self.messenger = messenger
-        self.dus = dus
         self.metrics = metrics
         self.rate_limiter = rate_limiter
 
@@ -69,10 +73,10 @@ class HandlersManager:
             return command_name
         return ''
 
-    def handle_command(self, text: str, message: telegram.Message) -> bool:
+    def handle_command(self, text: str, message: telegram.Message) -> list[Message]:
         command_name = self._get_command_name(text, message)
         if command_name == '':
-            return False
+            return []
 
         args = ARGS_SPLIT_REGEXP.split(text[1:])
 
@@ -85,16 +89,13 @@ class HandlersManager:
             if command.handler.is_admins_only() and not self.users_repo.is_admin(message.from_user.id):
                 break
 
-            if self.rate_limiter.handle(message):
-                return True
+            replies = self.rate_limiter.handle(message)
+            if replies:
+                return self._convert_handler_response(replies)
 
-            try:
-                command.handler.handle(text, message, args)
-            except Exception as ex:
-                logger.opt(exception=ex).error('Caught exception when handling command.')
-            return True
+            return self._convert_handler_response(command.handler.handle(text, message, args))
 
-        return False
+        return []
 
     def handle_callback(self, callback: telegram.CallbackQuery):
         message = callback.message
@@ -135,47 +136,67 @@ class HandlersManager:
                 logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
             return True
 
+    @staticmethod
+    def _convert_handler_response(replies: list[Message] | str | None) -> list[Message]:
+        if replies is None:
+            return []
+        if isinstance(replies, str):
+            return [TextMessage(replies)]
+        return replies
+
     def _handle_update_inner(self, update: telegram.Update):
-        self.metrics.updates.inc(1)
-        # Пишем в БД
-        self.dus.handle(update)
+        # Update handlers (like database)
+        for updater in self.update_handlers:
+            updater.handle(update)
 
-        # Обрабатываем коллбэк
+        # Callback handlers
         if update.callback_query is not None:
-            if self.handle_callback(update.callback_query):
-                return
+            self.handle_callback(update.callback_query)
+            return
 
-        # Обрабатываем только сообщения
+        # Дальше обрабатываем только сообщения
         if update.message is None:
             return
 
-        # Обрабатываем команду
+        replies = []
+
+        # Command handlers
         text = update.message.text
         if text is not None:
-            if self.handle_command(text, update.message):
-                return
-
-        # Обрабатываем сообщение
-
-        if update.message.chat_id > 0:
-            handlers = self.handlers_private
-        else:
-            handlers = self.handlers_chats
-
-        for handler in handlers:
             try:
-                handler.pre_handle(update.message)
+                replies += self.handle_command(text, update.message)
             except Exception as ex:
-                self.messenger.reply(update.message, 'Ошибка.')
-                logger.opt(exception=ex).error('Caught exception when handling update.')
+                replies.append(TextMessage('Ошибка.'))
+                logger.opt(exception=ex).error('Caught exception when handling command.')
 
-        for handler in handlers:
+        # Useful message handlers (chain teaching, music links parser)
+        for handler in self.useful_message_handlers:
             try:
-                if handler.handle(update.message):
-                    return
+                replies += self._convert_handler_response(handler.handle(text or '', update.message))
             except Exception as ex:
-                self.messenger.reply(update.message, 'Ошибка.')
-                logger.opt(exception=ex).error('Caught exception when handling update.')
+                replies.append(TextMessage('Ошибка.'))
+                logger.opt(exception=ex).error('Caught exception when handling message by useful handler.')
+
+        # Flood message handlers
+        for handler in self.flood_message_handlers:
+            if len(replies) > 0:
+                break
+
+            try:
+                replies += self._convert_handler_response(handler.handle(text or '', update.message))
+            except Exception as ex:
+                replies.append(TextMessage('Ошибка.'))
+                logger.opt(exception=ex).error('Caught exception when handling message by flood handler.')
+
+        for reply in replies:
+            try:
+                self.messenger.send(update.message.chat_id, reply, update.message.message_id)
+            except Exception as ex:
+                logger.opt(exception=ex).error(
+                    'Caught exception when replying to message.',
+                    chat_id=update.message.chat_id,
+                    message_id=update.message.message_id,
+                )
 
     def handle_update(self, update: telegram.Update):
         with self.metrics.update_time.time():  # TODO: do with decorator

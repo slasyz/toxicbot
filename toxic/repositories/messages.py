@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Iterator
 
 from toxic.db import Database
 
@@ -7,7 +7,7 @@ class MessagesRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def get_all_groups_messages(self):
+    def get_all_groups_messages(self) -> Iterator[tuple[int, str | None]]:
         for row in self.database.query('''
                 SELECT chat_id, text 
                 FROM messages 

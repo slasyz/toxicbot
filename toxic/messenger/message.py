@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Optional
 
 import telegram
@@ -29,6 +30,9 @@ class Message:
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         raise NotImplementedError()
 
+    def get_with_delay(self) -> bool:
+        return False
+
 
 class VoiceMessage(Message):
     def __init__(self, text, service=None):
@@ -55,17 +59,21 @@ class VoiceMessage(Message):
 
 
 class TextMessage(Message):
-    def __init__(self, text, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True):
+    def __init__(self, text, is_html: bool = False, markup: ReplyMarkup = None, send_trimmed: bool = True, with_delay: bool = False):
         self.text = text
         self.is_html = is_html
         self.markup = markup
         self.send_trimmed = send_trimmed
+        self.with_delay = with_delay
 
     def get_length(self) -> int:
         return len(self.text)
 
     def get_chat_action(self) -> str:
         return CHATACTION_TYPING
+
+    def get_with_delay(self) -> bool:
+        return self.with_delay
 
     def send(self, bot: telegram.Bot, chat_id: int, reply_to: int = None) -> telegram.Message:
         text, trimmed = split_into_chunks(
@@ -128,3 +136,9 @@ class PhotoMessage(Message):
                     parse_mode=telegram.ParseMode.HTML if self.is_html else None,
                 )
         return first_message
+
+
+@dataclass
+class CallbackReply:
+    text: str
+    show_alert: bool = False

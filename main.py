@@ -24,7 +24,7 @@ from toxic.features.music.services.collector import MusicInfoCollector
 from toxic.features.music.services.odesli import Odesli
 from toxic.features.music.services.spotify import Spotify
 from toxic.features.taro import Taro
-from toxic.handlers.chain import ChainHandler
+from toxic.handlers import chain
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
 from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifyAuthCommand
 from toxic.handlers.commands.hookah import HookahCommand
@@ -34,7 +34,7 @@ from toxic.handlers.commands.dump import DumpCommand
 from toxic.handlers.commands.music import MusicPlaintextCallback
 from toxic.handlers.commands.send import SendCommand
 from toxic.handlers.commands.stat import StatCommand, StatsHandler
-from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler
+from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler, PrivateHandler
 from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallback, TaroFirstCallback
 from toxic.handlers.commands.voice import VoiceCommand
 from toxic.handlers.database import DatabaseUpdateSaver
@@ -140,11 +140,6 @@ def __main__():
         ReminderWorker(reminders_repo, deps.messenger),
     ])
 
-    handlers_private = (
-        MusicHandler(music_formatter, deps.messenger),
-        # PrivateHandler(deps.config['replies']['private'], deps.users_repo, deps.messenger),
-    )
-
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, deps.metrics)
     chain_factory = ChainFactory(window=2)
@@ -153,7 +148,6 @@ def __main__():
         rate=5,
         per=120,
         reply=deps.config['replies']['rate_limiter'],
-        messenger=deps.messenger,
     )
 
     taro_dir = get_resource_path('taro')
@@ -163,42 +157,48 @@ def __main__():
     russian = Russian(wn, morph)
     emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
 
-    handlers_chats = (
-        MusicHandler(music_formatter, deps.messenger),
-        KeywordsHandler.new(deps.config['replies']['keywords'], deps.messenger),
-        SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
-        StatsHandler.new(deps.config['replies']['stats'], deps.chats_repo, deps.messenger),
-        ChainHandler.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger),
-    )
+    chain_teaching_handler, chain_flood_handler = chain.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
-    commands = (
-        CommandDefinition('admin', AdminCommand(deps.messenger, spotify, callback_data_repo, settings_repo)),
-        CommandDefinition('dump', DumpCommand(deps.messages_repo, deps.messenger)),
-        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo, deps.messenger)),
-        CommandDefinition('joke', JokeCommand(joker, deps.messenger)),
+    useful_handlers = [
+        MusicHandler(music_formatter),
+        KeywordsHandler.new(deps.config['replies']['keywords']),
+        SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
+        StatsHandler.new(deps.config['replies']['stats'], deps.chats_repo),
+        chain_teaching_handler,
+    ]
+    flood_handlers = [
+        chain_flood_handler,
+        PrivateHandler(deps.config['replies']['private'], deps.users_repo),
+    ]
+
+    commands = [
+        CommandDefinition('admin', AdminCommand(spotify, callback_data_repo, settings_repo)),
+        CommandDefinition('dump', DumpCommand(deps.messages_repo)),
+        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo)),
+        CommandDefinition('joke', JokeCommand(joker)),
         CommandDefinition('send', SendCommand(deps.chats_repo, deps.messenger)),
-        CommandDefinition('chats', ChatsCommand(deps.chats_repo, deps.messenger)),
-        CommandDefinition('voice', VoiceCommand(deps.messages_repo, deps.messenger)),
-        CommandDefinition('taro', TaroCommand(taro_dir, deps.messenger, callback_data_repo)),
-        CommandDefinition('spotify', AdminSpotifyAuthCommand(deps.messenger, spotify)),
-        CommandDefinition('hookah', HookahCommand(emojifier, deps.messenger)),
-    )
-    callbacks = (
+        CommandDefinition('chats', ChatsCommand(deps.chats_repo)),
+        CommandDefinition('voice', VoiceCommand(deps.messages_repo)),
+        CommandDefinition('taro', TaroCommand(taro_dir, callback_data_repo)),
+        CommandDefinition('spotify', AdminSpotifyAuthCommand(spotify)),
+        CommandDefinition('hookah', HookahCommand(emojifier)),
+    ]
+    callbacks = [
         CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
         CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
-        CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo, deps.messenger)),
-        CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify, deps.messenger)),
-        CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger))
-    )
+        CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo)),
+        CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify)),
+        CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger, deps.config['replies']['music']['error']))
+    ]
     handle_manager = HandlersManager(
-        handlers_private,
-        handlers_chats,
-        commands,
+        [deps.dus],
         callbacks,
+        commands,
+        useful_handlers,
+        flood_handlers,
         deps.users_repo,
         callback_data_repo,
         deps.messenger,
-        deps.dus,
         deps.metrics,
         rate_limiter,
     )

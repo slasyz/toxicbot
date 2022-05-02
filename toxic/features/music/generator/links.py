@@ -13,12 +13,17 @@ HOSTS = [
 ]
 
 
-def is_link_to_music(link: str) -> bool:
+def get_hostname(link: str) -> str:
     parsed = urllib.parse.urlparse(link)
     if parsed.hostname is None:
-        return False
+        return ''
+    return parsed.hostname
+
+
+def is_link_to_music(link: str) -> bool:
+    hostname = get_hostname(link)
     for host in HOSTS:
-        if parsed.hostname == host or parsed.hostname.endswith('.' + host):
+        if hostname == host or hostname.endswith('.' + host):
             return True
     return False
 

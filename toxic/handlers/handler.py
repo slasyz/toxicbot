@@ -1,16 +1,15 @@
 import telegram
 
+from toxic.messenger.message import Message, CallbackReply
+
 
 class MessageHandler:
-    def pre_handle(self, message: telegram.Message):
-        pass
-
-    def handle(self, message: telegram.Message) -> bool:
+    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         raise NotImplementedError()
 
 
 class CommandHandler:
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         raise NotImplementedError()
 
     @staticmethod
@@ -19,7 +18,7 @@ class CommandHandler:
 
 
 class CallbackHandler:
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         raise NotImplementedError()
 
     @staticmethod

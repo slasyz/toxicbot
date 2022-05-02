@@ -6,18 +6,17 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 
 from toxic.features.taro import Taro, CardData
 from toxic.handlers.handler import CallbackHandler, CommandHandler
-from toxic.messenger.message import TextMessage, PhotoMessage
+from toxic.messenger.message import TextMessage, PhotoMessage, Message, CallbackReply
 from toxic.messenger.messenger import Messenger
 from toxic.repositories.callback_data import CallbackDataRepository
 
 
 class TaroCommand(CommandHandler):
-    def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
+    def __init__(self, res_dir: str, callback_data_repo: CallbackDataRepository):
         self.res_dir = res_dir
-        self.messenger = messenger
         self.callback_data_repo = callback_data_repo
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         goals = ['general', 'love', 'question', 'daily', 'advice']
         buttons = []
         for goal in goals:
@@ -27,10 +26,10 @@ class TaroCommand(CommandHandler):
                     callback_data=self.callback_data_repo.insert_value({'name': '/taro/first', 'goal': goal}),
                 ),
             ])
-        self.messenger.reply(message, TextMessage(
+        return [TextMessage(
             text='🧙 🌟 Что хотим получить от Вселенной? 🪐 🪄',
             markup=InlineKeyboardMarkup(buttons),
-        ))
+        )]
 
 
 GOALS_EMOJI = {
@@ -73,7 +72,7 @@ class TaroFirstCallback(CallbackHandler):
         self.messenger = messenger
         self.callback_data_repo = callback_data_repo
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
 
@@ -96,6 +95,7 @@ class TaroFirstCallback(CallbackHandler):
             ])
         ))
         self.messenger.delete_message(message.chat_id, message.message_id)
+        return None
 
 
 class TaroSecondCallback(CallbackHandler):
@@ -103,7 +103,7 @@ class TaroSecondCallback(CallbackHandler):
         self.taro = taro
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict):
+    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         card = self.taro.get_random_card()
 
         logger.info('Handling taro callback: {}.', args)
@@ -119,3 +119,4 @@ class TaroSecondCallback(CallbackHandler):
             is_html=True,
         ))
         self.messenger.delete_message(message.chat_id, message.message_id)
+        return None

@@ -19,9 +19,9 @@ class Service(Enum):
 
 @dataclass
 class Info:
-    type: Type = None
-    artist_name: str = None
-    title: str = None
+    type: Type = Type.ARTIST
+    artist_name: str = ''
+    title: str = ''
 
     links: dict[Service, str] = field(default_factory=dict)
     thumbnail_url: Optional[str] = None

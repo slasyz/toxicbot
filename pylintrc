@@ -151,7 +151,8 @@ disable=no-self-use,
         too-few-public-methods,
         too-many-arguments,
         too-many-locals,
-        fixme
+        fixme,
+        useless-return
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -550,7 +551,7 @@ max-parents=7
 max-public-methods=20
 
 # Maximum number of return / yield for function / method body.
-max-returns=6
+max-returns=10
 
 # Maximum number of statements in function / method body.
 max-statements=50

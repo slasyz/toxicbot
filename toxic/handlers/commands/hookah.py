@@ -2,24 +2,20 @@ import telegram
 
 from toxic.features.emojifier import Emojifier
 from toxic.handlers.handler import CommandHandler
-from toxic.messenger.messenger import Messenger
+from toxic.messenger.message import Message
 
 
 class HookahCommand(CommandHandler):
-    def __init__(self, emojifier: Emojifier, messenger: Messenger):
+    def __init__(self, emojifier: Emojifier):
         self.emojifier = emojifier
-        self.messenger = messenger
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         message_src = message.reply_to_message
         if message_src is None:
-            self.messenger.reply(message, 'Эту команду нужно присылать в ответ на сообщение.')
-            return
+            return 'Эту команду нужно присылать в ответ на сообщение.'
 
         text = message_src.text or message_src.caption or ''
         if text is None or text == '':
-            self.messenger.reply(message, '???')
-            return
+            return '???'
 
-        res = self.emojifier.generate(text)
-        self.messenger.reply(message, res)
+        return self.emojifier.generate(text)

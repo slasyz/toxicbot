@@ -2,20 +2,17 @@ import telegram
 from loguru import logger
 
 from toxic.handlers.handler import CommandHandler
-from toxic.messenger.message import VoiceMessage
-from toxic.messenger.messenger import Messenger
+from toxic.messenger.message import VoiceMessage, Message
 from toxic.repositories.messages import MessagesRepository
 
 
 class VoiceCommand(CommandHandler):
-    def __init__(self, messages_repository: MessagesRepository, messenger: Messenger):
+    def __init__(self, messages_repository: MessagesRepository):
         self.messages_repository = messages_repository
-        self.messenger = messenger
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if message.reply_to_message is None:
-            self.messenger.reply(message, 'Нет.')
-            return
+            return 'Нет.'
 
         # TODO: use message.reply_to_message.text ?
 
@@ -26,7 +23,6 @@ class VoiceCommand(CommandHandler):
                 chat_id=message.chat_id,
                 reply_to=message.reply_to_message.message_id,
             )
-            self.messenger.reply(message, 'Нет.')
-            return
+            return 'Нет.'
 
-        self.messenger.reply(message, VoiceMessage(text_to_voice))
+        return [VoiceMessage(text_to_voice)]

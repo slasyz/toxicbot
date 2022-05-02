@@ -4,37 +4,33 @@ import telegram
 from loguru import logger
 
 from toxic.handlers.handler import CommandHandler
-from toxic.messenger.messenger import Messenger
+from toxic.messenger.message import Message
 from toxic.repositories.messages import MessagesRepository
 
 
 class DumpCommand(CommandHandler):
-    def __init__(self, messages_repo: MessagesRepository, messenger: Messenger):
+    def __init__(self, messages_repo: MessagesRepository):
         self.messages_repo = messages_repo
-        self.messenger = messenger
 
     @staticmethod
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]):
+    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) != 2:
-            self.messenger.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
-            return
+            return f'Нужно писать так: /{args[0]} UPDATE_ID'
 
         try:
             update_id = int(args[1])
         except ValueError:
-            self.messenger.reply(message, f'Нужно писать так: /{args[0]} UPDATE_ID')
-            return
+            return f'Нужно писать так: /{args[0]} UPDATE_ID'
 
         dump = self.messages_repo.get_update_dump(update_id)
         if dump is None:
-            self.messenger.reply(message, 'В базе нет такого апдейта.')
-            return
+            return 'В базе нет такого апдейта.'
 
         try:
-            self.messenger.reply(message, json.dumps(json.loads(dump), indent=2, ensure_ascii=False))
+            return json.dumps(json.loads(dump), indent=2, ensure_ascii=False)
         except json.decoder.JSONDecodeError as ex:
             logger.opt(exception=ex).error('Caught exception when decoding dump.')
-            self.messenger.reply(message, dump)
+            return dump

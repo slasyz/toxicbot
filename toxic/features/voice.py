@@ -3,7 +3,8 @@ from typing import IO
 
 import requests
 
-from toxic.helpers import consts, decorators
+from toxic.helpers import consts
+from toxic.helpers.retry import with_retry
 
 MAX_ATTEMPTS = 3
 MAX_ERROR_LENGTH = 100
@@ -29,7 +30,7 @@ class NextUpService(VoiceService):
             f = BytesIO(audio.content)
             return f
 
-    @decorators.with_retry(MAX_ATTEMPTS, (InvalidLinkException,))
+    @with_retry(MAX_ATTEMPTS, (InvalidLinkException,))
     def generate_link(self, text):
         # TODO: proxy
         req = requests.get(
