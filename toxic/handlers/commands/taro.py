@@ -16,7 +16,7 @@ class TaroCommand(CommandHandler):
         self.res_dir = res_dir
         self.callback_data_repo = callback_data_repo
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         goals = ['general', 'love', 'question', 'daily', 'advice']
         buttons = []
         for goal in goals:
@@ -72,14 +72,14 @@ class TaroFirstCallback(CallbackHandler):
         self.messenger = messenger
         self.callback_data_repo = callback_data_repo
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
 
         goal = args.get('goal', '')
         mention = get_mention(callback.from_user)
 
-        self.messenger.send(message.chat_id, PhotoMessage(
+        await self.messenger.send(message.chat_id, PhotoMessage(
             photo=photo,
             text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
             is_html=True,
@@ -103,7 +103,7 @@ class TaroSecondCallback(CallbackHandler):
         self.taro = taro
         self.messenger = messenger
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         card = self.taro.get_random_card()
 
         logger.info('Handling taro callback: {}.', args)
@@ -113,7 +113,7 @@ class TaroSecondCallback(CallbackHandler):
 
         mention = get_mention(callback.from_user)
 
-        self.messenger.send(message.chat_id, PhotoMessage(
+        await self.messenger.send(message.chat_id, PhotoMessage(
             photo=card.image,
             text=f'''{mention}, тебе выпала карта <b>{card.data.name}</b>\n\n{description}''',
             is_html=True,

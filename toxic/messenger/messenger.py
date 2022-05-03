@@ -1,4 +1,4 @@
-import time
+import asyncio
 
 import telegram
 from loguru import logger
@@ -25,7 +25,7 @@ class Messenger:
         self.dus = dus
         self.delayer_factory = delayer_factory
 
-    def send(self, chat_id: int, msg: str | Message, reply_to: int = None):
+    async def send(self, chat_id: int, msg: str | Message, reply_to: int = None):
         if isinstance(msg, str):
             msg = TextMessage(msg)
 
@@ -36,8 +36,7 @@ class Messenger:
             delayer = self.delayer_factory.create(total_delay, DELAY_KEEPALIVE)
             for interval in delayer:
                 self.bot.send_chat_action(chat_id, msg.get_chat_action())
-                # TODO: do it asynchronously
-                time.sleep(interval)
+                await asyncio.sleep(interval)
 
         chat_id = self.chats_repo.get_latest_chat_id(chat_id)
 
@@ -59,9 +58,9 @@ class Messenger:
         else:
             raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))
 
-    def send_to_admins(self, msg: str | Message):
+    async def send_to_admins(self, msg: str | Message):
         for id in self.users_repo.get_admins():
-            self.send(id, msg)
+            await self.send(id, msg)
 
     def delete_message(self, chat_id: int, message_id: int, ignore_not_found: bool = True):
         try:
@@ -114,7 +113,7 @@ def __main__():
 
     deps = main.init(['../../config.json'])
 
-    deps.messenger.send(-328967401, 'приветики')
+    asyncio.run(deps.messenger.send(-328967401, 'приветики'))
 
 
 if __name__ == '__main__':

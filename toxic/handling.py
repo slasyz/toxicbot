@@ -73,7 +73,7 @@ class HandlersManager:
             return command_name
         return ''
 
-    def handle_command(self, text: str, message: telegram.Message) -> list[Message]:
+    async def handle_command(self, text: str, message: telegram.Message) -> list[Message]:
         command_name = self._get_command_name(text, message)
         if command_name == '':
             return []
@@ -93,11 +93,11 @@ class HandlersManager:
             if replies:
                 return self._convert_handler_response(replies)
 
-            return self._convert_handler_response(command.handler.handle(text, message, args))
+            return self._convert_handler_response(await command.handler.handle(text, message, args))
 
         return []
 
-    def handle_callback(self, callback: telegram.CallbackQuery):
+    async def handle_callback(self, callback: telegram.CallbackQuery):
         message = callback.message
         if message is None:
             return
@@ -132,11 +132,11 @@ class HandlersManager:
                 continue
 
             try:
-                reply = callback_definition.handler.handle(callback, message, args)
+                reply = await callback_definition.handler.handle(callback, message, args)
                 if reply is None:
                     return
                 if isinstance(reply, Message):
-                    self.messenger.send(message.chat_id, reply)
+                    await self.messenger.send(message.chat_id, reply)
                     return
                 callback.answer(text=reply.text, show_alert=reply.show_alert)
             except Exception as ex:
@@ -151,14 +151,17 @@ class HandlersManager:
             return [TextMessage(replies)]
         return replies
 
-    def _handle_update_inner(self, update: telegram.Update):
+    async def _handle_update_inner(self, update: telegram.Update):
         # Update handlers (like database)
         for updater in self.update_handlers:
-            updater.handle(update)
+            try:
+                await updater.handle(update)
+            except Exception as ex:
+                logger.opt(exception=ex).error('Caught exception when handling update by update handler.')
 
         # Callback handlers
         if update.callback_query is not None:
-            self.handle_callback(update.callback_query)
+            await self.handle_callback(update.callback_query)
             return
 
         # Дальше обрабатываем только сообщения
@@ -171,7 +174,7 @@ class HandlersManager:
         text = update.message.text
         if text is not None:
             try:
-                replies += self.handle_command(text, update.message)
+                replies += await self.handle_command(text, update.message)
             except Exception as ex:
                 replies.append(TextMessage('Ошибка.'))
                 logger.opt(exception=ex).error('Caught exception when handling command.')
@@ -179,7 +182,7 @@ class HandlersManager:
         # Useful message handlers (chain teaching, music links parser)
         for handler in self.useful_message_handlers:
             try:
-                replies += self._convert_handler_response(handler.handle(text or '', update.message))
+                replies += self._convert_handler_response(await handler.handle(text or '', update.message))
             except Exception as ex:
                 replies.append(TextMessage('Ошибка.'))
                 logger.opt(exception=ex).error('Caught exception when handling message by useful handler.')
@@ -190,14 +193,14 @@ class HandlersManager:
                 break
 
             try:
-                replies += self._convert_handler_response(handler.handle(text or '', update.message))
+                replies += self._convert_handler_response(await handler.handle(text or '', update.message))
             except Exception as ex:
                 replies.append(TextMessage('Ошибка.'))
                 logger.opt(exception=ex).error('Caught exception when handling message by flood handler.')
 
         for reply in replies:
             try:
-                self.messenger.send(update.message.chat_id, reply, update.message.message_id)
+                await self.messenger.send(update.message.chat_id, reply, update.message.message_id)
             except Exception as ex:
                 logger.opt(exception=ex).error(
                     'Caught exception when replying to message.',
@@ -205,6 +208,6 @@ class HandlersManager:
                     message_id=update.message.message_id,
                 )
 
-    def handle_update(self, update: telegram.Update):
+    async def handle_update(self, update: telegram.Update):
         with self.metrics.update_time.time():  # TODO: do with decorator
-            self._handle_update_inner(update)
+            await self._handle_update_inner(update)

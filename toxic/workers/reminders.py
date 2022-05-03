@@ -1,3 +1,4 @@
+import asyncio
 import time
 from datetime import datetime
 
@@ -16,7 +17,7 @@ class ReminderWorker(Worker):
         self.reminders_repo = reminders_repo
         self.messenger = messenger
 
-    def work(self):
+    async def work(self):
         while True:
             reminder = self.reminders_repo.get_latest_reminder()
             if reminder is None:
@@ -25,7 +26,7 @@ class ReminderWorker(Worker):
             seconds = until(reminder.when)
             if seconds > 0:
                 print_sleep(seconds, f'reminder #{id}')
-                time.sleep(seconds)
+                await asyncio.sleep(seconds)
 
-            self.messenger.send(reminder.chat_id, reminder.text)
+            await self.messenger.send(reminder.chat_id, reminder.text)
             self.reminders_repo.deactivate_reminder(reminder.id)

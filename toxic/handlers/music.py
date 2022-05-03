@@ -12,7 +12,7 @@ class MusicHandler(MessageHandler):
         self.music_formatter = music_formatter
 
     @decorators.non_empty
-    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         links = extract_music_links(text)

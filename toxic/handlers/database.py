@@ -116,7 +116,7 @@ class DatabaseUpdateSaver:
         row = self.database.query_row('''SELECT count(*) FROM messages''')
         self.metrics.messages.set(row[0])
 
-    def handle(self, update: telegram.Update):
+    async def handle(self, update: telegram.Update):
         row = self.database.query_row('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
         if row is not None:
             logger.info('Ignoring update #{}.', update.update_id)

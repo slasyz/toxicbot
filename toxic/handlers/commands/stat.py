@@ -38,7 +38,7 @@ class StatCommand(CommandHandler):
 
         return self._get_response(chat_id)
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if message.chat_id < 0:
             if len(args) == 1:
                 return self._get_response(message.chat_id)
@@ -75,7 +75,7 @@ class StatsHandler(MessageHandler):
         return StatsHandler(replies_regexes, chats_repo)
 
     @decorators.non_empty
-    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         for key, value in self.replies.items():

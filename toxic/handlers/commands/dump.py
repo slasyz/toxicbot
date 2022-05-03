@@ -16,7 +16,7 @@ class DumpCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) != 2:
             return f'Нужно писать так: /{args[0]} UPDATE_ID'
 

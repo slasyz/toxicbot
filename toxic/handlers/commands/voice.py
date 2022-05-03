@@ -10,7 +10,7 @@ class VoiceCommand(CommandHandler):
     def __init__(self, messages_repository: MessagesRepository):
         self.messages_repository = messages_repository
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if message.reply_to_message is None:
             return 'Нет.'
 

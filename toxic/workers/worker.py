@@ -1,5 +1,5 @@
 import _thread
-import threading
+import asyncio
 import traceback
 from datetime import datetime
 
@@ -12,7 +12,7 @@ MAX_ERRORS_PER_MINUTE = 3
 
 
 class Worker:
-    def work(self):
+    async def work(self):
         raise NotImplementedError()
 
 
@@ -26,10 +26,10 @@ class WorkerWrapper:
         now = datetime.now()
         self.counter = {x for x in self.counter if (now - x).total_seconds() <= 60}
 
-    def run(self):
+    async def run(self):
         while True:
             try:
-                self.worker.work()
+                await self.worker.work()
                 return
             except Exception as ex:
                 traceback.print_stack()
@@ -43,7 +43,7 @@ class WorkerWrapper:
                         len(self.counter), self.__class__.__name__,
                     )
                     try:
-                        self.messenger.send_to_admins(f'Воркер {type(self.worker).__name__} бросил исключение {len(self.counter)} раз. Выход.')
+                        await self.messenger.send_to_admins(f'Воркер {type(self.worker).__name__} бросил исключение {len(self.counter)} раз. Выход.')
                     except AttributeError:
                         # Скорее всего, ошибка возникла на старте, когда ещё нет подключения к телеге.
                         # Если бот не запустится, это будет заметно сразу.
@@ -60,9 +60,11 @@ class WorkersManager:
     def __init__(self, messenger: Messenger):
         self.messenger = messenger
 
-    def start(self, workers: list[Worker]):
+    async def run(self, workers: list[Worker]):
+        tasks = []
         for worker in workers:
             wrapper = WorkerWrapper(worker, self.messenger)
-            thread = threading.Thread(target=wrapper.run)
-            thread.daemon = True
-            thread.start()
+            t = asyncio.create_task(wrapper.run())
+            tasks.append(t)
+
+        await asyncio.gather(*tasks)

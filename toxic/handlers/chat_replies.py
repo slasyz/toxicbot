@@ -29,7 +29,7 @@ class KeywordsHandler(MessageHandler):
         return KeywordsHandler(map)
 
     @decorators.non_empty
-    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         for key, val in self.map.items():
@@ -48,7 +48,7 @@ class PrivateHandler(MessageHandler):
         self.replies = replies
         self.users_repo = users_repo
 
-    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         if message.chat_id < 0:
             return None
 
@@ -69,7 +69,7 @@ class SorryHandler(MessageHandler):
         return SorryHandler(config['sorry'], config['not_sorry'], messenger)
 
     @decorators.non_empty
-    def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         reply = self.reply_sorry

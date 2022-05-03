@@ -1,3 +1,4 @@
+import asyncio
 import math
 import time
 
@@ -16,25 +17,25 @@ class JokesWorker(Worker):
         self.chats_repo = chats_repo
         self.messenger = messenger
 
-    def work(self):
+    async def work(self):
         while True:
             now = time.localtime()
             now = time.mktime(now[:3] + (0, 0, 0) + now[6:])  # отбрасываем часы-минуты-секунды
             seconds = math.ceil(now + 24 * 3600 - time.time())  # прибавляем 24 часа, смотрим сколько осталось
             print_sleep(seconds, 'next midnight joke')
-            time.sleep(seconds)
+            await asyncio.sleep(seconds)
 
             for id in self.chats_repo.get_joker_chats():
                 logger.info('Sending joke to chat #{}.', id)
                 joke, _ = self.joker.get_random_joke()
 
                 try:
-                    self.messenger.send(id, joke)
+                    await self.messenger.send(id, joke)
                 except Exception as ex:
                     logger.opt(exception=ex).error('Cannot send joke to chat #%d.', id)
                     continue
 
-            time.sleep(2)
+            await asyncio.sleep(2)
 
 
 if __name__ == '__main__':

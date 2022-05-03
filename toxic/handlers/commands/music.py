@@ -13,7 +13,7 @@ class MusicPlaintextCallback(CallbackHandler):
         self.messenger = messenger
         self.error_reply = error_reply
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         link = args['link']
         music_message = self.music_formatter.get_message(link, True)
         if music_message is None:

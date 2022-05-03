@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import os
 import sys
 import time
@@ -54,7 +55,7 @@ from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
-from toxic.workers.worker import WorkersManager
+from toxic.workers.worker import WorkerWrapper
 
 
 @dataclass
@@ -113,8 +114,37 @@ def init(config_files: list) -> BasicDependencies:
     )
 
 
+async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
+    # TODO: распутать это всё
+    update_id = None
+    while True:
+        try:
+            for update in deps.messenger.bot.get_updates(offset=update_id, timeout=10):
+                update_id = update.update_id
+                await handle_manager.handle_update(update)
+                update_id = update.update_id + 1
+        except NetworkError as ex:
+            logger.opt(exception=ex).error('Network error.')
+            if isinstance(ex, telegram.error.BadRequest):
+                update_id += 1
+            await asyncio.sleep(1)
+        except Unauthorized:  # The user has removed or blocked the bot.
+            logger.info('User removed or blocked the bot.')
+            update_id += 1
+        except Conflict as ex:
+            logger.opt(exception=ex).error('Bot is already running somewhere, stopping it.')
+            sys.exit(1)
+        except KeyboardInterrupt:
+            sys.exit(0)
+        except InterfaceError as ex:
+            logger.opt(exception=ex).error('Get psycopg2.InterfaceError, stopping.')
+            sys.exit(1)
+        except Exception as ex:
+            logger.opt(exception=ex).error('Caught an exception while handling an update.')
+
+
 # pylint: disable=too-many-statements
-def __main__():
+async def __main__():
     deps = init(['./config.json', '/etc/toxic/config.json'])
 
     init_sentry(deps.config['sentry']['dsn'])
@@ -134,11 +164,11 @@ def __main__():
     )
     music_formatter = MusicMessageGenerator(music_info_collector, settings_repo, callback_data_repo)
 
-    worker_manager = WorkersManager(deps.messenger)
-    worker_manager.start([
+    # worker_manager = WorkersManager(deps.messenger)
+    workers = [
         JokesWorker(joker, deps.chats_repo, deps.messenger),
         ReminderWorker(reminders_repo, deps.messenger),
-    ])
+    ]
 
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, deps.metrics)
@@ -203,38 +233,19 @@ def __main__():
         rate_limiter,
     )
 
-    deps.messenger.send_to_admins('Я запустился.')
+    await deps.messenger.send_to_admins('Я запустился.')
 
     messages_total_row = deps.database.query_row('''SELECT count(*) FROM messages''')
     deps.metrics.messages.set(messages_total_row[0])
 
-    # TODO: распутать это всё
-    update_id = None
-    while True:
-        try:
-            for update in deps.messenger.bot.get_updates(offset=update_id, timeout=10):
-                update_id = update.update_id
-                handle_manager.handle_update(update)
-                update_id = update.update_id + 1
-        except NetworkError as ex:
-            logger.opt(exception=ex).error('Network error.')
-            if isinstance(ex, telegram.error.BadRequest):
-                update_id += 1
-            time.sleep(1)
-        except Unauthorized:  # The user has removed or blocked the bot.
-            logger.info('User removed or blocked the bot.')
-            update_id += 1
-        except Conflict as ex:
-            logger.opt(exception=ex).error('Bot is already running somewhere, stopping it.')
-            sys.exit(1)
-        except KeyboardInterrupt:
-            sys.exit(0)
-        except InterfaceError as ex:
-            logger.opt(exception=ex).error('Get psycopg2.InterfaceError, stopping.')
-            sys.exit(1)
-        except Exception as ex:
-            logger.opt(exception=ex).error('Caught an exception while handling an update.')
+    tasks = [loop(deps, handle_manager)]
+    # TODO: find out why WorkersManager doesn't start them
+    for worker in workers:
+        t = asyncio.create_task(WorkerWrapper(worker, deps.messenger).run())
+        tasks.append(t)
+
+    await asyncio.gather(*tasks)
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

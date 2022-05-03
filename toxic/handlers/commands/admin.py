@@ -19,7 +19,7 @@ class AdminCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         buttons = [
             [InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
         ]
@@ -42,7 +42,7 @@ class AdminChatsCallback(CallbackHandler):
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         response = []
         for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')
@@ -58,7 +58,7 @@ class AdminSpotifyAuthCallback(CallbackHandler):
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         if self.spotify.is_authenticated():
             return CallbackReply('Уже авторизован.', show_alert=True)
 
@@ -78,7 +78,7 @@ class AdminSpotifyAuthCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) != 2:
             return 'Нужно писать так: /spotify URL'
 

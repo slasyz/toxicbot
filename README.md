@@ -11,7 +11,7 @@ for anyone else.
 ### Random replies
 
 It uses Markov chain algorithm to generate a random reply when someone 
-mentions the bot, or when it feels and urge to join the conversation with
+mentions the bot, or when it feels an urge to join the conversation with
 its dumb phrases.
 
 <p align="center"><img alt="Random replies example." src="./docs/img/chain.png" /></p>
