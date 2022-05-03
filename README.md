@@ -33,14 +33,6 @@ for it in other streaming services and sends them in response.
 <p align="center"><img alt="Music link converting example." src="./docs/img/streaming.png" /></p>
 
 
-### Adding songs to Spotify queue
-
-When I have a party with my friends, they can send music links to one of 
-our group chats, so I could add these songs to my Spotify queue.
-
-Sounds stupid, and it is.
-
-
 ### Tarot cards divination
 
 <p align="center"><img alt="Tarot example (first step)." src="./docs/img/taro-1.png" /></p>
