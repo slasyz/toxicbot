@@ -2,7 +2,6 @@ import csv
 import json
 import os
 import random
-from typing import Iterable
 
 from ruwordnet import RuWordNet
 from pymorphy2 import MorphAnalyzer
@@ -15,7 +14,7 @@ class Russian:
         self.wn = wn
         self.morph = morph
 
-    def get_hypernyms(self, synset_ids: Iterable[str]) -> set[str]:
+    def get_hypernyms(self, synset_ids: set[str]) -> set[str]:
         res = set()
         for synset_id in synset_ids:
             synset = self.wn[synset_id]
@@ -24,7 +23,7 @@ class Russian:
 
         return res
 
-    def get_hyponyms(self, synset_ids: Iterable[str]) -> set[str]:
+    def get_hyponyms(self, synset_ids: set[str]) -> set[str]:
         res = set()
         for synset_id in synset_ids:
             synset = self.wn[synset_id]

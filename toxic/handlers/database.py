@@ -1,5 +1,3 @@
-from typing import Optional
-
 import telegram
 from loguru import logger
 
@@ -65,7 +63,7 @@ class DatabaseUpdateSaver:
                 chat.id
             ))
 
-    def handle_message(self, message: telegram.Message, update_id: Optional[int] = None):
+    def handle_message(self, message: telegram.Message, update_id: int | None = None):
         if message.from_user is not None:
             self.handle_user(message.from_user)
         if message.chat is not None:

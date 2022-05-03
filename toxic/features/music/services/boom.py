@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 import requests
 from loguru import logger
@@ -9,7 +8,7 @@ from toxic.features.music.services.structs import Infoer, Info, Type, Service
 
 
 class Boom(Infoer):
-    def get_info(self, url: str) -> Optional[Info]:
+    def get_info(self, url: str) -> Info | None:
         try:
             return self._get_info(url)
         except Exception as ex:
@@ -17,7 +16,7 @@ class Boom(Infoer):
 
         return None
 
-    def _get_info(self, url: str) -> Optional[Info]:
+    def _get_info(self, url: str) -> Info | None:
         data = self._get_json(url)
         if data is None:
             return None
@@ -60,7 +59,7 @@ class Boom(Infoer):
 
         return None
 
-    def _get_json(self, url: str) -> Optional[dict]:
+    def _get_json(self, url: str) -> dict | None:
         with requests.get(url) as req:
             data = req.content.decode('utf-8', 'ignore')
             parser = html.HTMLParser(encoding='utf-8')

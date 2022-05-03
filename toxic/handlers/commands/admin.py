@@ -1,5 +1,3 @@
-from typing import Optional
-
 import telegram
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -12,7 +10,7 @@ from toxic.repositories.settings import SettingsRepository
 
 
 class AdminCommand(CommandHandler):
-    def __init__(self, spotify: Optional[Spotify], callback_data_repo: CallbackDataRepository, settings_repo: SettingsRepository):
+    def __init__(self, spotify: Spotify | None, callback_data_repo: CallbackDataRepository, settings_repo: SettingsRepository):
         self.spotify = spotify
         self.callback_data_repo = callback_data_repo
         self.settings_repo = settings_repo

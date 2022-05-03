@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 from urllib.parse import urlencode
 
 import requests
@@ -49,7 +48,7 @@ class Odesli(Infoer):
         return entity_id
 
     @classmethod
-    def _parse_result(cls, data: dict) -> Optional[Info]:
+    def _parse_result(cls, data: dict) -> Info | None:
         entity_id = data.get('entityUniqueId')
         if entity_id is None:
             return None
@@ -75,7 +74,7 @@ class Odesli(Infoer):
 
         return result
 
-    def get_info(self, url: str) -> Optional[Info]:
+    def get_info(self, url: str) -> Info | None:
         basepath = 'https://api.song.link/v1-alpha.1/links'
         params = {
             'url': url

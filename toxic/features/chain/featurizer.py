@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 FEATURE_NONE = 0
 
 
@@ -16,7 +13,7 @@ class Featurizer:
         self.features: dict[str, int] = {}
         self.values: dict[int, str] = {}
 
-    def get_feature(self, value: Optional[str]) -> int:
+    def get_feature(self, value: str | None) -> int:
         if value is None:
             return FEATURE_NONE
 
@@ -28,7 +25,7 @@ class Featurizer:
             self.values[next_feature_num] = value
             return next_feature_num
 
-    def get_value(self, feature: int) -> Optional[str]:
+    def get_value(self, feature: int) -> str | None:
         if feature == FEATURE_NONE:
             return None
 

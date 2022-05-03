@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 import spotipy
 from loguru import logger
@@ -95,7 +94,7 @@ class SpotifySearcher(Searcher):
     def clean(self, query: str) -> str:
         return CLEAN_REGEXP.sub('', query)
 
-    def _search(self, query: str, type: str, key: str) -> Optional[str]:
+    def _search(self, query: str, type: str, key: str) -> str | None:
         query = self.clean(query)
 
         try:
@@ -112,16 +111,16 @@ class SpotifySearcher(Searcher):
             # TODO: log
             return None
 
-    def _get_link_artist(self, name: str) -> Optional[str]:
+    def _get_link_artist(self, name: str) -> str | None:
         return self._search('{}'.format(name), 'artist', 'artists')
 
-    def _get_link_album(self, artist_name: str, title: str) -> Optional[str]:
+    def _get_link_album(self, artist_name: str, title: str) -> str | None:
         return self._search('{} {}'.format(artist_name, title), 'album', 'albums')
 
-    def _get_link_song(self, artist_name: str, title: str) -> Optional[str]:
+    def _get_link_song(self, artist_name: str, title: str) -> str | None:
         return self._search('{} {}'.format(artist_name, title), 'track', 'tracks')
 
-    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[SearchResult]:
+    def get_link(self, type: Type, artist_name: str, title: str) -> SearchResult | None:
         res = None
         if type == Type.ARTIST:
             res = self._get_link_artist(artist_name)

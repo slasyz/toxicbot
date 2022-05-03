@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyMarkup
 
@@ -13,7 +12,7 @@ from toxic.repositories.settings import SettingsRepository
 class MusicMessage:
     text: str
     buttons: ReplyMarkup
-    image_url: Optional[str]
+    image_url: str | None
 
 
 class MusicMessageGenerator:
@@ -26,7 +25,7 @@ class MusicMessageGenerator:
             self,
             source_link: str,
             include_plaintext_links: bool,
-    ) -> Optional[MusicMessage]:
+    ) -> MusicMessage | None:
         info = self.collector.collect_info(source_link)
         if info is None:
             return None

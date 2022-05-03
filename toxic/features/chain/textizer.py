@@ -1,5 +1,3 @@
-from typing import Optional
-
 from toxic.features.chain.chain import Chain
 from toxic.features.chain.featurizer import Featurizer, FEATURE_NONE
 from toxic.features.chain.splitters import Splitter
@@ -38,7 +36,7 @@ class Textizer:
         feature = self.featurizer.get_feature(None)
         chain.teach(feature)
 
-    def predict(self, chain: Chain, message: Optional[str] = None) -> str:
+    def predict(self, chain: Chain, message: str | None = None) -> str:
         if message is None:
             message = ''
 

@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-from typing import Optional
 
 from toxic.config import Config
 from toxic.db import Database
@@ -45,7 +44,7 @@ def get_json_id(message: dict) -> int:
     return message['id']
 
 
-def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> Optional[int]:
+def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> int | None:
     rows = list(database.query(
         'SELECT tg_id FROM messages WHERE chat_id=%s AND user_id=%s AND text=%s AND abs(EXTRACT(epoch from date-%s)) < 1;',
         (chat_id, user_id, s, date),

@@ -1,5 +1,4 @@
 import random
-from typing import Optional
 
 
 class Chain:
@@ -13,7 +12,7 @@ class Chain:
     def get_start(self, features: list[int]) -> tuple:
         raise NotImplementedError()
 
-    def predict(self, current: tuple) -> Optional[int]:
+    def predict(self, current: tuple) -> int | None:
         raise NotImplementedError()
 
 
@@ -62,7 +61,7 @@ class MarkovChain(Chain):
 
         return tuple(features[-self.window:])
 
-    def predict(self, current: tuple) -> Optional[int]:
+    def predict(self, current: tuple) -> int | None:
         try:
             stat = self.data[current]
         except KeyError:

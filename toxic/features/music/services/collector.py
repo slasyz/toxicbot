@@ -1,5 +1,3 @@
-from typing import Optional
-
 from loguru import logger
 
 from toxic.features.music.services.structs import Info, Infoer, Searcher, Service
@@ -10,7 +8,7 @@ class MusicInfoCollector:
         self.infoers = infoers
         self.searchers = searchers
 
-    def _collect_info_by_url(self, info: Info, url: str) -> Optional[Info]:
+    def _collect_info_by_url(self, info: Info, url: str) -> Info:
         for infoer in self.infoers:
             new_info = infoer.get_info(url)
             logger.debug(
@@ -35,12 +33,9 @@ class MusicInfoCollector:
 
             logger.debug('After infoer there is this info.', infoer=infoer.__class__.__name__, info=info)
 
-        if info.type is None:
-            return None
-
         return info
 
-    def collect_info(self, url: str) -> Optional[Info]:
+    def collect_info(self, url: str) -> Info | None:
         # First step — get name/urls using source URL
         info = self._collect_info_by_url(Info(), url)
         if info is None:

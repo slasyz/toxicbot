@@ -1,7 +1,6 @@
-from datetime import datetime, timedelta
-from collections.abc import Iterator
-
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Iterator
 
 from loguru import logger
 

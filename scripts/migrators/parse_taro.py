@@ -3,7 +3,6 @@ import dataclasses
 import hashlib
 import os
 from datetime import datetime
-from typing import List, Tuple
 from urllib.parse import urljoin
 
 import requests

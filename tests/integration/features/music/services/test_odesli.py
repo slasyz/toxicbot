@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pytest
 
 from toxic.features.music.services.odesli import Odesli
@@ -74,7 +72,7 @@ from toxic.features.music.services.structs import Info, Type, Service
         ),
     ]
 )
-def test_get_info(url: str, expected: Optional[Info]):
+def test_get_info(url: str, expected: Info | None):
     odesli = Odesli()
     actual = odesli.get_info(url)
 

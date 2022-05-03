@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 from toxic.db import Database
 
@@ -17,7 +16,7 @@ class RemindersRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def get_latest_reminder(self) -> Optional[Reminder]:
+    def get_latest_reminder(self) -> Reminder | None:
         row = self.database.query_row('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
         if row is None:
             return None

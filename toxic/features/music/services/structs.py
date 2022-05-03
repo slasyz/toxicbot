@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 
 class Type(Enum):
@@ -24,11 +23,11 @@ class Info:
     title: str = ''
 
     links: dict[Service, str] = field(default_factory=dict)
-    thumbnail_url: Optional[str] = None
+    thumbnail_url: str | None = None
 
 
 class Infoer:
-    def get_info(self, url: str) -> Optional[Info]:
+    def get_info(self, url: str) -> Info | None:
         raise NotImplementedError()
 
 
@@ -39,5 +38,5 @@ class SearchResult:
 
 
 class Searcher:
-    def get_link(self, type: Type, artist_name: str, title: str) -> Optional[SearchResult]:
+    def get_link(self, type: Type, artist_name: str, title: str) -> SearchResult | None:
         raise NotImplementedError()

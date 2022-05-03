@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 import telegram
 from loguru import logger
@@ -10,7 +9,7 @@ from toxic.features.voice import NextUpService
 
 
 # TODO: fix problems with HTML tags
-def split_into_chunks(text: Optional[str], max_len: int, max_trimmed_len: int) -> tuple[Optional[str], list[str]]:
+def split_into_chunks(text: str | None, max_len: int, max_trimmed_len: int) -> tuple[str | None, list[str]]:
     if text is None:
         return None, []
     if len(text) <= max_len:
