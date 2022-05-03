@@ -76,10 +76,10 @@ def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChats
     chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, messages_repo, messenger)
     chain_flood_handler = ChainFloodHandler(textizer, chats_repo, messenger)
 
-    # for chat_id, text in messages_repo.get_all_groups_messages():
-    #     if text is None:
-    #         continue
-    #     chain_teaching_handler.teach(chat_id, text)
+    for chat_id, text in messages_repo.get_all_groups_messages():
+        if text is None:
+            continue
+        chain_teaching_handler.teach(chat_id, text)
 
     return chain_teaching_handler, chain_flood_handler
 

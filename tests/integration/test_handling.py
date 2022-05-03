@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import pytest
@@ -34,7 +35,7 @@ def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
     message = telegram.Message(message_id=22, date=datetime.now(), chat=chat, from_user=from_user)
     update = telegram.Update(update_id=1337, message=message)
 
-    dus.handle(update)
+    asyncio.run(dus.handle(update))
 
     rows = database.query_row('''SELECT chat_id FROM updates WHERE tg_id=%s''', (1337,))
     assert rows is not None

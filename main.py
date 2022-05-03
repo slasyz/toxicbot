@@ -121,6 +121,7 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
         try:
             for update in deps.messenger.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
+                # TODO: add it to coroutines list
                 await handle_manager.handle_update(update)
                 update_id = update.update_id + 1
         except NetworkError as ex:
