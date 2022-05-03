@@ -18,7 +18,7 @@ class Service(Enum):
 
 @dataclass
 class Info:
-    type: Type = Type.ARTIST
+    type: Type | None = None
     artist_name: str = ''
     title: str = ''
 

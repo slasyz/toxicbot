@@ -23,7 +23,7 @@ class MusicInfoCollector:
             if info.type is None:
                 info.type = new_info.type
             elif new_info.type != info.type:
-                # Got different entity type, ignoring it (because first one should have bigger priority).
+                # Got different entity type, ignoring it (because first one has bigger priority).
                 continue
 
             info.artist_name = info.artist_name or new_info.artist_name
@@ -38,7 +38,7 @@ class MusicInfoCollector:
     def collect_info(self, url: str) -> Info | None:
         # First step — get name/urls using source URL
         info = self._collect_info_by_url(Info(), url)
-        if info is None:
+        if info.type is None:
             # At this moment we should have something.
             return None
 
@@ -55,13 +55,13 @@ class MusicInfoCollector:
         for new_url in more_urls.values():
             info = self._collect_info_by_url(info, new_url)
 
+        if info.type is None:
+            return None
+
         info.links = more_urls | info.links
 
         if len(info.links) == 1 and Service.YOUTUBE in info.links:
             # That's just a YouTube video.
-            return None
-
-        if info.type is None:
             return None
 
         return info
