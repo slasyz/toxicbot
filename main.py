@@ -26,7 +26,8 @@ from toxic.features.music.services.spotify import Spotify
 from toxic.features.taro import Taro
 from toxic.handlers import chain
 from toxic.features.chain.splitters import SpaceAdjoinSplitter
-from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, AdminSpotifyAuthCommand
+from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, \
+    AdminSpotifyAuthCommand, AdminKeyboardClearCallback
 from toxic.handlers.commands.hookah import HookahCommand
 from toxic.handlers.commands.joke import JokeCommand
 from toxic.handlers.commands.chats import ChatsCommand
@@ -54,7 +55,7 @@ from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
-from toxic.workers.worker import WorkerWrapper, WorkersManager
+from toxic.workers.worker import WorkersManager
 
 
 @dataclass
@@ -214,6 +215,7 @@ async def __main__():
         CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
         CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
         CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo)),
+        CallbackDefinition('/admin/keyboard/clear', AdminKeyboardClearCallback()),
         CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify)),
         CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger, deps.config['replies']['music']['error']))
     ]

@@ -1,32 +1,25 @@
-- name: Set host variables
-  hosts: slasyz.ru
-  tasks:
-    - name: Set directories
-      add_host:
-        name: DIRECTORIES
-        project: "{{ ansible_env.HOME }}/deployments/ToxicTgBot"
-        logs: "{{ ansible_env.HOME }}/logs/ToxicTgBot"
-
-
 - name: Copy files
   hosts: slasyz.ru
+  vars:
+    project_dir: "{{ ansible_env.HOME }}/deployments/ToxicTgBot"
+    logs_dir: "{{ ansible_env.HOME }}/logs/ToxicTgBot"
   tasks:
     - name: Copy sources
       synchronize:
         src: ./toxic/
-        dest: "{{ hostvars['DIRECTORIES']['project'] }}/toxic/"
+        dest: "{{ project_dir }}/toxic/"
     - name: Copy main.py
       copy:
         src: ./main.py
-        dest: "{{ hostvars['DIRECTORIES']['project'] }}/main.py"
+        dest: "{{ project_dir }}/main.py"
     - name: Copy resources
       synchronize:
         src: ./resources/
-        dest: "{{ hostvars['DIRECTORIES']['project'] }}/resources/"
+        dest: "{{ project_dir }}/resources/"
     - name: Copy config
       copy:
         src: ./config.json
-        dest: "{{ hostvars['DIRECTORIES']['project'] }}/config.json"
+        dest: "{{ project_dir }}/config.json"
     - name: Copy main systemd service
       template:
         src: ./systemd/toxic-main.service
@@ -40,16 +33,13 @@
     - name: Copy requirements.txt
       copy:
         src: ./requirements.txt
-        dest: "{{ hostvars['DIRECTORIES']['project'] }}/requirements.txt"
+        dest: "{{ project_dir }}/requirements.txt"
 
-
-- name: Restart
-  hosts: slasyz.ru
-  tasks:
     - name: Install dependencies
       make:
-        chdir: "{{ hostvars['DIRECTORIES']['project'] }}"
+        chdir: "{{ project_dir }}"
         target: deps
+
     - name: Restart main service
       systemd:
         name: toxic-main

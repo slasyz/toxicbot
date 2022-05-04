@@ -57,7 +57,12 @@ class VoiceMessage(Message):
 
 
 class TextMessage(Message):
-    def __init__(self, text, is_html: bool = False, markup: aiogram.types.InlineKeyboardMarkup = None, send_trimmed: bool = True, with_delay: bool = False):
+    def __init__(self,
+                 text,
+                 is_html: bool = False,
+                 markup: aiogram.types.InlineKeyboardMarkup | aiogram.types.ReplyKeyboardMarkup | aiogram.types.ReplyKeyboardRemove | aiogram.types.ForceReply | None = None,
+                 send_trimmed: bool = True,
+                 with_delay: bool = False):
         self.text = text
         self.is_html = is_html
         self.markup = markup
@@ -99,7 +104,12 @@ class TextMessage(Message):
 
 
 class PhotoMessage(Message):
-    def __init__(self, photo: bytes | str, text: str = None, is_html: bool = False, markup: aiogram.types.InlineKeyboardMarkup = None, send_trimmed: bool = True):
+    def __init__(self,
+                 photo: bytes | str,
+                 text: str = None,
+                 is_html: bool = False,
+                 markup: aiogram.types.InlineKeyboardMarkup | aiogram.types.ReplyKeyboardMarkup | aiogram.types.ReplyKeyboardRemove | aiogram.types.ForceReply | None = None,
+                 send_trimmed: bool = True):
         self.photo = photo
         self.text = text
         self.is_html = is_html

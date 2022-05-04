@@ -21,6 +21,7 @@ class AdminCommand(CommandHandler):
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         buttons = [
             [aiogram.types.InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
+            [aiogram.types.InlineKeyboardButton('⌨️ Убрать клавиатуру', callback_data=self.callback_data_repo.insert_value({'name': '/admin/keyboard/clear'}))],
         ]
         if self.spotify and not self.spotify.is_authenticated():
             buttons.append(
@@ -47,6 +48,15 @@ class AdminChatsCallback(CallbackHandler):
             response.append(f'{title} — #{id}')
 
         return TextMessage('\n'.join(response))
+
+
+class AdminKeyboardClearCallback(CallbackHandler):
+    @staticmethod
+    def is_admins_only() -> bool:
+        return True
+
+    async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
+        return TextMessage('Ок.', markup=aiogram.types.ReplyKeyboardRemove())
 
 
 class AdminSpotifyAuthCallback(CallbackHandler):
