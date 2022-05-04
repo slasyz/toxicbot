@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from loguru import logger
 import telegram
 
 from toxic.features.chain.featurizer import Featurizer
@@ -16,11 +17,11 @@ from toxic.repositories.messages import MessagesRepository
 
 
 class ChainTeachingHandler(MessageHandler):
-    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger):
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, chats: dict[int, Chain]):
         self.chain_factory = chain_factory
         self.textizer = textizer
         self.chats_repo = chats_repo
-        self.chats: dict[int, Chain] = {}
+        self.chats = chats
 
     async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         if message.chat_id > 0:
@@ -41,11 +42,11 @@ class ChainTeachingHandler(MessageHandler):
 
 
 class ChainFloodHandler(MessageHandler):
-    def __init__(self, textizer: Textizer, chats_repo: CachedChatsRepository, messenger: Messenger):
+    def __init__(self, textizer: Textizer, chats_repo: CachedChatsRepository, messenger: Messenger, chats: dict[int, Chain]):
         self.textizer = textizer
         self.chats_repo = chats_repo
         self.messenger = messenger
-        self.chats: dict[int, Chain] = {}
+        self.chats = chats
 
     async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
         if message.chat_id > 0:
@@ -73,13 +74,17 @@ class ChainFloodHandler(MessageHandler):
 
 
 def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
-    chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, messages_repo, messenger)
-    chain_flood_handler = ChainFloodHandler(textizer, chats_repo, messenger)
+    chats: dict[int, Chain] = {}
+    chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, chats)
+    chain_flood_handler = ChainFloodHandler(textizer, chats_repo, messenger, chats)
 
+    logger.info('Starting teaching messages.')
+    start = datetime.now()
     for chat_id, text in messages_repo.get_all_groups_messages():
         if text is None:
             continue
         chain_teaching_handler.teach(chat_id, text)
+    logger.info('Finished teaching messages.', duration=str(datetime.now()-start))
 
     return chain_teaching_handler, chain_flood_handler
 

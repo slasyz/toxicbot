@@ -106,7 +106,7 @@ class TaroSecondCallback(CallbackHandler):
     async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
         card = self.taro.get_random_card()
 
-        logger.info('Handling taro callback: {}.', args)
+        logger.info('Handling taro callback.', args=args)
 
         goal = args.get('goal', '')
         description = get_description_by_goal(card.data, goal)

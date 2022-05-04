@@ -59,6 +59,7 @@ class StatCommand(CommandHandler):
         return self._parse_args_and_send(args)
 
 
+# TODO: unify with StatsCommand, maybe rename handle to handle_command+handle_message
 class StatsHandler(MessageHandler):
     def __init__(self, replies: dict[re.Pattern, str], chats_repo: ChatsRepository):
         self.replies = replies
