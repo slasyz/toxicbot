@@ -26,7 +26,7 @@ class Content:
 
 def get_content(info: Info) -> Content:
     text = f'Исполнитель: <b>{info.artist_name}</b>'
-    if info.type != Type.ARTIST:
+    if info.type is not None and info.type != Type.ARTIST:
         text += f'\n{info.type.value}: <b>{info.title}</b>'
 
     services = []

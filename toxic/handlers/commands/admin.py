@@ -1,5 +1,4 @@
-import telegram
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+import aiogram
 
 from toxic.features.music.services.spotify import Spotify
 from toxic.handlers.handler import CallbackHandler, CommandHandler
@@ -19,18 +18,18 @@ class AdminCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         buttons = [
-            [InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
+            [aiogram.types.InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
         ]
         if self.spotify and not self.spotify.is_authenticated():
             buttons.append(
-                [InlineKeyboardButton('🎶 Spotify 🔑 Authenticate', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
+                [aiogram.types.InlineKeyboardButton('🎶 Spotify 🔑 Authenticate', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
             )
 
         return [TextMessage(
             text='Доступные команды',
-            markup=InlineKeyboardMarkup(buttons),
+            markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=buttons),
         )]
 
 
@@ -42,7 +41,7 @@ class AdminChatsCallback(CallbackHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         response = []
         for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')
@@ -58,14 +57,14 @@ class AdminSpotifyAuthCallback(CallbackHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         if self.spotify.is_authenticated():
             return CallbackReply('Уже авторизован.', show_alert=True)
 
         return TextMessage(
             text='Перейди по ссылке, чтобы авторизоваться.\n\nА потом пришли /spotify URL, где URL — это то, куда перенаправила страница авторизации.',
-            markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton('👉', self.spotify.get_auth_url()),
+            markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[[
+                aiogram.types.InlineKeyboardButton('👉', self.spotify.get_auth_url()),
             ]])
         )
 
@@ -78,7 +77,7 @@ class AdminSpotifyAuthCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) != 2:
             return 'Нужно писать так: /spotify URL'
 

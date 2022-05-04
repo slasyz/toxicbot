@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, ReplyMarkup
+import aiogram
 
 from toxic.features.music.generator.content import get_content
 from toxic.features.music.services.collector import MusicInfoCollector
@@ -11,7 +11,7 @@ from toxic.repositories.settings import SettingsRepository
 @dataclass
 class MusicMessage:
     text: str
-    buttons: ReplyMarkup
+    buttons: aiogram.types.InlineKeyboardMarkup
     image_url: str | None
 
 
@@ -34,7 +34,7 @@ class MusicMessageGenerator:
 
         buttons = []
         for i, service in enumerate(content.buttons):
-            button = InlineKeyboardButton(service.name, url=service.link)
+            button = aiogram.types.InlineKeyboardButton(service.name, url=service.link)
             if i % 2 == 0:
                 buttons.append([button])
             else:
@@ -44,7 +44,7 @@ class MusicMessageGenerator:
             links = [f'<a href="{service.link}">{service.name}</a>' for service in content.buttons]
             content.text = '{}\n\n{}'.format(content.text, ' | '.join(links))
         else:
-            buttons.append([InlineKeyboardButton(
+            buttons.append([aiogram.types.InlineKeyboardButton(
                 '📝 Пришли обычные ссылки',
                 callback_data=self.callback_data_repo.insert_value({
                     'name': '/music/plaintext',
@@ -52,5 +52,5 @@ class MusicMessageGenerator:
                 })
             )])
 
-        markup = InlineKeyboardMarkup(buttons)
+        markup = aiogram.types.InlineKeyboardMarkup(inline_keyboard=buttons)
         return MusicMessage(content.text, markup, info.thumbnail_url)

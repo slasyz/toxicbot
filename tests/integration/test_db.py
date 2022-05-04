@@ -1,5 +1,5 @@
 import pytest
-import telegram
+import aiogram
 
 from toxic.config import Config
 from toxic.db import Database
@@ -23,7 +23,7 @@ def database():
     [
         ('SELECT %s;', (1337,), [(1337,)]),
         ('SELECT %(name)s;', {'name': 'Vyacheslav'}, [('Vyacheslav',)]),
-        ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', telegram.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
+        ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', aiogram.types.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
     ]
 )
 def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):

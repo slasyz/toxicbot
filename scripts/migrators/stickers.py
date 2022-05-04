@@ -5,10 +5,9 @@ Script to run just once to set messages.text/sticker using updates.json.message.
 
 import json
 
-import telegram
+import aiogram
 
 from toxic import db
-from toxic.helpers import consts
 
 
 def load():
@@ -20,7 +19,7 @@ def load():
             update_id, dump = record
 
             try:
-                update = telegram.Update.de_json(dump, consts.bot)
+                update = aiogram.types.Update.to_object(dump)
                 if update.message is None:
                     continue
                 if update.message.sticker is None:

@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 
 import pytest
-import telegram
+import aiogram
 
 from toxic.config import Config
 from toxic.db import Database
@@ -30,10 +30,10 @@ def dus(database: Database):
 
 
 def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
-    chat = telegram.Chat(id=11, type='bla', title='chat title')
-    from_user = telegram.User(id=14, first_name='Elisey', is_bot=False)
-    message = telegram.Message(message_id=22, date=datetime.now(), chat=chat, from_user=from_user)
-    update = telegram.Update(update_id=1337, message=message)
+    chat = aiogram.types.Chat(id=11, type='bla', title='chat title')
+    from_user = aiogram.types.User(id=14, first_name='Elisey', is_bot=False)
+    message = aiogram.types.Message(message_id=22, date=datetime.now(), chat=chat, from_user=from_user)
+    update = aiogram.types.Update(update_id=1337, message=message)
 
     asyncio.run(dus.handle(update))
 

@@ -1,13 +1,13 @@
 import re
 from dataclasses import dataclass
 
-import telegram
+import aiogram
 from loguru import logger
 
 from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.handlers.handler import MessageHandler, CallbackHandler, CommandHandler
+from toxic.helpers import consts_tg
 from toxic.helpers.rate_limiter import RateLimiter
-
 from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
@@ -54,27 +54,27 @@ class HandlersManager:
         self.metrics = metrics
         self.rate_limiter = rate_limiter
 
-    def _get_command_name(self, text: str, message: telegram.Message) -> str:
+    async def _get_command_name(self, text: str, message: aiogram.types.Message) -> str:
         # Проходимся по всем сущностям, если на первом месте в сообщении есть сущность типа 'bot_command', то записываем
         # название команды.
         for entity in message.entities:
             if entity.offset != 0:
                 continue
 
-            if entity.type != telegram.MessageEntity.BOT_COMMAND:
+            if entity.type != consts_tg.MESSAGEENTITY_BOT_COMMAND:
                 continue
 
             command_name = text[1:entity.length]  # trim leading slash
             if '@' in command_name:
                 command_name, command_target = command_name.split('@', 2)
-                if command_target != self.messenger.bot.username:
+                if command_target != (await self.messenger.bot.me).username:
                     continue
 
             return command_name
         return ''
 
-    async def handle_command(self, text: str, message: telegram.Message) -> list[Message]:
-        command_name = self._get_command_name(text, message)
+    async def handle_command(self, text: str, message: aiogram.types.Message) -> list[Message]:
+        command_name = await self._get_command_name(text, message)
         if command_name == '':
             return []
 
@@ -97,14 +97,14 @@ class HandlersManager:
 
         return []
 
-    async def handle_callback(self, callback: telegram.CallbackQuery):
+    async def handle_callback(self, callback: aiogram.types.CallbackQuery):
         message = callback.message
         if message is None:
             return
 
         log_extra = {
             'user_id': callback.from_user.id,
-            'chat_id': message.chat_id,
+            'chat_id': message.chat.id,
             'message_id': message.message_id,
         }
 
@@ -127,8 +127,12 @@ class HandlersManager:
                 continue
 
             if callback_definition.handler.is_admins_only() and not self.users_repo.is_admin(callback.from_user.id):
-                callback.answer('Где ваши документы?', True)
-                logger.error('Regular user sent admin-only callback.', user=callback.from_user.id, username=callback.from_user.username, callback=callback.id, data=callback.data)
+                await self.messenger.answer_callback(callback.id, 'Где ваши документы?', True)
+                logger.error('Regular user sent admin-only callback.',
+                             user=callback.from_user.id,
+                             username=callback.from_user.username,
+                             callback=callback.id,
+                             data=callback.data)
                 continue
 
             try:
@@ -136,9 +140,9 @@ class HandlersManager:
                 if reply is None:
                     return
                 if isinstance(reply, Message):
-                    await self.messenger.send(message.chat_id, reply)
+                    await self.messenger.send(message.chat.id, reply)
                     return
-                callback.answer(text=reply.text, show_alert=reply.show_alert)
+                await self.messenger.answer_callback(callback.id, text=reply.text, show_alert=reply.show_alert)
             except Exception as ex:
                 logger.opt(exception=ex).error('Caught exception when handling callback.', **log_extra)
             return
@@ -151,7 +155,7 @@ class HandlersManager:
             return [TextMessage(replies)]
         return replies
 
-    async def _handle_update_inner(self, update: telegram.Update):
+    async def _handle_update_inner(self, update: aiogram.types.Update):
         # Update handlers (like database)
         for updater in self.update_handlers:
             try:
@@ -200,14 +204,14 @@ class HandlersManager:
 
         for reply in replies:
             try:
-                await self.messenger.send(update.message.chat_id, reply, update.message.message_id)
+                await self.messenger.send(update.message.chat.id, reply, update.message.message_id)
             except Exception as ex:
                 logger.opt(exception=ex).error(
                     'Caught exception when replying to message.',
-                    chat_id=update.message.chat_id,
+                    chat_id=update.message.chat.id,
                     message_id=update.message.message_id,
                 )
 
-    async def handle_update(self, update: telegram.Update):
+    async def handle_update(self, update: aiogram.types.Update):
         with self.metrics.update_time.time():  # TODO: do with decorator
             await self._handle_update_inner(update)

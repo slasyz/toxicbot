@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import aiogram
 from loguru import logger
-import telegram
 
 from toxic.features.chain.featurizer import Featurizer
 from toxic.features.chain.textizer import Textizer
@@ -23,11 +23,11 @@ class ChainTeachingHandler(MessageHandler):
         self.chats_repo = chats_repo
         self.chats = chats
 
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
-        if message.chat_id > 0:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
+        if message.chat.id > 0:
             return None
 
-        self.teach(message.chat_id, text)
+        self.teach(message.chat.id, text)
         return None
 
     def teach(self, chat_id: int, text: str):
@@ -48,12 +48,12 @@ class ChainFloodHandler(MessageHandler):
         self.messenger = messenger
         self.chats = chats
 
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
-        if message.chat_id > 0:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
+        if message.chat.id > 0:
             return None
 
-        if self.messenger.is_reply_or_mention(message):
-            chain = self.chats[message.chat_id]
+        if await self.messenger.is_reply_or_mention(message):
+            chain = self.chats[message.chat.id]
             return [TextMessage(
                 self.textizer.predict_not_empty(chain, text),
                 with_delay=True,
@@ -62,9 +62,9 @@ class ChainFloodHandler(MessageHandler):
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
             return None
 
-        count = self.chats_repo.count_messages(message.chat_id)
-        if count % self.chats_repo.get_period(message.chat_id) == 0:
-            chain = self.chats[message.chat_id]
+        count = self.chats_repo.count_messages(message.chat.id)
+        if count % self.chats_repo.get_period(message.chat.id) == 0:
+            chain = self.chats[message.chat.id]
             return [TextMessage(
                 self.textizer.predict_not_empty(chain, message.text),
                 with_delay=True,

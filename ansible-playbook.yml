@@ -37,6 +37,10 @@
         src: ./systemd/toxic-server.service
         dest: ~/.config/systemd/user/toxic-server.service
         mode: 0644
+    - name: Copy requirements.txt
+      copy:
+        src: ./requirements.txt
+        dest: "{{ hostvars['DIRECTORIES']['project'] }}/requirements.txt"
 
 
 - name: Restart

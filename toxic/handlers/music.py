@@ -1,4 +1,4 @@
-import telegram
+import aiogram
 
 from toxic.features.music.generator.generator import MusicMessageGenerator
 from toxic.features.music.generator.links import get_hostname, extract_music_links
@@ -12,7 +12,7 @@ class MusicHandler(MessageHandler):
         self.music_formatter = music_formatter
 
     @decorators.non_empty
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         links = extract_music_links(text)

@@ -1,4 +1,4 @@
-import telegram
+import aiogram
 from loguru import logger
 
 from toxic.db import Database
@@ -10,7 +10,7 @@ class DatabaseUpdateSaver:
         self.database = database
         self.metrics = metrics
 
-    def handle_user(self, user: telegram.User):
+    def handle_user(self, user: aiogram.types.User):
         row = self.database.query_row('''
             SELECT first_name, last_name, username 
             FROM users 
@@ -41,7 +41,7 @@ class DatabaseUpdateSaver:
                 user.id
             ))
 
-    def handle_chat(self, chat: telegram.Chat):
+    def handle_chat(self, chat: aiogram.types.Chat):
         title = chat.title or (((chat.first_name or '') + ' ' + (chat.last_name or '')).strip()) or None
 
         row = self.database.query_row('SELECT title FROM chats WHERE tg_id=%s', (chat.id,))
@@ -63,14 +63,14 @@ class DatabaseUpdateSaver:
                 chat.id
             ))
 
-    def handle_message(self, message: telegram.Message, update_id: int | None = None):
+    def handle_message(self, message: aiogram.types.Message, update_id: int | None = None):
         if message.from_user is not None:
             self.handle_user(message.from_user)
         if message.chat is not None:
             self.handle_chat(message.chat)
 
         row = self.database.query_row('SELECT true FROM messages WHERE chat_id=%s AND tg_id=%s AND update_id=%s', (
-            message.chat_id,
+            message.chat.id,
             message.message_id,
             update_id
         ))
@@ -100,7 +100,7 @@ class DatabaseUpdateSaver:
                 date = %s,
                 sticker = %s
         ''', (
-            message.chat_id,
+            message.chat.id,
             message.message_id,
             from_user_id,
             update_id,
@@ -116,18 +116,18 @@ class DatabaseUpdateSaver:
         row = self.database.query_row('''SELECT count(*) FROM messages''')
         self.metrics.messages.set(row[0])
 
-    async def handle(self, update: telegram.Update):
+    async def handle(self, update: aiogram.types.Update):
         row = self.database.query_row('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
         if row is not None:
             logger.info('Ignoring update #{}.', update.update_id)
             return
 
-        logger.info('Handling update.', **update.to_dict())
+        logger.info('Handling update.', **update.to_python())
 
         message = update.message or update.edited_message
         chat_id = 0
         if message is not None:
-            chat_id = message.chat_id
+            chat_id = message.chat.id
 
         self.database.exec('''
             INSERT INTO updates(tg_id, chat_id, json)
@@ -135,7 +135,7 @@ class DatabaseUpdateSaver:
         ''', (
             update.update_id,
             chat_id,
-            update.to_json(),
+            update.as_json(),
         ))
 
         if message is None:

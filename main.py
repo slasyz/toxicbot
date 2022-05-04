@@ -5,12 +5,11 @@ import sys
 import time
 from dataclasses import dataclass
 
-import telegram
+import aiogram
 from loguru import logger
 from psycopg2 import InterfaceError
 from pymorphy2 import MorphAnalyzer
 from ruwordnet import RuWordNet
-from telegram.error import NetworkError, Unauthorized, Conflict
 
 from toxic.config import Config
 from toxic.db import Database
@@ -55,7 +54,7 @@ from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
-from toxic.workers.worker import WorkerWrapper
+from toxic.workers.worker import WorkerWrapper, WorkersManager
 
 
 @dataclass
@@ -99,7 +98,7 @@ def init(config_files: list) -> BasicDependencies:
 
     delayer_factory = DelayerFactory()
 
-    bot = telegram.Bot(config['telegram']['token'])
+    bot = aiogram.Bot(config['telegram']['token'])
     messenger = Messenger(bot, chats_repo, users_repo, dus, delayer_factory)
 
     return BasicDependencies(
@@ -119,20 +118,17 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
     update_id = None
     while True:
         try:
-            for update in deps.messenger.bot.get_updates(offset=update_id, timeout=10):
+            for update in await deps.messenger.bot.get_updates(offset=update_id, timeout=10):
                 update_id = update.update_id
                 # TODO: add it to coroutines list
                 await handle_manager.handle_update(update)
                 update_id = update.update_id + 1
-        except NetworkError as ex:
+        except aiogram.exceptions.NetworkError as ex:
             logger.opt(exception=ex).error('Network error.')
-            if isinstance(ex, telegram.error.BadRequest):
-                update_id += 1
             await asyncio.sleep(1)
-        except Unauthorized:  # The user has removed or blocked the bot.
+        except aiogram.exceptions.Unauthorized:  # The user has removed or blocked the bot.
             logger.info('User removed or blocked the bot.')
-            update_id += 1
-        except Conflict as ex:
+        except aiogram.exceptions.ConflictError as ex:
             logger.opt(exception=ex).error('Bot is already running somewhere, stopping it.')
             sys.exit(1)
         except KeyboardInterrupt:
@@ -165,7 +161,7 @@ async def __main__():
     )
     music_formatter = MusicMessageGenerator(music_info_collector, settings_repo, callback_data_repo)
 
-    # worker_manager = WorkersManager(deps.messenger)
+    workers_manager = WorkersManager(deps.messenger)
     workers = [
         JokesWorker(joker, deps.chats_repo, deps.messenger),
         ReminderWorker(reminders_repo, deps.messenger),
@@ -239,13 +235,10 @@ async def __main__():
     messages_total_row = deps.database.query_row('''SELECT count(*) FROM messages''')
     deps.metrics.messages.set(messages_total_row[0])
 
-    tasks = [loop(deps, handle_manager)]
-    # TODO: find out why WorkersManager doesn't start them
-    for worker in workers:
-        t = asyncio.create_task(WorkerWrapper(worker, deps.messenger).run())
-        tasks.append(t)
-
-    await asyncio.gather(*tasks)
+    await asyncio.gather(
+        loop(deps, handle_manager),
+        workers_manager.run(workers),
+    )
 
 
 if __name__ == '__main__':

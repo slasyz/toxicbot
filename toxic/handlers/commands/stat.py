@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-import telegram
+import aiogram
 from loguru import logger
 
 from toxic.handlers.handler import CommandHandler, MessageHandler
@@ -38,16 +38,16 @@ class StatCommand(CommandHandler):
 
         return self._get_response(chat_id)
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
-        if message.chat_id < 0:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
+        if message.chat.id < 0:
             if len(args) == 1:
-                return self._get_response(message.chat_id)
+                return self._get_response(message.chat.id)
             if len(args) == 2:
                 return self._parse_args_and_send(args)
             return None
 
         if message.from_user is None:
-            logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat_id)
+            logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat.id)
             return 'Что-то не то.'
 
         if not self.users_repo.is_admin(message.from_user.id):
@@ -76,7 +76,7 @@ class StatsHandler(MessageHandler):
         return StatsHandler(replies_regexes, chats_repo)
 
     @decorators.non_empty
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         for key, value in self.replies.items():
@@ -84,7 +84,7 @@ class StatsHandler(MessageHandler):
                 continue
 
             response = value + ':\n'
-            response += get_stat(message.chat_id, self.chats_repo)
+            response += get_stat(message.chat.id, self.chats_repo)
 
             return response
 

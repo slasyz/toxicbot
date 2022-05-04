@@ -1,4 +1,4 @@
-import telegram
+import aiogram
 
 from toxic.features.emojifier import Emojifier
 from toxic.handlers.handler import CommandHandler
@@ -9,7 +9,7 @@ class HookahCommand(CommandHandler):
     def __init__(self, emojifier: Emojifier):
         self.emojifier = emojifier
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         message_src = message.reply_to_message
         if message_src is None:
             return 'Эту команду нужно присылать в ответ на сообщение.'

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+import aiogram
 from loguru import logger
 
 
@@ -18,8 +19,8 @@ class RateLimiter:
 
         self.buckets: dict[tuple[int, int], Bucket] = {}
 
-    def handle(self, message) -> str | None:
-        if self.discard(message.chat_id, message.from_user.id):
+    def handle(self, message: aiogram.types.Message) -> str | None:
+        if self.discard(message.chat.id, message.from_user.id):
             return self.reply
 
         return None

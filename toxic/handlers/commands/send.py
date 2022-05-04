@@ -1,6 +1,6 @@
 import re
 
-import telegram
+import aiogram
 
 from toxic.handlers.handler import CommandHandler
 from toxic.messenger.message import Message
@@ -17,7 +17,7 @@ class SendCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) < 3:
             return f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE'
 

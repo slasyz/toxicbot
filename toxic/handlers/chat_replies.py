@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 import re
 
-import telegram
+import aiogram
 
 from toxic.handlers.handler import MessageHandler
 from toxic.helpers import decorators
@@ -29,7 +29,7 @@ class KeywordsHandler(MessageHandler):
         return KeywordsHandler(map)
 
     @decorators.non_empty
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         for key, val in self.map.items():
@@ -48,11 +48,11 @@ class PrivateHandler(MessageHandler):
         self.replies = replies
         self.users_repo = users_repo
 
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
-        if message.chat_id < 0:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
+        if message.chat.id < 0:
             return None
 
-        if self.users_repo.is_admin(message.chat_id):
+        if self.users_repo.is_admin(message.chat.id):
             return 'Я запущен'
 
         return random.choice(self.replies)
@@ -69,17 +69,17 @@ class SorryHandler(MessageHandler):
         return SorryHandler(config['sorry'], config['not_sorry'], messenger)
 
     @decorators.non_empty
-    async def handle(self, text: str, message: telegram.Message) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
         # pylint: disable=W0221
         # Because of the decorator
         reply = self.reply_sorry
-        if message.chat_id > 0:
+        if message.chat.id > 0:
             reply = self.reply_not_sorry
 
         if SORRY_REGEXP.search(text.lower()) is not None:
             return reply
 
-        if self.messenger.is_reply_or_mention(message) and 'извинись' in text.lower():
+        if await self.messenger.is_reply_or_mention(message) and 'извинись' in text.lower():
             return reply
 
         return None

@@ -1,4 +1,4 @@
-import telegram
+import aiogram
 
 from toxic.handlers.handler import CommandHandler
 from toxic.messenger.message import Message
@@ -13,7 +13,7 @@ class ChatsCommand(CommandHandler):
     def is_admins_only() -> bool:
         return True
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         response = []
         for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')

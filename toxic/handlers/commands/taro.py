@@ -1,8 +1,7 @@
 import os
 
-import telegram
+import aiogram
 from loguru import logger
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, User
 
 from toxic.features.taro import Taro, CardData
 from toxic.handlers.handler import CallbackHandler, CommandHandler
@@ -16,19 +15,19 @@ class TaroCommand(CommandHandler):
         self.res_dir = res_dir
         self.callback_data_repo = callback_data_repo
 
-    async def handle(self, text: str, message: telegram.Message, args: list[str]) -> str | list[Message] | None:
+    async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         goals = ['general', 'love', 'question', 'daily', 'advice']
         buttons = []
         for goal in goals:
             buttons.append([
-                InlineKeyboardButton(
+                aiogram.types.InlineKeyboardButton(
                     GOALS_EMOJI[goal] + ' ' + GOALS[goal],
                     callback_data=self.callback_data_repo.insert_value({'name': '/taro/first', 'goal': goal}),
                 ),
             ])
         return [TextMessage(
             text='🧙 🌟 Что хотим получить от Вселенной? 🪐 🪄',
-            markup=InlineKeyboardMarkup(buttons),
+            markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=buttons),
         )]
 
 
@@ -60,7 +59,7 @@ def get_description_by_goal(card: CardData, goal: str) -> str:
     return card.general_forwards
 
 
-def get_mention(user: User):
+def get_mention(user: aiogram.types.User):
     if user.username != '':
         return '<a href="tg://user?id={}">@{}</a>'.format(user.id, user.username)
     return '<a href="tg://user?id={}">{}</a>'.format(user.id, user.first_name)
@@ -72,29 +71,29 @@ class TaroFirstCallback(CallbackHandler):
         self.messenger = messenger
         self.callback_data_repo = callback_data_repo
 
-    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
             photo = f.read()
 
         goal = args.get('goal', '')
         mention = get_mention(callback.from_user)
 
-        await self.messenger.send(message.chat_id, PhotoMessage(
+        await self.messenger.send(message.chat.id, PhotoMessage(
             photo=photo,
             text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
             is_html=True,
-            markup=InlineKeyboardMarkup([
+            markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[
                 [
-                    InlineKeyboardButton('1️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    InlineKeyboardButton('2️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton('1️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton('2️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ],
                 [
-                    InlineKeyboardButton('3️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton('3️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton('4️⃣', callback_data=self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ]
             ])
         ))
-        self.messenger.delete_message(message.chat_id, message.message_id)
+        await self.messenger.delete_message(message.chat.id, message.message_id)
         return None
 
 
@@ -103,7 +102,7 @@ class TaroSecondCallback(CallbackHandler):
         self.taro = taro
         self.messenger = messenger
 
-    async def handle(self, callback: telegram.CallbackQuery, message: telegram.Message, args: dict) -> Message | CallbackReply | None:
+    async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         card = self.taro.get_random_card()
 
         logger.info('Handling taro callback.', args=args)
@@ -113,10 +112,10 @@ class TaroSecondCallback(CallbackHandler):
 
         mention = get_mention(callback.from_user)
 
-        await self.messenger.send(message.chat_id, PhotoMessage(
+        await self.messenger.send(message.chat.id, PhotoMessage(
             photo=card.image,
             text=f'''{mention}, тебе выпала карта <b>{card.data.name}</b>\n\n{description}''',
             is_html=True,
         ))
-        self.messenger.delete_message(message.chat_id, message.message_id)
+        await self.messenger.delete_message(message.chat.id, message.message_id)
         return None
