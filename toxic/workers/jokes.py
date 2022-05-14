@@ -1,5 +1,6 @@
 import asyncio
 import math
+import random
 import time
 
 from loguru import logger
@@ -25,7 +26,12 @@ class JokesWorker(Worker):
             print_sleep(seconds, 'next midnight joke')
             await asyncio.sleep(seconds)
 
-            for id in self.chats_repo.get_joker_chats():
+            for id, period in self.chats_repo.get_joker_chats():
+                random_value = random.randint(1, period)
+                if random_value != 1:
+                    logger.info('Not sending joke to chat #{} (#{}/#{}).', id, random_value, period)
+                    continue
+
                 logger.info('Sending joke to chat #{}.', id)
                 joke, _ = self.joker.get_random_joke()
 

@@ -81,10 +81,10 @@ class ChatsRepository:
     def disable_joke(self, chat_id):
         self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
 
-    def get_joker_chats(self) -> Iterator[int]:
-        rows = self.database.query('SELECT tg_id FROM chats WHERE tg_id < 0 AND joke;')
+    def get_joker_chats(self) -> Iterator[tuple[int, int]]:
+        rows = self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
         for row in rows:
-            yield row[0]
+            yield row[0], row[1]
 
 
 @dataclass
