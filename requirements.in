@@ -15,6 +15,7 @@ pylint~=2.8.2
 pymorphy2~=0.9.1
 pymorphy2-dicts-ru~=2.4.0
 pytest~=6.2.4
+pytest-asyncio~=0.18.3
 requests~=2.25.0
 ruwordnet~=0.0.3
 sentry-sdk~=1.1.0

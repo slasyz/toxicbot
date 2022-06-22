@@ -18,6 +18,7 @@ async def database():
     )
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['query', 'vars', 'expected'],
     [
@@ -26,8 +27,7 @@ async def database():
         ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', aiogram.types.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
     ]
 )
-@pytest.mark.asyncio
-def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
+async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
     rows = list(database.query(query, vars))
     assert rows == expected
 

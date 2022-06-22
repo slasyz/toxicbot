@@ -32,7 +32,8 @@ class ChatsRepository:
         return row[0]
 
     async def get_period(self, chat_id: int) -> int:
-        return await self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))[0]
+        row = await self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))
+        return row[0]
 
     async def count_messages(self, chat_id: int) -> int:
         row = await self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (chat_id,))

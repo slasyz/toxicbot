@@ -155,8 +155,12 @@ pymorphy2==0.9.1
     # via -r requirements.in
 pyparsing==2.4.7
     # via packaging
-pytest==6.2.4
+pytest-asyncio==0.18.3
     # via -r requirements.in
+pytest==6.2.4
+    # via
+    #   -r requirements.in
+    #   pytest-asyncio
 python-dateutil==2.8.2
     # via botocore
 python-dotenv==0.19.0
