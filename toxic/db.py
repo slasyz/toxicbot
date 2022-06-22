@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterator
+from typing import AsyncIterator
 
 import psycopg2
 
@@ -26,7 +26,7 @@ class Database:
             cur.execute(query, vars)
             self.conn.commit()
 
-    def query(self, query, vars=None) -> Iterator:
+    async def query(self, query, vars=None) -> AsyncIterator:
         with self.conn, self.conn.cursor() as cur:
             cur.execute(query, vars)
             # TODO: возможно, делать коммит и возвращать итератор с записями
@@ -39,7 +39,7 @@ class Database:
                 yield record
 
     async def query_row(self, query, vars=None):
-        for record in self.query(query, vars):
+        async for record in self.query(query, vars):
             return record
 
         return None

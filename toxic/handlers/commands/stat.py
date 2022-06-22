@@ -12,9 +12,9 @@ from toxic.repositories.chats import ChatsRepository
 from toxic.repositories.users import UsersRepository
 
 
-def get_stat(chat_id: int, chats_repo: ChatsRepository) -> str:
+async def get_stat(chat_id: int, chats_repo: ChatsRepository) -> str:
     response = ''
-    for name, count in chats_repo.get_stat(chat_id):
+    async for name, count in chats_repo.get_stat(chat_id):
         response += f'\n{name} — {count} сообщ.'
 
     return response
@@ -25,25 +25,25 @@ class StatCommand(CommandHandler):
         self.users_repo = users_repo
         self.chats_repo = chats_repo
 
-    def _get_response(self, chat_id) -> str:
+    async def _get_response(self, chat_id) -> str:
         response = 'Статистика чата:\n'
-        response += get_stat(chat_id, self.chats_repo)
+        response += await get_stat(chat_id, self.chats_repo)
         return response
 
-    def _parse_args_and_send(self, args: list[str]) -> str:
+    async def _parse_args_and_send(self, args: list[str]) -> str:
         try:
             chat_id = int(args[1])
         except ValueError:
             return f'Нужно писать так: /{args[0]} CHAT_ID'
 
-        return self._get_response(chat_id)
+        return await self._get_response(chat_id)
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         if message.chat.id < 0:
             if len(args) == 1:
-                return self._get_response(message.chat.id)
+                return await self._get_response(message.chat.id)
             if len(args) == 2:
-                return self._parse_args_and_send(args)
+                return await self._parse_args_and_send(args)
             return None
 
         if message.from_user is None:
@@ -56,7 +56,7 @@ class StatCommand(CommandHandler):
         if len(args) != 2:
             return f'Нужно писать так: /{args[0]} [CHAT_ID]'
 
-        return self._parse_args_and_send(args)
+        return await self._parse_args_and_send(args)
 
 
 # TODO: unify with StatsCommand, maybe rename handle to handle_command+handle_message
@@ -84,7 +84,7 @@ class StatsHandler(MessageHandler):
                 continue
 
             response = value + ':\n'
-            response += get_stat(message.chat.id, self.chats_repo)
+            response += await get_stat(message.chat.id, self.chats_repo)
 
             return response
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Iterator
+from typing import AsyncIterator
 
 from loguru import logger
 
@@ -39,7 +39,7 @@ class ChatsRepository:
         row = await self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (chat_id,))
         return row[0]
 
-    def get_stat(self, chat_id: int) -> Iterator[tuple[str, int]]:
+    async def get_stat(self, chat_id: int) -> AsyncIterator[tuple[str, int]]:
         rows = self.database.query('''
                 WITH RECURSIVE ch(id) AS (
                     SELECT %s::bigint
@@ -57,10 +57,10 @@ class ChatsRepository:
                 ORDER BY c DESC
                 LIMIT 10;
             ''', (chat_id,))
-        for row in rows:
+        async for row in rows:
             yield row[0], row[1]
 
-    def list(self) -> Iterator[tuple[int, str]]:
+    async def list(self) -> AsyncIterator[tuple[int, str]]:
         rows = self.database.query('''
                     SELECT c.tg_id, c.title
                     FROM chats c
@@ -69,11 +69,11 @@ class ChatsRepository:
                     SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name))
                     FROM users u
                 ''')
-        for row in rows:
+        async for row in rows:
             yield row[0], row[1]
 
-    def is_existing(self, chat_id: int) -> bool:
-        row = self.database.query('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
+    async def is_existing(self, chat_id: int) -> bool:
+        row = await self.database.query_row('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
         return row is not None
 
     async def update_next_id(self, chat_id: int, new_chat_id: int):
@@ -82,9 +82,9 @@ class ChatsRepository:
     async def disable_joke(self, chat_id):
         await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
 
-    def get_joker_chats(self) -> Iterator[tuple[int, int]]:
+    async def get_joker_chats(self) -> AsyncIterator[tuple[int, int]]:
         rows = self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
-        for row in rows:
+        async for row in rows:
             yield row[0], row[1]
 
 

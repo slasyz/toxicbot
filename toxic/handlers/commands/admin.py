@@ -44,7 +44,7 @@ class AdminChatsCallback(CallbackHandler):
 
     async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         response = []
-        for id, title in self.chats_repo.list():
+        async for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')
 
         return TextMessage('\n'.join(response))

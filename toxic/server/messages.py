@@ -27,7 +27,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             GROUP BY c.tg_id, c.title
             ORDER BY c.title
         ''')
-        for row in rows:
+        async for row in rows:
             groups_dict[row[0]] = Group(row[0], row[1], row[2])
 
         # Получаем пользователей
@@ -38,7 +38,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             GROUP BY u.tg_id, u.first_name, u.last_name
             ORDER BY name
         ''')
-        for row in rows:
+        async for row in rows:
             users_dict[row[0]] = User(row[0], row[1], row[2])
 
         groups_list = []
@@ -76,7 +76,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             WHERE chat_id = %s
             ORDER BY tg_id NULLS FIRST, json_id, update_id
         ''', (id,))
-        for row in rows:
+        async for row in rows:
             update_id, tg_id, user_id, user_name, date, text = row
 
             if not text:
@@ -114,7 +114,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             WHERE chat_id = %s
             ORDER BY tg_id NULLS FIRST, json_id, update_id
         ''', (id,))
-        for row in rows:
+        async for row in rows:
             user_id, update_id, tg_id, date, text = row
 
             if not text:

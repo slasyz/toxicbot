@@ -15,7 +15,7 @@ class ChatsCommand(CommandHandler):
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         response = []
-        for id, title in self.chats_repo.list():
+        async for id, title in self.chats_repo.list():
             response.append(f'{title} — #{id}')
 
         return '\n'.join(response)

@@ -81,7 +81,7 @@ async def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: Cache
 
     logger.info('Starting teaching messages.')
     start = datetime.now()
-    for chat_id, text in messages_repo.get_all_groups_messages():
+    async for chat_id, text in messages_repo.get_all_groups_messages():
         if text is None:
             continue
         await chain_teaching_handler.teach(chat_id, text)

@@ -57,7 +57,7 @@ class Messenger:
             raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))
 
     async def send_to_admins(self, msg: str | Message):
-        for id in self.users_repo.get_admins():
+        async for id in self.users_repo.get_admins():
             await self.send(id, msg)
 
     async def delete_message(self, chat_id: int, message_id: int, ignore_not_found: bool = True):

@@ -26,7 +26,7 @@ class SendCommand(CommandHandler):
         except ValueError:
             return f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE'
 
-        if not self.chats_repository.is_existing(chat_id):
+        if not await self.chats_repository.is_existing(chat_id):
             return f'Не могу найти такой чат ({chat_id}).'
 
         prefix_regexp = re.compile(r'^/' + args[0] + r'\s+' + args[1] + r'\s+')

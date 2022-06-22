@@ -28,7 +28,7 @@ class JokesWorker(Worker):
     async def step(self):
         tasks = []
 
-        for chat_id, period in self.chats_repo.get_joker_chats():
+        async for chat_id, period in self.chats_repo.get_joker_chats():
             random_value = random.randint(1, period)
             if random_value != 1:
                 logger.info('Not sending joke to chat #{} ({}/{}).', chat_id, random_value, period)

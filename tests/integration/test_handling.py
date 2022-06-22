@@ -1,8 +1,8 @@
-import asyncio
 from datetime import datetime
 
 import pytest
 import aiogram
+import pytest_asyncio
 
 from toxic.config import Config
 from toxic.db import Database
@@ -10,7 +10,7 @@ from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.metrics import Metrics
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def database():
     config = Config.load(['config.tests.json'])
 

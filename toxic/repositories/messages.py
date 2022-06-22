@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import AsyncIterator
 
 from toxic.db import Database
 
@@ -7,8 +7,8 @@ class MessagesRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def get_all_groups_messages(self) -> Iterator[tuple[int, str | None]]:
-        for row in self.database.query('''
+    async def get_all_groups_messages(self) -> AsyncIterator[tuple[int, str | None]]:
+        async for row in self.database.query('''
                 SELECT chat_id, text 
                 FROM messages 
                 WHERE chat_id < 0 AND update_id IS NOT NULL 

@@ -45,11 +45,11 @@ def get_json_id(message: dict) -> int:
     return message['id']
 
 
-def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> int | None:
-    rows = list(database.query(
+async def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> int | None:
+    rows = [x async for x in database.query(
         'SELECT tg_id FROM messages WHERE chat_id=%s AND user_id=%s AND text=%s AND abs(EXTRACT(epoch from date-%s)) < 1;',
         (chat_id, user_id, s, date),
-    ))
+    )]
 
     if len(rows) == 0:
         return None
@@ -108,7 +108,7 @@ async def __main__():
             date = get_date(message)
             json_id = get_json_id(message)
 
-            tg_id = search_message(database, chat_id, user_id, text, date)
+            tg_id = await search_message(database, chat_id, user_id, text, date)
             if tg_id is not None:
                 print('{} / {}: setting json_id={} to tg_id={} text={}'.format(i, n, json_id, tg_id, crop_text(text)))
                 await update(database, chat_id, tg_id, json_id, text)

@@ -1,11 +1,12 @@
 import pytest
 import aiogram
+import pytest_asyncio
 
 from toxic.config import Config
 from toxic.db import Database
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def database():
     config = Config.load(['config.tests.json'])
 
@@ -28,7 +29,7 @@ async def database():
     ]
 )
 async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
-    rows = list(database.query(query, vars))
+    rows = [x async for x in database.query(query, vars)]
     assert rows == expected
 
 
