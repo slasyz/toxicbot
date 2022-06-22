@@ -26,11 +26,13 @@ async def database():
         ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', aiogram.types.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
     ]
 )
+@pytest.mark.asyncio
 def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
     rows = list(database.query(query, vars))
     assert rows == expected
 
 
+@pytest.mark.asyncio
 async def test_database_insert(database: Database):
     await database.exec('DELETE FROM reminders WHERE chat_id=1235')
     await database.exec('DELETE FROM chats WHERE tg_id=1235')
