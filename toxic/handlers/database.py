@@ -10,7 +10,7 @@ class DatabaseUpdateSaver:
         self.database = database
         self.metrics = metrics
 
-    def handle_user(self, user: aiogram.types.User):
+    async def handle_user(self, user: aiogram.types.User):
         row = self.database.query_row('''
             SELECT first_name, last_name, username 
             FROM users 
@@ -18,7 +18,7 @@ class DatabaseUpdateSaver:
         ''', (user.id,))
 
         if row is None:
-            self.database.exec('''
+            await self.database.exec('''
                 INSERT INTO users(tg_id, first_name, last_name, username)
                 VALUES(%s, %s, %s, %s)
             ''', (
@@ -28,7 +28,7 @@ class DatabaseUpdateSaver:
                 user.username
             ))
         elif row[0] != user.first_name or row[1] != user.last_name or row[2] != user.username:
-            self.database.exec('''
+            await self.database.exec('''
                 UPDATE users
                 SET first_name = %s,
                     last_name = %s,
@@ -41,12 +41,12 @@ class DatabaseUpdateSaver:
                 user.id
             ))
 
-    def handle_chat(self, chat: aiogram.types.Chat):
+    async def handle_chat(self, chat: aiogram.types.Chat):
         title = chat.title or (((chat.first_name or '') + ' ' + (chat.last_name or '')).strip()) or None
 
         row = self.database.query_row('SELECT title FROM chats WHERE tg_id=%s', (chat.id,))
         if row is None:
-            self.database.exec('''
+            await self.database.exec('''
                 INSERT INTO chats(tg_id, title)
                 VALUES(%s, %s)
             ''', (
@@ -54,7 +54,7 @@ class DatabaseUpdateSaver:
                 title
             ))
         elif row[0] != title:
-            self.database.exec('''
+            await self.database.exec('''
                 UPDATE chats
                 SET title = %s
                 WHERE tg_id=%s
@@ -63,11 +63,11 @@ class DatabaseUpdateSaver:
                 chat.id
             ))
 
-    def handle_message(self, message: aiogram.types.Message, update_id: int | None = None):
+    async def handle_message(self, message: aiogram.types.Message, update_id: int | None = None):
         if message.from_user is not None:
-            self.handle_user(message.from_user)
+            await self.handle_user(message.from_user)
         if message.chat is not None:
-            self.handle_chat(message.chat)
+            await self.handle_chat(message.chat)
 
         row = self.database.query_row('SELECT true FROM messages WHERE chat_id=%s AND tg_id=%s AND update_id=%s', (
             message.chat.id,
@@ -91,7 +91,7 @@ class DatabaseUpdateSaver:
         if message.from_user is not None:
             from_user_id = message.from_user.id
 
-        self.database.exec('''
+        await self.database.exec('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
             VALUES(%s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (chat_id, json_id, tg_id) DO UPDATE SET 
@@ -129,7 +129,7 @@ class DatabaseUpdateSaver:
         if message is not None:
             chat_id = message.chat.id
 
-        self.database.exec('''
+        await self.database.exec('''
             INSERT INTO updates(tg_id, chat_id, json)
             VALUES(%s, %s, %s)
         ''', (
@@ -141,4 +141,4 @@ class DatabaseUpdateSaver:
         if message is None:
             return
 
-        self.handle_message(message, update.update_id)
+        await self.handle_message(message, update.update_id)

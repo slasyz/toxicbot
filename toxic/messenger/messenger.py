@@ -41,17 +41,17 @@ class Messenger:
         for _ in range(10):
             try:
                 message = await msg.send(self.bot, chat_id, reply_to)
-                self.dus.handle_message(message)
+                await self.dus.handle_message(message)
                 return
             except aiogram.exceptions.MigrateToChat as ex:
                 logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.migrate_to_chat_id)
-                self.chats_repo.update_next_id(chat_id, ex.migrate_to_chat_id)
-                self.chats_repo.disable_joke(chat_id)
+                await self.chats_repo.update_next_id(chat_id, ex.migrate_to_chat_id)
+                await self.chats_repo.disable_joke(chat_id)
                 chat_id = ex.migrate_to_chat_id
                 continue
             except aiogram.exceptions.Unauthorized as ex:
                 logger.opt(exception=ex).info('Unauthorized.', chat_id=chat_id)
-                self.chats_repo.disable_joke(chat_id)
+                await self.chats_repo.disable_joke(chat_id)
             break
         else:
             raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))

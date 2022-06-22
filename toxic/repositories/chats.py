@@ -75,11 +75,11 @@ class ChatsRepository:
         row = self.database.query('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
         return row is not None
 
-    def update_next_id(self, chat_id: int, new_chat_id: int):
-        self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (new_chat_id, chat_id))
+    async def update_next_id(self, chat_id: int, new_chat_id: int):
+        await self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (new_chat_id, chat_id))
 
-    def disable_joke(self, chat_id):
-        self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
+    async def disable_joke(self, chat_id):
+        await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
 
     def get_joker_chats(self) -> Iterator[tuple[int, int]]:
         rows = self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')

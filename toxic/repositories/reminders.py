@@ -27,5 +27,5 @@ class RemindersRepository:
             row[3]
         )
 
-    def deactivate_reminder(self, id: int):
-        self.database.exec('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))
+    async def deactivate_reminder(self, id: int):
+        await self.database.exec('UPDATE reminders SET isactive=FALSE WHERE id = %s', (id,))

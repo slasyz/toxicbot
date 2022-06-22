@@ -29,4 +29,4 @@ class ReminderWorker(Worker):
                 await asyncio.sleep(seconds)
 
             await self.messenger.send(reminder.chat_id, reminder.text)
-            self.reminders_repo.deactivate_reminder(reminder.id)
+            await self.reminders_repo.deactivate_reminder(reminder.id)

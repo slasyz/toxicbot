@@ -7,12 +7,12 @@ class SettingsRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def _set_value(self, key: str, value: str | None):
+    async def _set_value(self, key: str, value: str | None):
         if value is None:
-            self.database.exec('DELETE FROM settings WHERE key=%s', (key,))
+            await self.database.exec('DELETE FROM settings WHERE key=%s', (key,))
             return
 
-        self.database.exec('''
+        await self.database.exec('''
             INSERT INTO settings(key, value) 
             VALUES(%s, %s) 
             ON CONFLICT(key) DO UPDATE
@@ -33,6 +33,6 @@ class SettingsRepository:
 
         return json.loads(value_str)
 
-    def spotify_set_token(self, token_info: dict):
+    async def spotify_set_token(self, token_info: dict):
         value_str = json.dumps(token_info)
-        return self._set_value('spotify_token', value_str)
+        return await self._set_value('spotify_token', value_str)

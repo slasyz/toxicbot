@@ -21,7 +21,7 @@ class Database:
 
         return Database(conn)
 
-    def exec(self, query, vars=None):
+    async def exec(self, query, vars=None):
         with self.conn, self.conn.cursor() as cur:
             cur.execute(query, vars)
             self.conn.commit()

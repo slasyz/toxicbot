@@ -31,11 +31,11 @@ def test_database_query(query: str, vars: tuple, expected: list[tuple], database
     assert rows == expected
 
 
-def test_database_insert(database: Database):
-    database.exec('DELETE FROM reminders WHERE chat_id=1235')
-    database.exec('DELETE FROM chats WHERE tg_id=1235')
+async def test_database_insert(database: Database):
+    await database.exec('DELETE FROM reminders WHERE chat_id=1235')
+    await database.exec('DELETE FROM chats WHERE tg_id=1235')
 
-    database.exec("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
+    await database.exec("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
 
     row_insert = database.query_row("INSERT INTO reminders(chat_id, datetime, text, isactive) VALUES(1235, now(), 'asdf', TRUE) RETURNING id")
     assert row_insert is not None

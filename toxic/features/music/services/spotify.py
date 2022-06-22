@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import concurrent.futures
 import re
 from dataclasses import dataclass
 
@@ -29,12 +31,14 @@ class Device:
 class Cache(CacheHandler):
     def __init__(self, settings_repo: SettingsRepository):
         self.settings_repo = settings_repo
+        # TODO: very bad way to do this, but I don't want to refactor it properly now.
+        self.pool = concurrent.futures.ThreadPoolExecutor()
 
     def get_cached_token(self):
         return self.settings_repo.spotify_get_token()
 
     def save_token_to_cache(self, token_info):
-        self.settings_repo.spotify_set_token(token_info)
+        self.pool.submit(asyncio.run, self.settings_repo.spotify_set_token(token_info))
 
 
 class Spotify:

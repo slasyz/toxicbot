@@ -24,10 +24,10 @@ LOGGING_CONFIG: dict = {
 }
 
 
-async def __main__():
-    deps = await init(
+def __main__():
+    deps = asyncio.run(init(
         [os.path.join(os.path.dirname(__file__), '..', '..', 'config.json'), '/etc/toxic/config.json']
-    )
+    ))
 
     init_sentry(deps.config['sentry']['dsn'])
 
@@ -60,4 +60,4 @@ async def __main__():
 
 
 if __name__ == '__main__':
-    asyncio.run(__main__())
+    __main__()

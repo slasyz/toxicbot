@@ -60,8 +60,8 @@ def search_message(database: Database, chat_id: int, user_id: int, s: str, date:
     return rows[0][0]
 
 
-def insert(database: Database, chat_id: int, json_id: int, user_id: int, text: str, date: str):
-    database.exec(
+async def insert(database: Database, chat_id: int, json_id: int, user_id: int, text: str, date: str):
+    await database.exec(
         """
         INSERT INTO messages(chat_id, tg_id, json_id, user_id, update_id, text, date, sticker)
         VALUES(%s, NULL, %s, %s, NULL, %s, %s, NULL)
@@ -70,8 +70,8 @@ def insert(database: Database, chat_id: int, json_id: int, user_id: int, text: s
     )
 
 
-def update(database: Database, chat_id: int, tg_id: int, json_id: int, text: str):
-    database.exec(
+async def update(database: Database, chat_id: int, tg_id: int, json_id: int, text: str):
+    await database.exec(
         'UPDATE messages SET json_id = %s WHERE chat_id = %s AND tg_id = %s',
         (json_id, chat_id, tg_id),
     )
@@ -111,10 +111,10 @@ async def __main__():
             tg_id = search_message(database, chat_id, user_id, text, date)
             if tg_id is not None:
                 print('{} / {}: setting json_id={} to tg_id={} text={}'.format(i, n, json_id, tg_id, crop_text(text)))
-                update(database, chat_id, tg_id, json_id, text)
+                await update(database, chat_id, tg_id, json_id, text)
             elif text != '':
                 print('{} / {}: inserting json_id={} text={}'.format(i, n, json_id, crop_text(text)))
-                insert(database, chat_id, json_id, user_id, text, date)
+                await insert(database, chat_id, json_id, user_id, text, date)
 
 
 if __name__ == '__main__':
