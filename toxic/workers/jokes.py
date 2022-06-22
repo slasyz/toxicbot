@@ -58,16 +58,20 @@ class JokesWorker(Worker):
             await asyncio.sleep(2)
 
 
-if __name__ == '__main__':
+async def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    deps = main.init(['../../config.json'])
+    deps = await main.init(['../../config.json'])
 
     jkr = Joker('ошибка')
     worker = JokesWorker(jkr, deps.chats_repo, None)
 
     start = datetime.now()
-    asyncio.run(worker.step())
-    logger.info('Finished joker step.', duration=str(datetime.now()-start))
+    await worker.step()
+    logger.info('Finished joker step.', duration=str(datetime.now() - start))
 
     # text, _ = Joker('ошибка').get_random_joke()
     # print(text)
+
+
+if __name__ == '__main__':
+    asyncio.run(__main__())

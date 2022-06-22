@@ -10,7 +10,7 @@ class Database:
         self.conn = conn
 
     @staticmethod
-    def connect(host: str, port: int, database: str, user: str, password: str) -> Database:
+    async def connect(host: str, port: int, database: str, user: str, password: str) -> Database:
         conn = psycopg2.connect(
             host=host,
             port=port,

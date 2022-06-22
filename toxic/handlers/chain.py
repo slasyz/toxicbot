@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime
 
 import aiogram
@@ -89,9 +90,9 @@ def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChats
     return chain_teaching_handler, chain_flood_handler
 
 
-def __main__():
+async def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    deps = main.init(['../../config.json'])
+    deps = await main.init(['../../config.json'])
 
     # splitter = NoPunctuationSplitter()
     # splitter = PunctuationSplitter()
@@ -109,4 +110,4 @@ def __main__():
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

@@ -1,8 +1,7 @@
 """
 Script to run just once to set messages.text/sticker using updates.json.message.sticker.
 """
-
-
+import asyncio
 import json
 
 import aiogram
@@ -49,14 +48,14 @@ def save():
             cur.execute("UPDATE messages SET text = %s, sticker = %s WHERE update_id = %s", (emoji, file_id, update_id))
 
 
-def __main__():
+async def __main__():
     import main  # pylint: disable=import-outside-toplevel
 
-    main.init(['../../config.json'])
+    await main.init(['../../config.json'])
 
     load()
     save()
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

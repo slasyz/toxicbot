@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import json
 
@@ -76,10 +77,10 @@ def update(database: Database, chat_id: int, tg_id: int, json_id: int, text: str
     )
 
 
-def __main__():
+async def __main__():
     config = Config.load(['/etc/toxic/config.json'])
 
-    database = Database.connect(
+    database = await Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],
@@ -117,4 +118,4 @@ def __main__():
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

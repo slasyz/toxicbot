@@ -1,3 +1,4 @@
+import asyncio
 import os
 from asyncio import CancelledError
 
@@ -23,8 +24,8 @@ LOGGING_CONFIG: dict = {
 }
 
 
-def __main__():
-    deps = init(
+async def __main__():
+    deps = await init(
         [os.path.join(os.path.dirname(__file__), '..', '..', 'config.json'), '/etc/toxic/config.json']
     )
 
@@ -59,4 +60,4 @@ def __main__():
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

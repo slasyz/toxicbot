@@ -6,10 +6,10 @@ from toxic.db import Database
 
 
 @pytest.fixture
-def database():
+async def database():
     config = Config.load(['config.tests.json'])
 
-    return Database.connect(
+    return await Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],

@@ -109,13 +109,13 @@ class Messenger:
         await self.bot.answer_callback_query(callback_id, text, show_alert)
 
 
-def __main__():
+async def __main__():
     import main  # pylint: disable=import-outside-toplevel
 
-    deps = main.init(['../../config.json'])
+    deps = await main.init(['../../config.json'])
 
     asyncio.run(deps.messenger.send(-328967401, 'приветики'))
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())

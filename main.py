@@ -74,14 +74,14 @@ def get_resource_path(name: str) -> str:
     return os.path.join(os.path.dirname(__file__), 'resources', name)
 
 
-def init(config_files: list) -> BasicDependencies:
+async def init(config_files: list) -> BasicDependencies:
     log.init()
     os.environ['TZ'] = 'Europe/Moscow'
     time.tzset()  # pylint: disable=no-member
 
     config = Config.load(config_files)
 
-    database = Database.connect(
+    database = await Database.connect(
         config['database']['host'],
         config['database']['port'],
         config['database']['name'],
@@ -143,7 +143,7 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
 
 # pylint: disable=too-many-statements
 async def __main__():
-    deps = init(['./config.json', '/etc/toxic/config.json'])
+    deps = await init(['./config.json', '/etc/toxic/config.json'])
 
     init_sentry(deps.config['sentry']['dsn'])
 

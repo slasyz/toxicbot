@@ -1,3 +1,4 @@
+import asyncio
 import gzip
 
 import yaml
@@ -31,9 +32,9 @@ def save(src: List):
             cur.execute('UPDATE updates SET json = %s WHERE tg_id = %s', (dump, update_id))
 
 
-def __main__():
+async def __main__():
     import main  # pylint: disable=import-outside-toplevel
-    main.init(['../../config.json'])
+    await main.init(['../../config.json'])
 
     total = get_total()
 
@@ -50,4 +51,4 @@ def __main__():
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())
