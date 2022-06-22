@@ -16,8 +16,8 @@ class RemindersRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def get_latest_reminder(self) -> Reminder | None:
-        row = self.database.query_row('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
+    async def get_latest_reminder(self) -> Reminder | None:
+        row = await self.database.query_row('SELECT id, chat_id, datetime, text FROM reminders WHERE isactive ORDER BY datetime LIMIT 1;')
         if row is None:
             return None
         return Reminder(

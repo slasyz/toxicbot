@@ -57,7 +57,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
     @router.get('/group/{id}', response_class=HTMLResponse)
     async def group(request: Request, id: int):
         # Получаем чат
-        row = database.query_row('''
+        row = await database.query_row('''
             SELECT c.title, count(m)
             FROM chats c
                 LEFT JOIN messages m ON c.tg_id = m.chat_id
@@ -96,7 +96,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
     @router.get('/user/{id}', response_class=HTMLResponse)
     async def user(request: Request, id: int):
         # Получаем пользователя
-        row = database.query_row('''
+        row = await database.query_row('''
             SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m)
             FROM users u
                 LEFT JOIN messages m ON u.tg_id = m.chat_id 

@@ -52,7 +52,7 @@ class PrivateHandler(MessageHandler):
         if message.chat.id < 0:
             return None
 
-        if self.users_repo.is_admin(message.chat.id):
+        if await self.users_repo.is_admin(message.chat.id):
             return 'Я запущен'
 
         return random.choice(self.replies)

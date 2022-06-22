@@ -50,7 +50,7 @@ class StatCommand(CommandHandler):
             logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat.id)
             return 'Что-то не то.'
 
-        if not self.users_repo.is_admin(message.from_user.id):
+        if not await self.users_repo.is_admin(message.from_user.id):
             return 'Это нужно делать в общем чате.'
 
         if len(args) != 2:

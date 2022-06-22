@@ -16,7 +16,7 @@ class VoiceCommand(CommandHandler):
 
         # TODO: use message.reply_to_message.text ?
 
-        text_to_voice = self.messages_repository.get_text(message.chat.id, message.reply_to_message.message_id)
+        text_to_voice = await self.messages_repository.get_text(message.chat.id, message.reply_to_message.message_id)
         if text_to_voice is None:
             logger.error(
                 'Error trying to voice message: message not found.',

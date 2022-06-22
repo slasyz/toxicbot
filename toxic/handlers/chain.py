@@ -28,11 +28,11 @@ class ChainTeachingHandler(MessageHandler):
         if message.chat.id > 0:
             return None
 
-        self.teach(message.chat.id, text)
+        await self.teach(message.chat.id, text)
         return None
 
-    def teach(self, chat_id: int, text: str):
-        chat_id = self.chats_repo.get_latest_chat_id(chat_id)
+    async def teach(self, chat_id: int, text: str):
+        chat_id = await self.chats_repo.get_latest_chat_id(chat_id)
         try:
             chain = self.chats[chat_id]
         except KeyError:
@@ -63,8 +63,8 @@ class ChainFloodHandler(MessageHandler):
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
             return None
 
-        count = self.chats_repo.count_messages(message.chat.id)
-        if count % self.chats_repo.get_period(message.chat.id) == 0:
+        count = await self.chats_repo.count_messages(message.chat.id)
+        if count % await self.chats_repo.get_period(message.chat.id) == 0:
             chain = self.chats[message.chat.id]
             return [TextMessage(
                 self.textizer.predict_not_empty(chain, message.text),
@@ -74,7 +74,7 @@ class ChainFloodHandler(MessageHandler):
         return None
 
 
-def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
+async def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, messages_repo: MessagesRepository, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
     chats: dict[int, Chain] = {}
     chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, chats)
     chain_flood_handler = ChainFloodHandler(textizer, chats_repo, messenger, chats)
@@ -84,7 +84,7 @@ def new(chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChats
     for chat_id, text in messages_repo.get_all_groups_messages():
         if text is None:
             continue
-        chain_teaching_handler.teach(chat_id, text)
+        await chain_teaching_handler.teach(chat_id, text)
     logger.info('Finished teaching messages.', duration=str(datetime.now()-start))
 
     return chain_teaching_handler, chain_flood_handler
@@ -99,7 +99,7 @@ async def __main__():
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, deps.metrics)
     chain_factory = ChainFactory(window=2)
-    teaching_handler, _ = new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
+    teaching_handler, _ = await new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)

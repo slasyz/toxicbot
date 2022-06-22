@@ -38,7 +38,7 @@ class Database:
             for record in cur:
                 yield record
 
-    def query_row(self, query, vars=None):
+    async def query_row(self, query, vars=None):
         for record in self.query(query, vars):
             return record
 

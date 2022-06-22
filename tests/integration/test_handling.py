@@ -29,7 +29,7 @@ def dus(database: Database):
     return DatabaseUpdateSaver(database, metrics)
 
 
-def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
+async def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
     chat = aiogram.types.Chat(id=11, type='bla', title='chat title')
     from_user = aiogram.types.User(id=14, first_name='Elisey', is_bot=False)
     message = aiogram.types.Message(message_id=22, date=datetime.now().timestamp(), chat=chat, from_user=from_user)
@@ -37,7 +37,7 @@ def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
 
     asyncio.run(dus.handle(update))
 
-    rows = database.query_row('''SELECT chat_id FROM updates WHERE tg_id=%s''', (1337,))
+    rows = await database.query_row('''SELECT chat_id FROM updates WHERE tg_id=%s''', (1337,))
     assert rows is not None
     assert len(rows) == 1
     assert rows[0] == 11

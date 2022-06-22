@@ -185,7 +185,7 @@ async def __main__():
     russian = Russian(wn, morph)
     emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
 
-    chain_teaching_handler, chain_flood_handler = chain.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
+    chain_teaching_handler, chain_flood_handler = await chain.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     useful_handlers = [
         MusicHandler(music_formatter),
@@ -234,7 +234,7 @@ async def __main__():
 
     await deps.messenger.send_to_admins('Я запустился.')
 
-    messages_total_row = deps.database.query_row('''SELECT count(*) FROM messages''')
+    messages_total_row = await deps.database.query_row('''SELECT count(*) FROM messages''')
     deps.metrics.messages.set(messages_total_row[0])
 
     await asyncio.gather(

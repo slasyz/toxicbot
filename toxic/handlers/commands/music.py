@@ -15,7 +15,7 @@ class MusicPlaintextCallback(CallbackHandler):
 
     async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         link = args['link']
-        music_message = self.music_formatter.get_message(link, True)
+        music_message = await self.music_formatter.get_message(link, True)
         if music_message is None:
             logger.error('Got nothing in MusicPlaintextCallback.', link=link)
             return CallbackReply(self.error_reply)

@@ -86,7 +86,7 @@ class HandlersManager:
 
             if message.from_user is None:
                 break
-            if command.handler.is_admins_only() and not self.users_repo.is_admin(message.from_user.id):
+            if command.handler.is_admins_only() and not await self.users_repo.is_admin(message.from_user.id):
                 break
 
             replies = self.rate_limiter.handle(message)
@@ -112,7 +112,7 @@ class HandlersManager:
             return
         args_id = callback.data
 
-        args = self.callback_data_repo.get_value(args_id)
+        args = await self.callback_data_repo.get_value(args_id)
         if args is None:
             return
 
@@ -126,7 +126,7 @@ class HandlersManager:
             if callback_definition.name != name:
                 continue
 
-            if callback_definition.handler.is_admins_only() and not self.users_repo.is_admin(callback.from_user.id):
+            if callback_definition.handler.is_admins_only() and not await self.users_repo.is_admin(callback.from_user.id):
                 await self.messenger.answer_callback(callback.id, 'Где ваши документы?', True)
                 logger.error('Regular user sent admin-only callback.',
                              user=callback.from_user.id,

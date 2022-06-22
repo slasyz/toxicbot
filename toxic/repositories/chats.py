@@ -14,8 +14,8 @@ class ChatsRepository:
     def __init__(self, database: Database):
         self.database = database
 
-    def get_latest_chat_id(self, chat_id: int) -> int:
-        row = self.database.query_row('''
+    async def get_latest_chat_id(self, chat_id: int) -> int:
+        row = await self.database.query_row('''
             WITH RECURSIVE r AS (
                 SELECT tg_id, next_tg_id
                 FROM chats
@@ -31,11 +31,11 @@ class ChatsRepository:
         ''', (chat_id,))
         return row[0]
 
-    def get_period(self, chat_id: int) -> int:
-        return self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))[0]
+    async def get_period(self, chat_id: int) -> int:
+        return await self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))[0]
 
-    def count_messages(self, chat_id: int) -> int:
-        row = self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (chat_id,))
+    async def count_messages(self, chat_id: int) -> int:
+        row = await self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (chat_id,))
         return row[0]
 
     def get_stat(self, chat_id: int) -> Iterator[tuple[str, int]]:
@@ -98,12 +98,12 @@ class CachedChatsRepository(ChatsRepository):
         super().__init__(database)
         self.latest_id_cache: dict[int, CachedEntry] = {}
 
-    def get_latest_chat_id(self, chat_id: int) -> int:
+    async def get_latest_chat_id(self, chat_id: int) -> int:
         entry = self.latest_id_cache.get(chat_id)
         if entry is not None and entry.valid_until > datetime.now():
             return entry.latest_chat_id
 
         logger.debug('Cache miss for chat_id=%s.', chat_id)
-        latest_chat_id = super().get_latest_chat_id(chat_id)
+        latest_chat_id = await super().get_latest_chat_id(chat_id)
         self.latest_id_cache[chat_id] = CachedEntry(latest_chat_id, datetime.now() + CACHE_DURATION)
         return latest_chat_id

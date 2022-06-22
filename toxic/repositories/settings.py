@@ -19,15 +19,15 @@ class SettingsRepository:
                 SET value = %s 
         ''', (key, value, value))
 
-    def _get_value(self, key: str) -> str | None:
-        row = self.database.query_row('SELECT value FROM settings WHERE key=%s', (key,))
+    async def _get_value(self, key: str) -> str | None:
+        row = await self.database.query_row('SELECT value FROM settings WHERE key=%s', (key,))
         if row is None:
             return None
 
         return row[0]
 
-    def spotify_get_token(self) -> dict | None:
-        value_str = self._get_value('spotify_token')
+    async def spotify_get_token(self) -> dict | None:
+        value_str = await self._get_value('spotify_token')
         if value_str is None:
             return None
 

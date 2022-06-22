@@ -36,7 +36,7 @@ class Messenger:
                 await self.bot.send_chat_action(chat_id, msg.get_chat_action())
                 await asyncio.sleep(interval)
 
-        chat_id = self.chats_repo.get_latest_chat_id(chat_id)
+        chat_id = await self.chats_repo.get_latest_chat_id(chat_id)
 
         for _ in range(10):
             try:

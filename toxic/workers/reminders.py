@@ -19,7 +19,7 @@ class ReminderWorker(Worker):
 
     async def work(self):
         while True:
-            reminder = self.reminders_repo.get_latest_reminder()
+            reminder = await self.reminders_repo.get_latest_reminder()
             if reminder is None:
                 return
 

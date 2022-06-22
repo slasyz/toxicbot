@@ -25,7 +25,7 @@ class DumpCommand(CommandHandler):
         except ValueError:
             return f'Нужно писать так: /{args[0]} UPDATE_ID'
 
-        dump = self.messages_repo.get_update_dump(update_id)
+        dump = await self.messages_repo.get_update_dump(update_id)
         if dump is None:
             return 'В базе нет такого апдейта.'
 

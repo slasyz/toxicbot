@@ -21,7 +21,7 @@ class MusicMessageGenerator:
         self.settings_repo = settings_repo
         self.callback_data_repo = callback_data_repo
 
-    def get_message(
+    async def get_message(
             self,
             source_link: str,
             include_plaintext_links: bool,
@@ -46,7 +46,7 @@ class MusicMessageGenerator:
         else:
             buttons.append([aiogram.types.InlineKeyboardButton(
                 '📝 Пришли обычные ссылки',
-                callback_data=self.callback_data_repo.insert_value({
+                callback_data=await self.callback_data_repo.insert_value({
                     'name': '/music/plaintext',
                     'link': source_link,
                 })

@@ -20,12 +20,12 @@ class AdminCommand(CommandHandler):
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         buttons = [
-            [aiogram.types.InlineKeyboardButton('📄 Список чатов', callback_data=self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
-            [aiogram.types.InlineKeyboardButton('⌨️ Убрать клавиатуру', callback_data=self.callback_data_repo.insert_value({'name': '/admin/keyboard/clear'}))],
+            [aiogram.types.InlineKeyboardButton('📄 Список чатов', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
+            [aiogram.types.InlineKeyboardButton('⌨️ Убрать клавиатуру', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/keyboard/clear'}))],
         ]
         if self.spotify and not self.spotify.is_authenticated():
             buttons.append(
-                [aiogram.types.InlineKeyboardButton('🎶 Spotify 🔑 Authenticate', callback_data=self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
+                [aiogram.types.InlineKeyboardButton('🎶 Spotify 🔑 Authenticate', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
             )
 
         return [TextMessage(

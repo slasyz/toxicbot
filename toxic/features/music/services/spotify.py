@@ -35,7 +35,7 @@ class Cache(CacheHandler):
         self.pool = concurrent.futures.ThreadPoolExecutor()
 
     def get_cached_token(self):
-        return self.settings_repo.spotify_get_token()
+        return self.pool.submit(asyncio.run, self.settings_repo.spotify_get_token())
 
     def save_token_to_cache(self, token_info):
         self.pool.submit(asyncio.run, self.settings_repo.spotify_set_token(token_info))

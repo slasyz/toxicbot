@@ -22,7 +22,7 @@ class MusicHandler(MessageHandler):
         replies: list[Message] = []
 
         for source_link in links:
-            music_message = self.music_formatter.get_message(source_link, include_plaintext_links=False)
+            music_message = await self.music_formatter.get_message(source_link, include_plaintext_links=False)
             if music_message is None:
                 replies.append(TextMessage(f'Вижу ссылку (на {get_hostname(source_link)}), но мне нечего ответить.'))
                 continue
