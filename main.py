@@ -6,8 +6,9 @@ import time
 from dataclasses import dataclass
 
 import aiogram
+import asyncpg
+import psycopg2
 from loguru import logger
-from psycopg2 import InterfaceError
 from pymorphy2 import MorphAnalyzer
 from ruwordnet import RuWordNet
 
@@ -134,8 +135,11 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
             sys.exit(1)
         except KeyboardInterrupt:
             sys.exit(0)
-        except InterfaceError as ex:
+        except psycopg2.InterfaceError as ex:
             logger.opt(exception=ex).error('Get psycopg2.InterfaceError, stopping.')
+            sys.exit(1)
+        except asyncpg.InterfaceError as ex:
+            logger.opt(exception=ex).error('Get asyncpg.InterfaceError, stopping.')
             sys.exit(1)
         except Exception as ex:
             logger.opt(exception=ex).error('Caught an exception while handling an update.')

@@ -3,6 +3,7 @@ import asyncio
 import traceback
 from datetime import datetime
 
+import asyncpg
 import psycopg2
 from loguru import logger
 
@@ -49,6 +50,9 @@ class WorkerWrapper:
                         # Если бот не запустится, это будет заметно сразу.
                         pass
                     except psycopg2.InterfaceError:
+                        # Ошибка БД, не получилось отправить сообщение.
+                        pass
+                    except asyncpg.InterfaceError:
                         # Ошибка БД, не получилось отправить сообщение.
                         pass
 
