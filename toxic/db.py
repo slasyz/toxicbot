@@ -42,18 +42,6 @@ class Database:
 
         await self.conn_async.execute(query, *vars)
 
-    async def query(self, query, vars=None) -> AsyncIterator:
-        with self.conn, self.conn.cursor() as cur:
-            cur.execute(query, vars)
-            # TODO: возможно, делать коммит и возвращать итератор с записями
-            self.conn.commit()
-
-            if cur.description is None:
-                return
-
-            for record in cur:
-                yield record
-
     async def query_async(self, query, vars=None) -> Iterator:
         if vars is None:
             return await self.conn_async.fetch(query)

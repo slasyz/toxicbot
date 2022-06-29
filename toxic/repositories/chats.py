@@ -40,9 +40,9 @@ class ChatsRepository:
         return row[0]
 
     async def get_stat(self, chat_id: int) -> AsyncIterator[tuple[str, int]]:
-        rows = self.database.query('''
+        rows = await self.database.query_async('''
                 WITH RECURSIVE ch(id) AS (
-                    SELECT %s::bigint
+                    SELECT $1::bigint
                     UNION
                     SELECT c.tg_id
                     FROM chats c
@@ -57,11 +57,11 @@ class ChatsRepository:
                 ORDER BY c DESC
                 LIMIT 10;
             ''', (chat_id,))
-        async for row in rows:
+        for row in rows:
             yield row[0], row[1]
 
     async def list(self) -> AsyncIterator[tuple[int, str]]:
-        rows = self.database.query('''
+        rows = await self.database.query_async('''
                     SELECT c.tg_id, c.title
                     FROM chats c
                     WHERE c.tg_id < 0
@@ -69,7 +69,7 @@ class ChatsRepository:
                     SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name))
                     FROM users u
                 ''')
-        async for row in rows:
+        for row in rows:
             yield row[0], row[1]
 
     async def is_existing(self, chat_id: int) -> bool:
@@ -83,8 +83,8 @@ class ChatsRepository:
         await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
 
     async def get_joker_chats(self) -> AsyncIterator[tuple[int, int]]:
-        rows = self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
-        async for row in rows:
+        rows = await self.database.query_async('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
+        for row in rows:
             yield row[0], row[1]
 
 

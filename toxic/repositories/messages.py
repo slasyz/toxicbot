@@ -8,7 +8,7 @@ class MessagesRepository:
         self.database = database
 
     async def get_all_groups_messages(self) -> AsyncIterator[tuple[int, str | None]]:
-        async for row in self.database.query('''
+        for row in await self.database.query_async('''
                 SELECT chat_id, text 
                 FROM messages 
                 WHERE chat_id < 0 AND update_id IS NOT NULL 

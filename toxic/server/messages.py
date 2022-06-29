@@ -19,7 +19,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         users_dict = {}
 
         # Получаем чаты
-        rows = database.query('''
+        rows = await database.query_async('''
             SELECT c.tg_id, c.title, count(m)
             FROM chats c
                 LEFT JOIN messages m ON c.tg_id = m.chat_id
@@ -27,18 +27,18 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             GROUP BY c.tg_id, c.title
             ORDER BY c.title
         ''')
-        async for row in rows:
+        for row in rows:
             groups_dict[row[0]] = Group(row[0], row[1], row[2])
 
         # Получаем пользователей
-        rows = database.query('''
+        rows = await database.query_async('''
             SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name)) as name, count(m)
             FROM users u
                 LEFT JOIN messages m on u.tg_id = m.chat_id
             GROUP BY u.tg_id, u.first_name, u.last_name
             ORDER BY name
         ''')
-        async for row in rows:
+        for row in rows:
             users_dict[row[0]] = User(row[0], row[1], row[2])
 
         groups_list = []
@@ -69,14 +69,14 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         messages = []
 
         # Получаем все сообщения из чата
-        rows = database.query('''
+        rows = await database.query_async('''
             SELECT update_id, m.tg_id, user_id, btrim(concat(u.first_name, ' ', u.last_name)), date, text
             FROM messages m
                 JOIN users u ON m.user_id = u.tg_id
-            WHERE chat_id = %s
+            WHERE chat_id = $1
             ORDER BY tg_id NULLS FIRST, json_id, update_id
         ''', (id,))
-        async for row in rows:
+        for row in rows:
             update_id, tg_id, user_id, user_name, date, text = row
 
             if not text:
@@ -108,13 +108,13 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         messages = []
 
         # Получаем все сообщения от пользователя
-        rows = database.query('''
+        rows = await database.query_async('''
             SELECT chat_id, update_id, tg_id, date, text
             FROM messages m
-            WHERE chat_id = %s
+            WHERE chat_id = $1
             ORDER BY tg_id NULLS FIRST, json_id, update_id
         ''', (id,))
-        async for row in rows:
+        for row in rows:
             user_id, update_id, tg_id, date, text = row
 
             if not text:

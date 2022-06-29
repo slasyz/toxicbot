@@ -12,6 +12,6 @@ class UsersRepository:
         return row is not None
 
     async def get_admins(self) -> AsyncIterator[int]:
-        rows = self.database.query('SELECT tg_id FROM users WHERE admin')
-        async for row in rows:
+        rows = await self.database.query_async('SELECT tg_id FROM users WHERE admin')
+        for row in rows:
             yield row[0]

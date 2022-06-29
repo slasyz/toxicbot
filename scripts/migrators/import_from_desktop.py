@@ -46,8 +46,8 @@ def get_json_id(message: dict) -> int:
 
 
 async def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> int | None:
-    rows = [x async for x in database.query(
-        'SELECT tg_id FROM messages WHERE chat_id=%s AND user_id=%s AND text=%s AND abs(EXTRACT(epoch from date-%s)) < 1;',
+    rows = [x for x in await database.query_async(
+        'SELECT tg_id FROM messages WHERE chat_id=$1 AND user_id=$2 AND text=$3 AND abs(EXTRACT(epoch from date-$4)) < 1;',
         (chat_id, user_id, s, date),
     )]
 

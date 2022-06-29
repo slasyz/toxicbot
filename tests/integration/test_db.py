@@ -23,13 +23,11 @@ async def database():
 @pytest.mark.parametrize(
     ['query', 'vars', 'expected'],
     [
-        ('SELECT %s;', (1337,), [(1337,)]),
-        ('SELECT %(name)s;', {'name': 'Vyacheslav'}, [('Vyacheslav',)]),
-        ('SELECT %(id)s, %(first_name)s, %(is_bot)s;', aiogram.types.User(id=1234, first_name='Vyacheslav', is_bot=False), [(1234, 'Vyacheslav', False)]),
+        ('SELECT $1;', (1337,), [(1337,)]),
     ]
 )
 async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
-    rows = [x async for x in database.query(query, vars)]
+    rows = [x for x in await database.query_async(query, vars)]
     assert rows == expected
 
 
