@@ -1,6 +1,6 @@
 import json
 
-import requests
+import aiohttp
 from loguru import logger
 from lxml import html
 
@@ -8,16 +8,16 @@ from toxic.features.music.services.structs import Infoer, Info, Type, Service
 
 
 class Boom(Infoer):
-    def get_info(self, url: str) -> Info | None:
+    async def get_info(self, url: str) -> Info | None:
         try:
-            return self._get_info(url)
+            return await self._get_info(url)
         except Exception as ex:
             logger.opt(exception=ex).error('Exception while getting Boom info.', url=url)
 
         return None
 
-    def _get_info(self, url: str) -> Info | None:
-        data = self._get_json(url)
+    async def _get_info(self, url: str) -> Info | None:
+        data = await self._get_json(url)
         if data is None:
             return None
 
@@ -59,11 +59,10 @@ class Boom(Infoer):
 
         return None
 
-    def _get_json(self, url: str) -> dict | None:
-        with requests.get(url) as req:
-            data = req.content.decode('utf-8', 'ignore')
+    async def _get_json(self, url: str) -> dict | None:
+        async with aiohttp.ClientSession() as session, session.get(url) as req:
             parser = html.HTMLParser(encoding='utf-8')
-            document = html.document_fromstring(data, parser=parser)
+            document = html.document_fromstring(await req.read(), parser=parser)
             element = document.find('.//script[@id="initial-mobx-state"]')
             if element is None:
                 return None

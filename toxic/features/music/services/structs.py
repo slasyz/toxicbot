@@ -27,7 +27,7 @@ class Info:
 
 
 class Infoer:
-    def get_info(self, url: str) -> Info | None:
+    async def get_info(self, url: str) -> Info | None:
         raise NotImplementedError()
 
 

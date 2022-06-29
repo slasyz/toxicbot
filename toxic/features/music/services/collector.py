@@ -8,9 +8,9 @@ class MusicInfoCollector:
         self.infoers = infoers
         self.searchers = searchers
 
-    def _collect_info_by_url(self, info: Info, url: str) -> Info:
+    async def _collect_info_by_url(self, info: Info, url: str) -> Info:
         for infoer in self.infoers:
-            new_info = infoer.get_info(url)
+            new_info = await infoer.get_info(url)
             logger.debug(
                 'MusicInfoCollector: infoer returned new_info.',
                 url=url,
@@ -35,9 +35,9 @@ class MusicInfoCollector:
 
         return info
 
-    def collect_info(self, url: str) -> Info | None:
+    async def collect_info(self, url: str) -> Info | None:
         # First step — get name/urls using source URL
-        info = self._collect_info_by_url(Info(), url)
+        info = await self._collect_info_by_url(Info(), url)
         if info.type is None:
             # At this moment we should have something.
             return None
@@ -53,7 +53,7 @@ class MusicInfoCollector:
 
         # Third step — get even more urls using new URLs
         for new_url in more_urls.values():
-            info = self._collect_info_by_url(info, new_url)
+            info = await self._collect_info_by_url(info, new_url)
 
         if info.type is None:
             return None

@@ -1,6 +1,6 @@
 import pytest
 
-from toxic.helpers.retry import with_retry
+from toxic.helpers.retry import with_retry, with_retry_async
 
 
 class FirstException(Exception):
@@ -36,6 +36,18 @@ def test_with_retry_success():
     assert fail.counter == 3
 
 
+@pytest.mark.asyncio
+async def test_with_retry_async_success():
+    fail = Fail(2, FirstException())
+
+    @with_retry_async(3, (FirstException, SecondException))
+    async def fail_func() -> bool:
+        return fail.call()
+
+    assert await fail_func()
+    assert fail.counter == 3
+
+
 def test_with_retry_unexpected_exception():
     fail = Fail(2, FirstException())
 
@@ -58,5 +70,19 @@ def test_with_retry_attempts_exceeded():
 
     with pytest.raises(FirstException):
         fail_func()
+
+    assert fail.counter == 3
+
+
+@pytest.mark.asyncio
+async def test_with_retry_async_attempts_exceeded():
+    fail = Fail(5, FirstException())
+
+    @with_retry_async(3, (FirstException,))
+    async def fail_func() -> bool:
+        return fail.call()
+
+    with pytest.raises(FirstException):
+        await fail_func()
 
     assert fail.counter == 3

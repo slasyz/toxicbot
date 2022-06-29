@@ -1,7 +1,7 @@
 import json
 from urllib.parse import urlencode
 
-import requests
+import aiohttp
 from loguru import logger
 
 from toxic.features.music.services.structs import Type, Service, Info, Infoer
@@ -74,16 +74,16 @@ class Odesli(Infoer):
 
         return result
 
-    def get_info(self, url: str) -> Info | None:
+    async def get_info(self, url: str) -> Info | None:
         basepath = 'https://api.song.link/v1-alpha.1/links'
         params = {
             'url': url
         }
         url = '{}?{}'.format(basepath, urlencode(params))
 
-        with requests.get(url) as resp:
+        async with aiohttp.ClientSession() as session, session.get(url) as resp:
             try:
-                parsed = json.loads(resp.content)
+                parsed = json.loads(await resp.read())
             except json.JSONDecodeError as ex:
                 logger.opt(exception=ex).error('Cannot parse Odesli response.', result=resp.content)
                 return None

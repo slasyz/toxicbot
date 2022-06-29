@@ -4,7 +4,7 @@ from typing import IO
 import aiohttp
 
 from toxic.helpers import consts
-from toxic.helpers.retry import with_retry
+from toxic.helpers.retry import with_retry_async
 
 MAX_ATTEMPTS = 3
 MAX_ERROR_LENGTH = 100
@@ -24,14 +24,14 @@ class VoiceService:
 class NextUpService(VoiceService):
     async def load(self, text: str) -> IO:
         # TODO: proxy
-        link = self.generate_link(text)
+        link = await self.generate_link(text)
 
         async with aiohttp.ClientSession() as session, session.get(link) as audio:
             f = BytesIO(await audio.read())
             return f
 
-    @with_retry(MAX_ATTEMPTS, (InvalidLinkException,))
-    def generate_link(self, text):
+    @with_retry_async(MAX_ATTEMPTS, (InvalidLinkException,))
+    async def generate_link(self, text):
         # TODO: proxy
         async with aiohttp.ClientSession() as session:
             req = await session.get(

@@ -26,7 +26,7 @@ class MusicMessageGenerator:
             source_link: str,
             include_plaintext_links: bool,
     ) -> MusicMessage | None:
-        info = self.collector.collect_info(source_link)
+        info = await self.collector.collect_info(source_link)
         if info is None:
             return None
 

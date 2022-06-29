@@ -4,6 +4,7 @@ from toxic.features.music.services.boom import Boom
 from toxic.features.music.services.structs import Info, Type, Service
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['url', 'test_func'],
     [
@@ -23,10 +24,11 @@ from toxic.features.music.services.structs import Info, Type, Service
 )
 def test_get_json(url, test_func):
     boom = Boom()
-    data = boom._get_json(url)
+    data = await boom._get_json(url)
     assert test_func(data)
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['url', 'expected_info'],
     [
@@ -60,5 +62,5 @@ def test_get_json(url, test_func):
 )
 def test_get_info(url: str, expected_info: Info):
     boom = Boom()
-    info = boom.get_info(url)
+    info = await boom.get_info(url)
     assert info == expected_info

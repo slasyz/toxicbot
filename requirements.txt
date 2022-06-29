@@ -175,7 +175,6 @@ pyyaml==5.4.1
     #   uvicorn
 requests==2.25.1
     # via
-    #   -r requirements.in
     #   spotipy
     #   translate
 ruwordnet==0.0.3
@@ -215,8 +214,6 @@ tomli==1.2.1
 tox==3.24.4
     # via translate
 translate==3.5.0
-    # via -r requirements.in
-types-requests==2.25.11
     # via -r requirements.in
 typing-extensions==3.10.0.2
     # via
