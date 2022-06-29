@@ -46,7 +46,7 @@ def get_json_id(message: dict) -> int:
 
 
 async def search_message(database: Database, chat_id: int, user_id: int, s: str, date: str) -> int | None:
-    rows = [x for x in await database.query_async(
+    rows = [x for x in await database.query(
         'SELECT tg_id FROM messages WHERE chat_id=$1 AND user_id=$2 AND text=$3 AND abs(EXTRACT(epoch from date-$4)) < 1;',
         (chat_id, user_id, s, date),
     )]
@@ -61,7 +61,7 @@ async def search_message(database: Database, chat_id: int, user_id: int, s: str,
 
 
 async def insert(database: Database, chat_id: int, json_id: int, user_id: int, text: str, date: str):
-    await database.exec_async(
+    await database.exec(
         """
         INSERT INTO messages(chat_id, tg_id, json_id, user_id, update_id, text, date, sticker)
         VALUES($1, NULL, $2, $3, NULL, $4, $5, NULL)
@@ -71,7 +71,7 @@ async def insert(database: Database, chat_id: int, json_id: int, user_id: int, t
 
 
 async def update(database: Database, chat_id: int, tg_id: int, json_id: int, text: str):
-    await database.exec_async(
+    await database.exec(
         'UPDATE messages SET json_id = $1 WHERE chat_id = $2 AND tg_id = $3',
         (json_id, chat_id, tg_id),
     )

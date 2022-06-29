@@ -19,7 +19,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         users_dict = {}
 
         # Получаем чаты
-        rows = await database.query_async('''
+        rows = await database.query('''
             SELECT c.tg_id, c.title, count(m)
             FROM chats c
                 LEFT JOIN messages m ON c.tg_id = m.chat_id
@@ -31,7 +31,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
             groups_dict[row[0]] = Group(row[0], row[1], row[2])
 
         # Получаем пользователей
-        rows = await database.query_async('''
+        rows = await database.query('''
             SELECT u.tg_id, btrim(concat(u.first_name, ' ', u.last_name)) as name, count(m)
             FROM users u
                 LEFT JOIN messages m on u.tg_id = m.chat_id
@@ -57,7 +57,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
     @router.get('/group/{id}', response_class=HTMLResponse)
     async def group(request: Request, id: int):
         # Получаем чат
-        row = await database.query_row_async('''
+        row = await database.query_row('''
             SELECT c.title, count(m)
             FROM chats c
                 LEFT JOIN messages m ON c.tg_id = m.chat_id
@@ -69,7 +69,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         messages = []
 
         # Получаем все сообщения из чата
-        rows = await database.query_async('''
+        rows = await database.query('''
             SELECT update_id, m.tg_id, user_id, btrim(concat(u.first_name, ' ', u.last_name)), date, text
             FROM messages m
                 JOIN users u ON m.user_id = u.tg_id
@@ -96,7 +96,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
     @router.get('/user/{id}', response_class=HTMLResponse)
     async def user(request: Request, id: int):
         # Получаем пользователя
-        row = await database.query_row_async('''
+        row = await database.query_row('''
             SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m)
             FROM users u
                 LEFT JOIN messages m ON u.tg_id = m.chat_id 
@@ -108,7 +108,7 @@ def get_router(templates: Jinja2Templates, database: Database) -> APIRouter:
         messages = []
 
         # Получаем все сообщения от пользователя
-        rows = await database.query_async('''
+        rows = await database.query('''
             SELECT chat_id, update_id, tg_id, date, text
             FROM messages m
             WHERE chat_id = $1

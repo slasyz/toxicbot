@@ -6,12 +6,12 @@ import asyncpg
 
 
 class Database:
-    def __init__(self, conn_async: asyncpg.Connection):
-        self.conn_async = conn_async
+    def __init__(self, conn: asyncpg.Connection):
+        self.conn = conn
 
     @staticmethod
     async def connect(host: str, port: int, database: str, user: str, password: str) -> Database:
-        conn_async = await asyncpg.connect(
+        conn = await asyncpg.connect(
             host=host,
             port=port,
             database=database,
@@ -19,23 +19,23 @@ class Database:
             password=password
         )
 
-        return Database(conn_async)
+        return Database(conn)
 
-    async def exec_async(self, query, vars=None):
+    async def exec(self, query, vars=None):
         if vars is None:
-            await self.conn_async.execute(query)
+            await self.conn.execute(query)
             return
 
-        await self.conn_async.execute(query, *vars)
+        await self.conn.execute(query, *vars)
 
-    async def query_async(self, query, vars=None) -> Iterator:
+    async def query(self, query, vars=None) -> Iterator:
         if vars is None:
-            return await self.conn_async.fetch(query)
+            return await self.conn.fetch(query)
 
-        return await self.conn_async.fetch(query, *vars)
+        return await self.conn.fetch(query, *vars)
 
-    async def query_row_async(self, query, vars=None) -> Any | None:
+    async def query_row(self, query, vars=None) -> Any | None:
         if vars is None:
-            return await self.conn_async.fetchrow(query)
+            return await self.conn.fetchrow(query)
 
-        return await self.conn_async.fetchrow(query, *vars)
+        return await self.conn.fetchrow(query, *vars)

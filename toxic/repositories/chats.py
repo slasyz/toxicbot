@@ -15,7 +15,7 @@ class ChatsRepository:
         self.database = database
 
     async def get_latest_chat_id(self, chat_id: int) -> int:
-        row = await self.database.query_row_async('''
+        row = await self.database.query_row('''
             WITH RECURSIVE r AS (
                 SELECT tg_id, next_tg_id
                 FROM chats
@@ -32,15 +32,15 @@ class ChatsRepository:
         return row[0]
 
     async def get_period(self, chat_id: int) -> int:
-        row = await self.database.query_row_async('''SELECT chain_period FROM chats WHERE tg_id = $1''', (chat_id,))
+        row = await self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = $1''', (chat_id,))
         return row[0]
 
     async def count_messages(self, chat_id: int) -> int:
-        row = await self.database.query_row_async('''SELECT count(tg_id) FROM messages WHERE chat_id = $1''', (chat_id,))
+        row = await self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = $1''', (chat_id,))
         return row[0]
 
     async def get_stat(self, chat_id: int) -> AsyncIterator[tuple[str, int]]:
-        rows = await self.database.query_async('''
+        rows = await self.database.query('''
                 WITH RECURSIVE ch(id) AS (
                     SELECT $1::bigint
                     UNION
@@ -61,7 +61,7 @@ class ChatsRepository:
             yield row[0], row[1]
 
     async def list(self) -> AsyncIterator[tuple[int, str]]:
-        rows = await self.database.query_async('''
+        rows = await self.database.query('''
                     SELECT c.tg_id, c.title
                     FROM chats c
                     WHERE c.tg_id < 0
@@ -73,17 +73,17 @@ class ChatsRepository:
             yield row[0], row[1]
 
     async def is_existing(self, chat_id: int) -> bool:
-        row = await self.database.query_row_async('SELECT tg_id FROM chats WHERE tg_id=$1', (chat_id,))
+        row = await self.database.query_row('SELECT tg_id FROM chats WHERE tg_id=$1', (chat_id,))
         return row is not None
 
     async def update_next_id(self, chat_id: int, new_chat_id: int):
-        await self.database.exec_async('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (new_chat_id, chat_id))
+        await self.database.exec('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (new_chat_id, chat_id))
 
     async def disable_joke(self, chat_id):
-        await self.database.exec_async('UPDATE chats SET joke=FALSE WHERE tg_id=$1', (chat_id,))
+        await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=$1', (chat_id,))
 
     async def get_joker_chats(self) -> AsyncIterator[tuple[int, int]]:
-        rows = await self.database.query_async('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
+        rows = await self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
         for row in rows:
             yield row[0], row[1]
 

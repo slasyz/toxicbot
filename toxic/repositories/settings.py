@@ -9,10 +9,10 @@ class SettingsRepository:
 
     async def _set_value(self, key: str, value: str | None):
         if value is None:
-            await self.database.exec_async('DELETE FROM settings WHERE key=$1', (key,))
+            await self.database.exec('DELETE FROM settings WHERE key=$1', (key,))
             return
 
-        await self.database.exec_async('''
+        await self.database.exec('''
             INSERT INTO settings(key, value) 
             VALUES($1, $2)
             ON CONFLICT(key) DO UPDATE
@@ -20,7 +20,7 @@ class SettingsRepository:
         ''', (key, value, value))
 
     async def _get_value(self, key: str) -> str | None:
-        row = await self.database.query_row_async('SELECT value FROM settings WHERE key=$1', (key,))
+        row = await self.database.query_row('SELECT value FROM settings WHERE key=$1', (key,))
         if row is None:
             return None
 

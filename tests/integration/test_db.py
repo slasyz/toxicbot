@@ -27,20 +27,20 @@ async def database():
     ]
 )
 async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
-    rows = [x for x in await database.query_async(query, vars)]
+    rows = [x for x in await database.query(query, vars)]
     assert rows == expected
 
 
 @pytest.mark.asyncio
 async def test_database_insert(database: Database):
-    await database.exec_async('DELETE FROM reminders WHERE chat_id=1235')
-    await database.exec_async('DELETE FROM chats WHERE tg_id=1235')
+    await database.exec('DELETE FROM reminders WHERE chat_id=1235')
+    await database.exec('DELETE FROM chats WHERE tg_id=1235')
 
-    await database.exec_async("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
+    await database.exec("INSERT INTO chats(tg_id, title) VALUES(1235, 'chat title')")
 
-    row_insert = await database.query_row_async("INSERT INTO reminders(chat_id, datetime, text, isactive) VALUES(1235, now(), 'asdf', TRUE) RETURNING id")
+    row_insert = await database.query_row("INSERT INTO reminders(chat_id, datetime, text, isactive) VALUES(1235, now(), 'asdf', TRUE) RETURNING id")
     assert row_insert is not None
 
-    row_select = await database.query_row_async("SELECT text FROM reminders WHERE id=$1", (row_insert[0],))
+    row_select = await database.query_row("SELECT text FROM reminders WHERE id=$1", (row_insert[0],))
     assert row_select is not None
     assert row_select[0] == 'asdf'
