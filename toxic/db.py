@@ -30,11 +30,6 @@ class Database:
 
         return Database(conn, conn_async)
 
-    async def exec(self, query, vars=None):
-        with self.conn, self.conn.cursor() as cur:
-            cur.execute(query, vars)
-            self.conn.commit()
-
     async def exec_async(self, query, vars=None):
         if vars is None:
             await self.conn_async.execute(query)

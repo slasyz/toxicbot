@@ -77,10 +77,10 @@ class ChatsRepository:
         return row is not None
 
     async def update_next_id(self, chat_id: int, new_chat_id: int):
-        await self.database.exec('UPDATE chats SET next_tg_id = %s WHERE tg_id=%s', (new_chat_id, chat_id))
+        await self.database.exec_async('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (new_chat_id, chat_id))
 
     async def disable_joke(self, chat_id):
-        await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=%s', (chat_id,))
+        await self.database.exec_async('UPDATE chats SET joke=FALSE WHERE tg_id=$1', (chat_id,))
 
     async def get_joker_chats(self) -> AsyncIterator[tuple[int, int]]:
         rows = await self.database.query_async('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')

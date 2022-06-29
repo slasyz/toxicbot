@@ -18,9 +18,9 @@ class DatabaseUpdateSaver:
         ''', (user.id,))
 
         if row is None:
-            await self.database.exec('''
+            await self.database.exec_async('''
                 INSERT INTO users(tg_id, first_name, last_name, username)
-                VALUES(%s, %s, %s, %s)
+                VALUES($1, $2, $3, $4)
             ''', (
                 user.id,
                 user.first_name,
@@ -28,12 +28,12 @@ class DatabaseUpdateSaver:
                 user.username
             ))
         elif row[0] != user.first_name or row[1] != user.last_name or row[2] != user.username:
-            await self.database.exec('''
+            await self.database.exec_async('''
                 UPDATE users
-                SET first_name = %s,
-                    last_name = %s,
-                    username = %s
-                WHERE tg_id = %s
+                SET first_name = $1,
+                    last_name = $2,
+                    username = $3
+                WHERE tg_id = $4
             ''', (
                 user.first_name,
                 user.last_name,
@@ -46,18 +46,18 @@ class DatabaseUpdateSaver:
 
         row = await self.database.query_row_async('SELECT title FROM chats WHERE tg_id=$1', (chat.id,))
         if row is None:
-            await self.database.exec('''
+            await self.database.exec_async('''
                 INSERT INTO chats(tg_id, title)
-                VALUES(%s, %s)
+                VALUES($1, $2)
             ''', (
                 chat.id,
                 title
             ))
         elif row[0] != title:
-            await self.database.exec('''
+            await self.database.exec_async('''
                 UPDATE chats
-                SET title = %s
-                WHERE tg_id=%s
+                SET title = $1
+                WHERE tg_id=$2
             ''', (
                 title,
                 chat.id
@@ -91,14 +91,14 @@ class DatabaseUpdateSaver:
         if message.from_user is not None:
             from_user_id = message.from_user.id
 
-        await self.database.exec('''
+        await self.database.exec_async('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
-            VALUES(%s, %s, %s, %s, %s, %s, %s)
+            VALUES($1, $2, $3, $4, $5, $6, $7)
             ON CONFLICT (chat_id, json_id, tg_id) DO UPDATE SET 
-                update_id = %s,
-                text = %s,
-                date = %s,
-                sticker = %s
+                update_id = $8,
+                text = $9,
+                date = $10,
+                sticker = $11
         ''', (
             message.chat.id,
             message.message_id,
@@ -129,9 +129,9 @@ class DatabaseUpdateSaver:
         if message is not None:
             chat_id = message.chat.id
 
-        await self.database.exec('''
+        await self.database.exec_async('''
             INSERT INTO updates(tg_id, chat_id, json)
-            VALUES(%s, %s, %s)
+            VALUES($1, $2, $3)
         ''', (
             update.update_id,
             chat_id,

@@ -9,14 +9,14 @@ class SettingsRepository:
 
     async def _set_value(self, key: str, value: str | None):
         if value is None:
-            await self.database.exec('DELETE FROM settings WHERE key=%s', (key,))
+            await self.database.exec_async('DELETE FROM settings WHERE key=$1', (key,))
             return
 
-        await self.database.exec('''
+        await self.database.exec_async('''
             INSERT INTO settings(key, value) 
-            VALUES(%s, %s) 
+            VALUES($1, $2)
             ON CONFLICT(key) DO UPDATE
-                SET value = %s 
+                SET value = $3
         ''', (key, value, value))
 
     async def _get_value(self, key: str) -> str | None:
