@@ -18,6 +18,8 @@ astroid==2.6.6
     # via pylint
 async-timeout==4.0.2
     # via aiohttp
+asyncpg==0.25.0
+    # via -r requirements.in
 attrs==21.2.0
     # via
     #   aiohttp
