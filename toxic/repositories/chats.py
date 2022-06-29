@@ -15,11 +15,11 @@ class ChatsRepository:
         self.database = database
 
     async def get_latest_chat_id(self, chat_id: int) -> int:
-        row = await self.database.query_row('''
+        row = await self.database.query_row_async('''
             WITH RECURSIVE r AS (
                 SELECT tg_id, next_tg_id
                 FROM chats
-                WHERE tg_id=%s
+                WHERE tg_id=$1
                 UNION
                 SELECT chats.tg_id, chats.next_tg_id
                 FROM chats
@@ -32,11 +32,11 @@ class ChatsRepository:
         return row[0]
 
     async def get_period(self, chat_id: int) -> int:
-        row = await self.database.query_row('''SELECT chain_period FROM chats WHERE tg_id = %s''', (chat_id,))
+        row = await self.database.query_row_async('''SELECT chain_period FROM chats WHERE tg_id = $1''', (chat_id,))
         return row[0]
 
     async def count_messages(self, chat_id: int) -> int:
-        row = await self.database.query_row('''SELECT count(tg_id) FROM messages WHERE chat_id = %s''', (chat_id,))
+        row = await self.database.query_row_async('''SELECT count(tg_id) FROM messages WHERE chat_id = $1''', (chat_id,))
         return row[0]
 
     async def get_stat(self, chat_id: int) -> AsyncIterator[tuple[str, int]]:
@@ -73,7 +73,7 @@ class ChatsRepository:
             yield row[0], row[1]
 
     async def is_existing(self, chat_id: int) -> bool:
-        row = await self.database.query_row('SELECT tg_id FROM chats WHERE tg_id=%s', (chat_id,))
+        row = await self.database.query_row_async('SELECT tg_id FROM chats WHERE tg_id=$1', (chat_id,))
         return row is not None
 
     async def update_next_id(self, chat_id: int, new_chat_id: int):

@@ -60,12 +60,6 @@ class Database:
 
         return await self.conn_async.fetch(query, *vars)
 
-    async def query_row(self, query, vars=None):
-        async for record in self.query(query, vars):
-            return record
-
-        return None
-
     async def query_row_async(self, query, vars=None) -> Any | None:
         if vars is None:
             return await self.conn_async.fetchrow(query)

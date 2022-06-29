@@ -38,7 +38,7 @@ async def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
 
     await dus.handle(update)
 
-    rows = await database.query_row('''SELECT chat_id FROM updates WHERE tg_id=%s''', (1337,))
+    rows = await database.query_row_async('''SELECT chat_id FROM updates WHERE tg_id=$1''', (1337,))
     assert rows is not None
     assert len(rows) == 1
     assert rows[0] == 11

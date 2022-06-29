@@ -20,7 +20,7 @@ class SettingsRepository:
         ''', (key, value, value))
 
     async def _get_value(self, key: str) -> str | None:
-        row = await self.database.query_row('SELECT value FROM settings WHERE key=%s', (key,))
+        row = await self.database.query_row_async('SELECT value FROM settings WHERE key=$1', (key,))
         if row is None:
             return None
 

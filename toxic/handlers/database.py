@@ -11,10 +11,10 @@ class DatabaseUpdateSaver:
         self.metrics = metrics
 
     async def handle_user(self, user: aiogram.types.User):
-        row = await self.database.query_row('''
+        row = await self.database.query_row_async('''
             SELECT first_name, last_name, username 
             FROM users 
-            WHERE tg_id=%s
+            WHERE tg_id=$1
         ''', (user.id,))
 
         if row is None:
@@ -44,7 +44,7 @@ class DatabaseUpdateSaver:
     async def handle_chat(self, chat: aiogram.types.Chat):
         title = chat.title or (((chat.first_name or '') + ' ' + (chat.last_name or '')).strip()) or None
 
-        row = await self.database.query_row('SELECT title FROM chats WHERE tg_id=%s', (chat.id,))
+        row = await self.database.query_row_async('SELECT title FROM chats WHERE tg_id=$1', (chat.id,))
         if row is None:
             await self.database.exec('''
                 INSERT INTO chats(tg_id, title)
@@ -69,7 +69,7 @@ class DatabaseUpdateSaver:
         if message.chat is not None:
             await self.handle_chat(message.chat)
 
-        row = await self.database.query_row('SELECT true FROM messages WHERE chat_id=%s AND tg_id=%s AND update_id=%s', (
+        row = await self.database.query_row_async('SELECT true FROM messages WHERE chat_id=$1 AND tg_id=$2 AND update_id=$3', (
             message.chat.id,
             message.message_id,
             update_id
@@ -113,11 +113,11 @@ class DatabaseUpdateSaver:
             sticker
         ))
 
-        row = await self.database.query_row('''SELECT count(*) FROM messages''')
+        row = await self.database.query_row_async('''SELECT count(*) FROM messages''')
         self.metrics.messages.set(row[0])
 
     async def handle(self, update: aiogram.types.Update):
-        row = await self.database.query_row('SELECT true FROM updates WHERE tg_id=%s', (update.update_id,))
+        row = await self.database.query_row_async('SELECT true FROM updates WHERE tg_id=$1', (update.update_id,))
         if row is not None:
             logger.info('Ignoring update #{}.', update.update_id)
             return
