@@ -35,7 +35,7 @@ class JokesWorker(Worker):
                 continue
 
             logger.info('Sending joke to chat #{} (1/{}).', chat_id, period)
-            joke, _ = self.joker.get_random_joke()
+            joke, _ = await self.joker.get_random_joke()
 
             try:
                 tasks.append(self.send(chat_id, joke))
@@ -69,7 +69,7 @@ async def __main__():
     await worker.step()
     logger.info('Finished joker step.', duration=str(datetime.now() - start))
 
-    # text, _ = Joker('ошибка').get_random_joke()
+    # text, _ = await Joker('ошибка').get_random_joke()
     # print(text)
 
 

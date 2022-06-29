@@ -9,5 +9,5 @@ class JokeCommand(CommandHandler):
         self.joker = joker
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]):
-        joke_text, _ = self.joker.get_random_joke()
+        joke_text, _ = await self.joker.get_random_joke()
         return [joke_text]

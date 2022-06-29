@@ -7,7 +7,9 @@
 aiogram==2.16
     # via -r requirements.in
 aiohttp==3.8.1
-    # via aiogram
+    # via
+    #   -r requirements.in
+    #   aiogram
 aiosignal==1.2.0
     # via aiohttp
 anyio==3.3.2
