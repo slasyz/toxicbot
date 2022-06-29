@@ -137,8 +137,6 @@ prometheus-client==0.10.1
     # via
     #   -r requirements.in
     #   starlette-exporter
-psycopg2==2.8.6
-    # via -r requirements.in
 py==1.10.0
     # via
     #   pytest
