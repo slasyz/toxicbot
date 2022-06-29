@@ -36,6 +36,10 @@ class Database:
             self.conn.commit()
 
     async def exec_async(self, query, vars=None):
+        if vars is None:
+            await self.conn_async.execute(query)
+            return
+
         await self.conn_async.execute(query, *vars)
 
     async def query(self, query, vars=None) -> AsyncIterator:
@@ -51,6 +55,9 @@ class Database:
                 yield record
 
     async def query_async(self, query, vars=None) -> Iterator:
+        if vars is None:
+            return await self.conn_async.fetch(query)
+
         return await self.conn_async.fetch(query, *vars)
 
     async def query_row(self, query, vars=None):
@@ -59,5 +66,8 @@ class Database:
 
         return None
 
-    async def query_row_async(self, query, vars=None) -> Any:
+    async def query_row_async(self, query, vars=None) -> Any | None:
+        if vars is None:
+            return await self.conn_async.fetchrow(query)
+
         return await self.conn_async.fetchrow(query, *vars)
