@@ -45,7 +45,7 @@ class VoiceMessage(Message):
 
     async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int = None) -> aiogram.types.Message:
         try:
-            f = self.service.load(self.text)
+            f = await self.service.load(self.text)
         except Exception as ex:
             logger.opt(exception=ex).error('Error sending voice message.')
             return await bot.send_message(chat_id,

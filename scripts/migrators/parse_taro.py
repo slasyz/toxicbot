@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import dataclasses
 import hashlib
@@ -5,7 +6,7 @@ import os
 from datetime import datetime
 from urllib.parse import urljoin
 
-import requests
+import aiohttp
 from lxml import html
 
 from toxic.features.taro import CardData
@@ -15,7 +16,7 @@ def normalize(src: str) -> str:
     return src.replace('ё', 'е').replace('Ë', 'Е')
 
 
-def get_with_cache(url: str) -> str:
+async def get_with_cache(url: str) -> str:
     hash = hashlib.md5(url.encode('utf-8')).hexdigest()
     filepath = os.path.join(os.path.dirname(__file__), 'cache', hash + '.html')
     try:
@@ -25,9 +26,9 @@ def get_with_cache(url: str) -> str:
     except FileNotFoundError:
         pass
 
-    with requests.get(url) as req:
+    async with aiohttp.ClientSession() as session, session.get(url) as req:
         print('reading {} from url'.format(url))
-        data = req.content.decode('utf-8', 'ignore')
+        data = await req.text()
 
     with open(filepath, 'w') as f:
         print('dumping {} to file ({})'.format(url, hash))
@@ -36,9 +37,9 @@ def get_with_cache(url: str) -> str:
     return data
 
 
-def get_cards_links() -> dict[str, str]:
+async def get_cards_links() -> dict[str, str]:
     src_link = 'https://astrohelper.ru/gadaniya/taro/znachenie/'
-    data = get_with_cache(src_link)
+    data = await get_with_cache(src_link)
     parser = html.HTMLParser(encoding='utf-8')
     document = html.document_fromstring(data, parser=parser)
     elements = document.xpath('.//*[@class="zsign-runes2"]/parent::a')
@@ -53,8 +54,8 @@ def get_cards_links() -> dict[str, str]:
     return res
 
 
-def get_card_content(url: str):
-    data = get_with_cache(url)
+async def get_card_content(url: str):
+    data = await get_with_cache(url)
     parser = html.HTMLParser(encoding='utf-8')
     document = html.document_fromstring(data, parser=parser)
     el_article = document.xpath('.//article')[0]
@@ -136,12 +137,12 @@ def convert_map_to_table_row(map: dict[tuple[str, str], list[str]]) -> list[str]
     return list(dataclasses.astuple(row))
 
 
-def __main__():
-    names = get_cards_links()
+async def __main__():
+    names = await get_cards_links()
     texts = {}
     for name, link in names.items():
         print(name, link)
-        map = get_card_content(link)
+        map = await get_card_content(link)
         row = convert_map_to_table_row(map)
         texts[normalize(name)] = row
 
@@ -162,4 +163,4 @@ def __main__():
 
 
 if __name__ == '__main__':
-    __main__()
+    asyncio.run(__main__())
