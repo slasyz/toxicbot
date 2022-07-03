@@ -1,4 +1,4 @@
-from typing import Callable, Coroutine
+from typing import Callable
 
 
 def with_retry(max_attempts: int, exceptions: tuple[type[Exception], ...]) -> Callable:

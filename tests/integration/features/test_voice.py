@@ -1,5 +1,5 @@
-from toxic.features.voice import NextUpService
-from toxic.helpers.consts import LINK_REGEXP
+# from toxic.features.voice import NextUpService
+# from toxic.helpers.consts import LINK_REGEXP
 
 
 # TODO: fix this

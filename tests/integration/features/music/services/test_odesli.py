@@ -4,7 +4,7 @@ from toxic.features.music.services.odesli import Odesli
 
 
 # TODO: use more services, for example https://songwhip.com/faq and direct APIs
-from toxic.features.music.services.structs import Info, Type, Service
+from toxic.features.music.services.structs import Type, Service
 
 
 @pytest.mark.parametrize(
@@ -84,15 +84,15 @@ from toxic.features.music.services.structs import Info, Type, Service
         ),
     ]
 )
-def test_get_info(url: str,
-                  expected_none: bool,
-                  expected_type: Type | None,
-                  expected_artist_name: str | None,
-                  expected_title: str | None,
-                  expected_links: dict[Service, str] | None,
-                  expected_thumbnail_url: str | None):
+async def test_get_info(url: str,
+                        expected_none: bool,
+                        expected_type: Type | None,
+                        expected_artist_name: str | None,
+                        expected_title: str | None,
+                        expected_links: dict[Service, str] | None,
+                        expected_thumbnail_url: str | None):
     odesli = Odesli()
-    actual = odesli.get_info(url)
+    actual = await odesli.get_info(url)
 
     if expected_none:
         assert actual is None

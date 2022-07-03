@@ -36,7 +36,6 @@ def test_with_retry_success():
     assert fail.counter == 3
 
 
-@pytest.mark.asyncio
 async def test_with_retry_async_success():
     fail = Fail(2, FirstException())
 
@@ -74,7 +73,6 @@ def test_with_retry_attempts_exceeded():
     assert fail.counter == 3
 
 
-@pytest.mark.asyncio
 async def test_with_retry_async_attempts_exceeded():
     fail = Fail(5, FirstException())
 

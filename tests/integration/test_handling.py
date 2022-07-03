@@ -29,7 +29,6 @@ def dus(database: Database):
     return DatabaseUpdateSaver(database, metrics)
 
 
-@pytest.mark.asyncio
 async def test_message_handle(database: Database, dus: DatabaseUpdateSaver):
     chat = aiogram.types.Chat(id=11, type='bla', title='chat title')
     from_user = aiogram.types.User(id=14, first_name='Elisey', is_bot=False)

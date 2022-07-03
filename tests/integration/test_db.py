@@ -1,5 +1,4 @@
 import pytest
-import aiogram
 import pytest_asyncio
 
 from toxic.config import Config
@@ -19,11 +18,10 @@ async def database():
     )
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ['query', 'vars', 'expected'],
     [
-        ('SELECT $1;', (1337,), [(1337,)]),
+        ('SELECT $1::int;', (1337,), [(1337,)]),
     ]
 )
 async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
@@ -31,7 +29,6 @@ async def test_database_query(query: str, vars: tuple, expected: list[tuple], da
     assert rows == expected
 
 
-@pytest.mark.asyncio
 async def test_database_insert(database: Database):
     await database.exec('DELETE FROM reminders WHERE chat_id=1235')
     await database.exec('DELETE FROM chats WHERE tg_id=1235')
