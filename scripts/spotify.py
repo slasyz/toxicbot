@@ -4,6 +4,7 @@ import os
 from main import init
 from toxic.features.music.services.spotify import Spotify
 from toxic.repositories.settings import SettingsRepository
+from toxic.workers.spotify_cache import SpotifyCacheWorker
 
 
 async def __main__():
@@ -12,8 +13,9 @@ async def __main__():
     )
 
     settings_repo = SettingsRepository(deps.database)
+    worker = SpotifyCacheWorker(settings_repo)
 
-    spotify = Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo)
+    spotify = await Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo, worker)
 
     if not spotify.is_authenticated():
         print(spotify.get_auth_url())

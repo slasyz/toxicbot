@@ -14,7 +14,7 @@ class CallbackDataRepository:
             ON CONFLICT (value) DO UPDATE set value=callback_data.value
             RETURNING uuid
         ''', (json.dumps(value),))
-        return row[0]
+        return str(row[0])
 
     async def get_value(self, uuid: str) -> dict | None:
         row = await self.database.query_row('SELECT value FROM callback_data WHERE uuid=$1', (uuid,))

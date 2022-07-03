@@ -11,6 +11,7 @@ from spotipy import SpotifyOAuth, CacheHandler, SpotifyException
 
 from toxic.features.music.services.structs import Searcher, Type, Service, SearchResult
 from toxic.repositories.settings import SettingsRepository
+from toxic.workers.spotify_cache import SpotifyCacheWorker
 
 SCOPES = [
     'user-read-playback-state',
@@ -29,17 +30,34 @@ class Device:
 
 
 class Cache(CacheHandler):
-    def __init__(self, settings_repo: SettingsRepository):
-        self.settings_repo = settings_repo
-        # TODO: very bad way to do this, but I don't want to refactor it properly now.
-        # pylint: disable=consider-using-with
-        self.pool = concurrent.futures.ThreadPoolExecutor()
+    """
+    Instance of this class is called automatically from spotipy library which is sync.  It causes problems when we want
+    to save token to database and read from it, because we use asyncpg which is async.
+
+    To work around this problem, this logic is implemented:
+    - class Cache saves info in memory and notifies SpotifyCacheWorker about the change;
+    - class SpotifyCacheWorker is called from main event loop, and saves it to database;
+    - this class is a single source of modifications for tokens, so every token change must be done by calling
+      save_token_to_cache().  Otherwise, changes will not be reflected in this class.
+
+    Another solution could be moving to some async Spotify library and manage tokens manually, but they are not mature
+    yet.
+    """
+
+    def __init__(self, value: str | None, worker: SpotifyCacheWorker):
+        self.value = value
+        self.worker = worker
+
+    @staticmethod
+    async def create(settings_repo: SettingsRepository, worker: SpotifyCacheWorker):
+        return Cache(await settings_repo.spotify_get_token(), worker)
 
     def get_cached_token(self):
-        return self.pool.submit(asyncio.run, self.settings_repo.spotify_get_token()).result()
+        return self.value
 
     def save_token_to_cache(self, token_info):
-        self.pool.submit(asyncio.run, self.settings_repo.spotify_set_token(token_info)).result()
+        self.value = token_info
+        self.worker.put(token_info)
 
 
 class Spotify:
@@ -49,8 +67,8 @@ class Spotify:
         self.client = client
 
     @staticmethod
-    def new(client_id: str, client_secret: str, settings_repo: SettingsRepository) -> Spotify:
-        cache_handler = Cache(settings_repo)
+    async def new(client_id: str, client_secret: str, settings_repo: SettingsRepository, worker: SpotifyCacheWorker) -> Spotify:
+        cache_handler = await Cache.create(settings_repo, worker)
 
         auth_manager = SpotifyOAuth(
             client_id=client_id,

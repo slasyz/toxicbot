@@ -55,6 +55,7 @@ from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers.jokes import JokesWorker
 from toxic.workers.reminders import ReminderWorker
+from toxic.workers.spotify_cache import SpotifyCacheWorker
 from toxic.workers.worker import WorkersManager
 
 
@@ -153,7 +154,8 @@ async def __main__():
 
     joker = Joker(deps.config['replies']['joker']['error'])
 
-    spotify = Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo)
+    spotify_cache_worker = SpotifyCacheWorker(settings_repo)
+    spotify = await Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo, spotify_cache_worker)
     spotify_searcher = spotify.create_searcher()
 
     music_info_collector = MusicInfoCollector(
@@ -166,6 +168,7 @@ async def __main__():
     workers = [
         JokesWorker(joker, deps.chats_repo, deps.messenger),
         ReminderWorker(reminders_repo, deps.messenger),
+        SpotifyCacheWorker(settings_repo),
     ]
 
     splitter = SpaceAdjoinSplitter()
