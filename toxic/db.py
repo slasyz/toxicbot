@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Iterator, Any
 
 import asyncpg
@@ -10,7 +11,16 @@ class Database:
         self.pool = pool
 
     @staticmethod
-    async def connect(host: str, port: int, database: str, user: str, password: str) -> Database:
+    async def _conn_init(conn: asyncpg.Connection):
+        await conn.set_type_codec(
+            'jsonb',
+            encoder=json.dumps,
+            decoder=json.loads,
+            schema='pg_catalog'
+        )
+
+    @classmethod
+    async def connect(cls, host: str, port: int, database: str, user: str, password: str) -> Database:
         pool = await asyncpg.create_pool(
             host=host,
             port=port,
@@ -20,6 +30,8 @@ class Database:
 
             min_size=2,
             max_size=10,
+
+            init=cls._conn_init,
         )
 
         return Database(pool)

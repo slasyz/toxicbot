@@ -1,5 +1,3 @@
-import json
-
 from toxic.db import Database
 
 
@@ -13,7 +11,7 @@ class CallbackDataRepository:
             VALUES($1)
             ON CONFLICT (value) DO UPDATE set value=callback_data.value
             RETURNING uuid
-        ''', (json.dumps(value),))
+        ''', (value,))
         return str(row[0])
 
     async def get_value(self, uuid: str) -> dict | None:

@@ -22,6 +22,7 @@ async def database():
     ['query', 'vars', 'expected'],
     [
         ('SELECT $1::int;', (1337,), [(1337,)]),
+        ('SELECT $1::jsonb;', ({"a": "b", "c": "d"},), [({'a': 'b', 'c': 'd'},)])
     ]
 )
 async def test_database_query(query: str, vars: tuple, expected: list[tuple], database: Database):
