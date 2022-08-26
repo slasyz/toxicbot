@@ -82,6 +82,10 @@ async def init(config_files: list) -> BasicDependencies:
 
     config = Config.load(config_files)
 
+    return await init_with_config(config)
+
+
+async def init_with_config(config: Config) -> BasicDependencies:
     database = await Database.connect(
         config['database']['host'],
         config['database']['port'],

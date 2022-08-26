@@ -38,19 +38,18 @@ class Database:
 
     async def exec(self, query, vars=None):
         if vars is None:
-            await self.pool.execute(query)
-            return
+            vars = tuple()
 
         await self.pool.execute(query, *vars)
 
     async def query(self, query, vars=None) -> Iterator:
         if vars is None:
-            return await self.pool.fetch(query)
+            vars = tuple()
 
         return await self.pool.fetch(query, *vars)
 
     async def query_row(self, query, vars=None) -> Any | None:
         if vars is None:
-            return await self.pool.fetchrow(query)
+            vars = tuple()
 
         return await self.pool.fetchrow(query, *vars)
