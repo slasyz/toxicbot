@@ -15,15 +15,17 @@ SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
 
 class KeywordsHandler(MessageHandler):
-    def __init__(self, map: dict[re.Pattern, str]):
+    def __init__(self, map: dict[re.Pattern, list[str]]):
         self.map = map
 
     @staticmethod
-    def new(config: dict[str, str]) -> KeywordsHandler:
+    def new(config: dict[str, str | list[str]]) -> KeywordsHandler:
         map = {}
 
         for key, val in config.items():
             regexp = re.compile(key)
+            if isinstance(val, str):
+                val = [val]
             map[regexp] = val
 
         return KeywordsHandler(map)
@@ -38,7 +40,7 @@ class KeywordsHandler(MessageHandler):
             if isinstance(key, re.Pattern) and key.search(text.lower()) is None:
                 continue
 
-            return val
+            return random.choice(val)
 
         return None
 

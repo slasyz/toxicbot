@@ -16,7 +16,7 @@ help:           ## show this help
 
 .PHONY: deploy
 deploy:         ## deploy using ansible
-	ansible-playbook ansible-playbook.yml
+	ansible-playbook -i ../infra/inventory.yml --ask-vault-pass ansible-playbook.yml
 
 
 .PHONY: fmt

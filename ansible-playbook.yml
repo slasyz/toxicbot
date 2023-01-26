@@ -1,5 +1,5 @@
 - name: Copy files
-  hosts: slasyz.ru
+  hosts: digitalocean-1
   vars:
     project_dir: "{{ ansible_env.HOME }}/deployments/ToxicTgBot"
     logs_dir: "{{ ansible_env.HOME }}/logs/ToxicTgBot"
