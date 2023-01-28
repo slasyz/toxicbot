@@ -1,39 +1,43 @@
 - name: Copy files
-  hosts: digitalocean-1
+  hosts: hetzner-1
   vars:
-    project_dir: "{{ ansible_env.HOME }}/deployments/ToxicTgBot"
-    logs_dir: "{{ ansible_env.HOME }}/logs/ToxicTgBot"
+    project_dir: "{{ ansible_env.HOME }}/deployments/toxic"
+    logs_prefix: "{{ ansible_env.HOME }}/logs/toxic"
   tasks:
     - name: Copy sources
       synchronize:
-        src: ./toxic/
+        src: ../toxic/
         dest: "{{ project_dir }}/toxic/"
     - name: Copy main.py
       copy:
-        src: ./main.py
+        src: ../main.py
         dest: "{{ project_dir }}/main.py"
     - name: Copy resources
       synchronize:
-        src: ./resources/
+        src: ../resources/
         dest: "{{ project_dir }}/resources/"
     - name: Copy config
       copy:
-        src: ./config.json
+        src: ../config.json
         dest: "{{ project_dir }}/config.json"
     - name: Copy main systemd service
       template:
-        src: ./systemd/toxic-main.service
+        src: ../systemd/toxic-main.service
         dest: ~/.config/systemd/user/toxic-main.service
         mode: 0644
     - name: Copy server systemd service
       template:
-        src: ./systemd/toxic-server.service
+        src: ../systemd/toxic-server.service
         dest: ~/.config/systemd/user/toxic-server.service
         mode: 0644
     - name: Copy requirements.txt
       copy:
-        src: ./requirements.txt
+        src: ../requirements.txt
         dest: "{{ project_dir }}/requirements.txt"
+    - name: Copy Makefile
+      copy:
+        src: ../Makefile
+        dest: "{{ project_dir }}/Makefile"
 
     - name: Install dependencies
       make:

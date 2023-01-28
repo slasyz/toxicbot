@@ -9,5 +9,5 @@ Type=simple
 WorkingDirectory={{ project_dir }}
 ExecStart=/bin/sh -c "make server"
 Restart=always
-StandardOutput=append:{{ logs_dir }}/server-stdout.log
-StandardError=append:{{ logs_dir }}/server-stderr.log
+StandardOutput=append:{{ logs_prefix }}-server.log
+StandardError=append:{{ logs_prefix }}-server.log

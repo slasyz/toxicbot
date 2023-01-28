@@ -9,5 +9,5 @@ Type=simple
 WorkingDirectory={{ project_dir }}
 ExecStart=/bin/sh -c "make run"
 Restart=always
-StandardOutput=append:{{ logs_dir }}/main-stdout.log
-StandardError=append:{{ logs_dir }}/main-stderr.log
+StandardOutput=append:{{ logs_prefix }}-main.log
+StandardError=append:{{ logs_prefix }}-main.log

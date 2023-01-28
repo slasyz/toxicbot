@@ -14,9 +14,13 @@ help:           ## show this help
 	@sed -nE '/@sed/!s/##\s?//p' Makefile
 
 
+.PHONY: prepare
+prepare:         ## prepare env using ansible
+	ansible-playbook -i ../infra/inventory.yml --ask-vault-pass ansible/prepare-playbook.yml
+
 .PHONY: deploy
 deploy:         ## deploy using ansible
-	ansible-playbook -i ../infra/inventory.yml --ask-vault-pass ansible-playbook.yml
+	ansible-playbook -i ../infra/inventory.yml --ask-vault-pass ansible/deploy-playbook.yml
 
 
 .PHONY: fmt
