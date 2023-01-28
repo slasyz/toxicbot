@@ -3,10 +3,10 @@ import asyncio
 import aiogram
 from loguru import logger
 
-from toxic.handlers.database import DatabaseUpdateSaver
 from toxic.helpers import consts_tg
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
+from toxic.modules.dus.dus import DatabaseUpdateSaver
 from toxic.repositories.chats import CachedChatsRepository
 from toxic.repositories.users import UsersRepository
 
@@ -16,7 +16,12 @@ DELAY_KEEPALIVE = 5
 
 
 class Messenger:
-    def __init__(self, bot: aiogram.Bot, chats_repo: CachedChatsRepository, users_repo: UsersRepository, dus: DatabaseUpdateSaver, delayer_factory: DelayerFactory):
+    def __init__(self,
+                 bot: aiogram.Bot,
+                 chats_repo: CachedChatsRepository,
+                 users_repo: UsersRepository,
+                 dus: DatabaseUpdateSaver,
+                 delayer_factory: DelayerFactory):
         self.bot = bot
         self.chats_repo = chats_repo
         self.users_repo = users_repo

@@ -6,7 +6,7 @@ import pytest_asyncio
 
 from toxic.config import Config
 from toxic.db import Database
-from toxic.handlers.database import DatabaseUpdateSaver
+from toxic.modules.dus.database import DatabaseUpdateSaver
 from toxic.metrics import Metrics
 
 

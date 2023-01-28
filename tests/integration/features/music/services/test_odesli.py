@@ -1,10 +1,10 @@
 import pytest
 
-from toxic.features.music.services.odesli import Odesli
+from toxic.modules.music.services.odesli import Odesli
 
 
 # TODO: use more services, for example https://songwhip.com/faq and direct APIs
-from toxic.features.music.services.structs import Type, Service
+from toxic.modules.music.services.structs import Type, Service
 
 
 @pytest.mark.parametrize(

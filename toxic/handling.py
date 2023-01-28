@@ -4,13 +4,13 @@ from dataclasses import dataclass
 import aiogram
 from loguru import logger
 
-from toxic.handlers.database import DatabaseUpdateSaver
-from toxic.handlers.handler import MessageHandler, CallbackHandler, CommandHandler
 from toxic.helpers import consts_tg
 from toxic.helpers.rate_limiter import RateLimiter
+from toxic.interfaces import CommandHandler, CallbackHandler, MessageHandler
 from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
+from toxic.modules.dus.dus import DatabaseUpdateSaver
 from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.users import UsersRepository
 

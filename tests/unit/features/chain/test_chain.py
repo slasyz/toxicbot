@@ -1,6 +1,6 @@
 import pytest
 
-from toxic.features.chain.chain import MarkovChain
+from toxic.modules.neural.chains.chain import MarkovChain
 
 
 @pytest.mark.parametrize(

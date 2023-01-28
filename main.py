@@ -13,33 +13,28 @@ from ruwordnet import RuWordNet
 
 from toxic.config import Config
 from toxic.db import Database
-from toxic.features.chain.chain import ChainFactory
-from toxic.features.chain.featurizer import Featurizer
-from toxic.features.chain.textizer import Textizer
-from toxic.features.emojifier import Emojifier, Russian
-from toxic.features.joke import Joker
-from toxic.features.music.generator.generator import MusicMessageGenerator
-from toxic.features.music.services.boom import Boom
-from toxic.features.music.services.collector import MusicInfoCollector
-from toxic.features.music.services.odesli import Odesli
-from toxic.features.music.services.spotify import Spotify
-from toxic.features.taro import Taro
-from toxic.handlers import chain
-from toxic.features.chain.splitters import SpaceAdjoinSplitter
-from toxic.handlers.commands.admin import AdminCommand, AdminChatsCallback, AdminSpotifyAuthCallback, \
-    AdminSpotifyAuthCommand, AdminKeyboardClearCallback
-from toxic.handlers.commands.hookah import HookahCommand
-from toxic.handlers.commands.joke import JokeCommand
-from toxic.handlers.commands.chats import ChatsCommand
-from toxic.handlers.commands.dump import DumpCommand
-from toxic.handlers.commands.music import MusicPlaintextCallback
-from toxic.handlers.commands.send import SendCommand
-from toxic.handlers.commands.stat import StatCommand, StatsHandler
-from toxic.handlers.chat_replies import KeywordsHandler, SorryHandler, PrivateHandler
-from toxic.handlers.commands.taro import TaroCommand, TaroSecondCallback, TaroFirstCallback
-from toxic.handlers.commands.voice import VoiceCommand
-from toxic.handlers.database import DatabaseUpdateSaver
-from toxic.handlers.music import MusicHandler
+from toxic.modules.dus.dus import DatabaseUpdateSaver
+from toxic.modules.emoji.emojifier import Russian, Emojifier
+from toxic.modules.emoji.handler import HookahCommand
+from toxic.modules.general.admin import AdminCommand, AdminChatsCallback, AdminKeyboardClearCallback
+from toxic.modules.general.chats import ChatsCommand
+from toxic.modules.general.dump import DumpCommand
+from toxic.modules.general.stats import StatsHandler, StatCommand
+from toxic.modules.joker.content import Joker
+from toxic.modules.joker.handler import JokeCommand
+from toxic.modules.joker.worker import JokesWorker
+from toxic.modules.music.handlers import MusicHandler, MusicPlaintextCallback
+from toxic.modules.neural import handlers
+from toxic.modules.neural.chains.chain import ChainFactory
+from toxic.modules.neural.chains.featurizer import Featurizer
+from toxic.modules.neural.chains.textizer import Textizer
+from toxic.modules.music.generator.generator import MusicMessageGenerator
+from toxic.modules.music.services.boom import Boom
+from toxic.modules.music.services.collector import MusicInfoCollector
+from toxic.modules.music.services.odesli import Odesli
+from toxic.modules.music.services.spotify import Spotify
+from toxic.modules.neural.chains.splitters import SpaceAdjoinSplitter
+from toxic.modules.general.send import SendCommand
 from toxic.handling import CommandDefinition, HandlersManager, CallbackDefinition
 from toxic.helpers import log
 from toxic.helpers.delayer import DelayerFactory
@@ -47,16 +42,20 @@ from toxic.helpers.log import init_sentry
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
+from toxic.modules.reminder.worker import ReminderWorker
+from toxic.modules.replies.handlers import KeywordsHandler, SorryHandler, PrivateHandler
+from toxic.modules.spotify.handlers import AdminSpotifyAuthCommand, AdminSpotifyAuthCallback
+from toxic.modules.spotify.worker import SpotifyCacheWorker
+from toxic.modules.taro.content import Taro
+from toxic.modules.taro.handlers import TaroCommand, TaroFirstCallback, TaroSecondCallback
+from toxic.modules.voice.handlers import VoiceCommand
 from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.chats import CachedChatsRepository
 from toxic.repositories.messages import MessagesRepository
 from toxic.repositories.reminders import RemindersRepository
 from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
-from toxic.workers.jokes import JokesWorker
-from toxic.workers.reminders import ReminderWorker
-from toxic.workers.spotify_cache import SpotifyCacheWorker
-from toxic.workers.worker import WorkersManager
+from toxic.workers import WorkersManager
 
 
 @dataclass
@@ -192,7 +191,7 @@ async def __main__():
     russian = Russian(wn, morph)
     emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
 
-    chain_teaching_handler, chain_flood_handler = await chain.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
+    chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     useful_handlers = [
         MusicHandler(music_formatter),

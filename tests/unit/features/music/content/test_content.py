@@ -1,7 +1,7 @@
 import pytest
 
-from toxic.features.music.generator.content import Content, StreamingLink, get_content
-from toxic.features.music.services.structs import Info, Service, Type
+from toxic.modules.music.generator.content import Content, StreamingLink, get_content
+from toxic.modules.music.services.structs import Info, Service, Type
 
 
 @pytest.mark.parametrize(

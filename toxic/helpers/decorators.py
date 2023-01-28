@@ -2,7 +2,7 @@ from typing import Callable, Awaitable
 
 import aiogram
 
-from toxic.handlers.handler import MessageHandler
+from toxic.interfaces import MessageHandler
 from toxic.messenger.message import Message
 
 

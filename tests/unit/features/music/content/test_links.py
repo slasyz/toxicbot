@@ -1,4 +1,4 @@
-from toxic.features.music.generator.links import extract_music_links
+from toxic.modules.music.generator.links import extract_music_links
 
 
 def test_search_links():

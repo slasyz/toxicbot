@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import aiogram.types
 from loguru import logger
 
-from toxic.features.voice import NextUpService
 from toxic.helpers import consts_tg
+from toxic.modules.voice.voice import NextUpService
 
 
 # TODO: fix problems with HTML tags

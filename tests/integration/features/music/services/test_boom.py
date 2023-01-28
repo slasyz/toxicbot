@@ -1,7 +1,7 @@
 import pytest
 
-from toxic.features.music.services.boom import Boom
-from toxic.features.music.services.structs import Info, Type, Service
+from toxic.modules.music.services.boom import Boom
+from toxic.modules.music.services.structs import Info, Type, Service
 
 
 @pytest.mark.parametrize(

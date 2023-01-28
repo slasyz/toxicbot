@@ -2,9 +2,9 @@ import asyncio
 import os
 
 from main import init
-from toxic.features.music.services.spotify import Spotify
+from toxic.modules.music.services.spotify import Spotify
 from toxic.repositories.settings import SettingsRepository
-from toxic.workers.spotify_cache import SpotifyCacheWorker
+from toxic.modules.spotify.spotify_cache import SpotifyCacheWorker
 
 
 async def __main__():
