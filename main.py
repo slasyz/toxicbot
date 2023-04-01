@@ -43,7 +43,7 @@ from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.modules.reminder.worker import ReminderWorker
-from toxic.modules.replies.handlers import KeywordsHandler, SorryHandler, PrivateHandler
+from toxic.modules.replies.handlers import KeywordsHandler, SorryHandler, PrivateHandler, PeopleHandler
 from toxic.modules.spotify.handlers import AdminSpotifyAuthCommand, AdminSpotifyAuthCallback
 from toxic.modules.spotify.worker import SpotifyCacheWorker
 from toxic.modules.taro.content import Taro
@@ -194,6 +194,7 @@ async def __main__():
     chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     useful_handlers = [
+        PeopleHandler.new(deps.config['replies']['people'], deps.messenger),
         MusicHandler(music_formatter),
         KeywordsHandler.new(deps.config['replies']['keywords']),
         SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),

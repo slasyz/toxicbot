@@ -45,6 +45,38 @@ class KeywordsHandler(MessageHandler):
         return None
 
 
+class PeopleHandler(MessageHandler):
+    def __init__(self, map: dict[int, list[str]], messenger: Messenger):
+        self.map = map
+        self.messenger = messenger
+
+    @staticmethod
+    def new(config: dict[str, str | list[str]], messenger: Messenger) -> PeopleHandler:
+        map = {}
+
+        for key, val in config.items():
+            if isinstance(val, str):
+                val = [val]
+            map[int(key)] = val
+
+        return PeopleHandler(map, messenger)
+
+    @decorators.non_empty
+    async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
+        # pylint: disable=W0221
+        # Because of the decorator
+        if not await self.messenger.is_reply_or_mention(message):
+            return None
+
+        if message.from_user.id in self.map:
+            if random.random() < 0.3:
+                return None
+
+            return random.choice(self.map[message.from_user.id])
+
+        return None
+
+
 class PrivateHandler(MessageHandler):
     def __init__(self, replies: list[str], users_repo: UsersRepository):
         self.replies = replies
