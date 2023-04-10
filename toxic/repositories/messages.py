@@ -15,12 +15,17 @@ class MessagesRepository:
                 ORDER BY tg_id'''):
             yield row[0], row[1]
 
-    async def get_all_user_messages(self, user_id: int) -> AsyncIterator[tuple[int, str]]:
+    async def get_all_user_replies(self, user_id_from: int, user_id_to: int) -> AsyncIterator[tuple[int, str]]:
         for row in await self.database.query('''
-                SELECT chat_id, text 
-                FROM messages 
-                WHERE chat_id < 0 AND user_id=$1 AND text IS NOT NULL
-                ORDER BY tg_id''', (user_id,)):
+                SELECT m.chat_id, m.text
+                FROM messages m
+                    JOIN updates u on m.update_id = u.tg_id
+                WHERE
+                    m.chat_id < 0 AND
+                    user_id = $1 AND
+                    text IS NOT NULL AND text != '' AND
+                    (u.json->'message'->'reply_to_message'->'from'->'id')::bigint = $2
+                ORDER BY m.tg_id''', (user_id_from, user_id_to)):
             yield row[0], row[1]
 
     async def get_update_dump(self, update_id: int) -> str | None:

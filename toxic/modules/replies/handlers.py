@@ -63,7 +63,7 @@ class PeopleHandler(MessageHandler):
                 val = [val]
             users[int(key)] = val
 
-            async for chat_id, text in messages_repo.get_all_user_messages(int(key)):
+            async for chat_id, text in messages_repo.get_all_user_replies(int(key), messenger.bot.id):
                 if (chat_id, int(key)) not in mirror_phrases:
                     mirror_phrases[(chat_id, int(key))] = []
                 logger.info(f'appending mirror to {chat_id} {int(key)}')

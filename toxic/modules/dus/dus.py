@@ -131,7 +131,7 @@ class DatabaseUpdateSaver:
 
         await self.database.exec('''
             INSERT INTO updates(tg_id, chat_id, json)
-            VALUES($1, $2, $3)
+            VALUES($1, $2, $3::json)
         ''', (
             update.update_id,
             chat_id,
