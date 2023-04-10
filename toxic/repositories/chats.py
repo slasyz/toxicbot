@@ -80,7 +80,7 @@ class ChatsRepository:
         await self.database.exec('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (new_chat_id, chat_id))
 
     async def disable_joke(self, chat_id):
-        await self.database.exec('UPDATE chats SET joke=FALSE WHERE tg_id=$1', (chat_id,))
+        await self.database.exec('UPDATE chats SET joke_period=0 WHERE tg_id=$1', (chat_id,))
 
     async def get_joker_chats(self) -> AsyncIterator[tuple[int, int]]:
         rows = await self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
