@@ -29,6 +29,12 @@ class CallbackDefinition:
     handler: CallbackHandler
 
 
+@dataclass
+class Reply:
+    source: str
+    message: Message
+
+
 class HandlersManager:
     def __init__(self,
                  update_handlers: list[DatabaseUpdateSaver],  # TODO: replace with interface
@@ -178,7 +184,7 @@ class HandlersManager:
         text = update.message.text
         if text is not None:
             try:
-                replies += await self.handle_command(text, update.message)
+                replies += [Reply('command', x) for x in await self.handle_command(text, update.message)]
             except Exception as ex:
                 replies.append(TextMessage('Ошибка.'))
                 logger.opt(exception=ex).error('Caught exception when handling command.')
@@ -186,9 +192,9 @@ class HandlersManager:
         # Useful message handlers (chain teaching, music links parser)
         for handler in self.useful_message_handlers:
             try:
-                replies += self._convert_handler_response(await handler.handle(text or '', update.message))
+                replies += [Reply(handler.__class__.__name__, x) for x in self._convert_handler_response(await handler.handle(text or '', update.message))]
             except Exception as ex:
-                replies.append(TextMessage('Ошибка.'))
+                replies.append(Reply(handler.__class__.__name__, TextMessage('Ошибка.')))
                 logger.opt(exception=ex).error('Caught exception when handling message by useful handler.')
 
         # Flood message handlers
@@ -197,14 +203,15 @@ class HandlersManager:
                 break
 
             try:
-                replies += self._convert_handler_response(await handler.handle(text or '', update.message))
+                replies += [Reply(handler.__class__.__name__, x) for x in self._convert_handler_response(await handler.handle(text or '', update.message))]
             except Exception as ex:
-                replies.append(TextMessage('Ошибка.'))
+                replies.append(Reply(handler.__class__.__name__, TextMessage('Ошибка.')))
                 logger.opt(exception=ex).error('Caught exception when handling message by flood handler.')
 
         for reply in replies:
+            logger.info(f'Replying {reply.source} -> {update.message.chat.id}:{update.message.message_id}.')
             try:
-                await self.messenger.send(update.message.chat.id, reply, update.message.message_id)
+                await self.messenger.send(update.message.chat.id, reply.message, update.message.message_id)
             except Exception as ex:
                 logger.opt(exception=ex).error(
                     'Caught exception when replying to message.',

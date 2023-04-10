@@ -4,11 +4,13 @@ import random
 import re
 
 import aiogram
+from loguru import logger
 
 from toxic.helpers import decorators
 from toxic.interfaces import MessageHandler
 from toxic.messenger.message import Message
 from toxic.messenger.messenger import Messenger
+from toxic.repositories.messages import MessagesRepository
 from toxic.repositories.users import UsersRepository
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
@@ -46,20 +48,31 @@ class KeywordsHandler(MessageHandler):
 
 
 class PeopleHandler(MessageHandler):
-    def __init__(self, map: dict[int, list[str]], messenger: Messenger):
-        self.map = map
+    def __init__(self, users: dict[int, dict[str, str | list[str]]], mirror_phrases: dict[tuple[int, int], list[str]], messenger: Messenger):
+        self.users = users
         self.messenger = messenger
+        self.mirror_phrases = mirror_phrases
 
     @staticmethod
-    def new(config: dict[str, str | list[str]], messenger: Messenger) -> PeopleHandler:
-        map = {}
+    async def new(users_raw: dict[str, dict[str, str | list[str]]], messenger: Messenger, messages_repo: MessagesRepository) -> PeopleHandler:
+        users = {}
+        mirror_phrases: dict[tuple[int, int], list[str]] = {}
 
-        for key, val in config.items():
+        for key, val in users_raw.items():
             if isinstance(val, str):
                 val = [val]
-            map[int(key)] = val
+            users[int(key)] = val
 
-        return PeopleHandler(map, messenger)
+            async for chat_id, text in messages_repo.get_all_user_messages(int(key)):
+                if (chat_id, int(key)) not in mirror_phrases:
+                    mirror_phrases[(chat_id, int(key))] = []
+                logger.info(f'appending mirror to {chat_id} {int(key)}')
+                mirror_phrases[(chat_id, int(key))].append(text)
+
+        for key, val in mirror_phrases.items():
+            logger.info(f'Mirror phrases: chat = {key[0]}, user = {key[1]}, loaded {len(val)} mirror phrases')
+
+        return PeopleHandler(users, mirror_phrases, messenger)
 
     @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
@@ -68,13 +81,23 @@ class PeopleHandler(MessageHandler):
         if not await self.messenger.is_reply_or_mention(message):
             return None
 
-        if message.from_user.id in self.map:
-            if random.random() < 0.3:
-                return None
+        if message.from_user.id not in self.users:
+            return None
 
-            return random.choice(self.map[message.from_user.id])
+        user_config = self.users[message.from_user.id]
+        user_const_phrases = user_config.get('phrases', [])
 
-        return None
+        user_mirroring_phrases = self.mirror_phrases.get((message.chat.id, message.from_user.id), [])
+        if not user_config.get('mirroring', False):
+            user_mirroring_phrases = []
+
+        if len(user_mirroring_phrases) == 0 and len(user_const_phrases) == 0:
+            return None
+
+        if len(user_mirroring_phrases) == 0:
+            return random.choice(user_const_phrases)
+
+        return random.choice(user_mirroring_phrases)
 
 
 class PrivateHandler(MessageHandler):

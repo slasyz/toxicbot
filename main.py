@@ -194,7 +194,7 @@ async def __main__():
     chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
 
     useful_handlers = [
-        PeopleHandler.new(deps.config['replies']['people'], deps.messenger),
+        await PeopleHandler.new(deps.config['replies']['people'], deps.messenger, deps.messages_repo),
         MusicHandler(music_formatter),
         KeywordsHandler.new(deps.config['replies']['keywords']),
         SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
