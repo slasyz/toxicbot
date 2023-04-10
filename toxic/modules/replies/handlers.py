@@ -66,7 +66,6 @@ class PeopleHandler(MessageHandler):
             async for chat_id, text in messages_repo.get_all_user_replies(int(key), messenger.bot.id):
                 if (chat_id, int(key)) not in mirror_phrases:
                     mirror_phrases[(chat_id, int(key))] = []
-                logger.info(f'appending mirror to {chat_id} {int(key)}')
                 mirror_phrases[(chat_id, int(key))].append(text)
 
         for key, val in mirror_phrases.items():
@@ -83,6 +82,13 @@ class PeopleHandler(MessageHandler):
 
         if message.from_user.id not in self.users:
             return None
+
+        if message.reply_to_message is not None and \
+                message.reply_to_message.from_user is not None and \
+                message.reply_to_message.from_user.id == self.messenger.bot.id:
+            if (message.chat.id, message.from_user.id) not in self.mirror_phrases:
+                self.mirror_phrases[(message.chat.id, message.from_user.id)] = []
+            self.mirror_phrases[(message.chat.id, message.from_user.id)].append(text)
 
         user_config = self.users[message.from_user.id]
         user_const_phrases = user_config.get('phrases', [])
