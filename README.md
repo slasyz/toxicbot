@@ -50,6 +50,19 @@ It tries to fit emojis by their meaning, but does not make this very well.
 <p align="center"><img alt="Emoji example." src="./docs/img/emoji.png" /></p>
 
 
+### Installation
+
+```shell
+mkdir -p ~/deployments/toxic
+cd ~/deployments/toxic
+
+chmod 0755 .
+
+sudo -u postgres createuser toxic -P
+sudo -u postgres createdb -O toxic toxic
+```
+
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
