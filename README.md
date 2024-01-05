@@ -54,12 +54,12 @@ It tries to fit emojis by their meaning, but does not make this very well.
 
 ```shell
 mkdir -p ~/deployments/toxic
-cd ~/deployments/toxic
-
-chmod 0755 .
+chmod 0755 ~/deployments/toxic
 
 sudo -u postgres createuser toxic -P
 sudo -u postgres createdb -O toxic toxic
+
+inv deploy -t=user@host
 ```
 
 
