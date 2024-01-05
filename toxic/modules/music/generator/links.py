@@ -5,9 +5,8 @@ from toxic.helpers.consts import LINK_REGEXP
 
 HOSTS = [
     'music.yandex.ru',
-    'youtu.be',
-    'youtube.com',
     'spotify.com',
+    'spoti.fy',
     'apple.com',
     'boom.ru',
 ]
@@ -22,6 +21,8 @@ def get_hostname(link: str) -> str:
 
 def is_link_to_music(link: str) -> bool:
     hostname = get_hostname(link)
+    if hostname == '':
+        return False
     for host in HOSTS:
         if hostname == host or hostname.endswith('.' + host):
             return True
