@@ -63,7 +63,7 @@ class ChainFloodHandler(MessageHandler):
         if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
             return None
 
-        count = await self.database.query_row('SELECT count(tg_id) FROM messages WHERE chat_id = $1', (message.chat.id,))[0]
+        count = (await self.database.query_row('SELECT count(tg_id) FROM messages WHERE chat_id = $1', (message.chat.id,)))[0]
         period = (await self.database.query_row('SELECT chain_period FROM chats WHERE tg_id = $1', (message.chat.id,)))[0]
         if count % period == 0:
             chain = self.chats[message.chat.id]
