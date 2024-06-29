@@ -12,13 +12,14 @@ def interval(seconds: float) -> str:
     hours, remainder = divmod(remainder, 60*60)
     minutes, seconds = divmod(remainder, 60)
 
+    # pylint: disable=C0209
     return '{:.0f}d {:.0f}h {:.0f}m {:.2f}s'.format(days, hours, minutes, seconds)
 
 
 def print_sleep(seconds: float, until: str):
     f = interval(seconds)
     # TODO: fix module name
-    logger.info('Sleeping {} until {}.', f, until)
+    logger.info(f'Sleeping {f} until {until}.')
 
 
 class InterceptHandler(logging.Handler):
@@ -31,6 +32,7 @@ class InterceptHandler(logging.Handler):
 
         # Find caller from where originated the logged message
         frame, depth = logging.currentframe(), 2
+        # pylint: disable=R1714
         while frame.f_code.co_filename == logging.__file__ or frame.f_code.co_filename == sentry_sdk.integrations.logging.__file__:
             frame = frame.f_back
             depth += 1

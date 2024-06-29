@@ -133,13 +133,13 @@ class SpotifySearcher(Searcher):
             return None
 
     def _get_link_artist(self, name: str) -> str | None:
-        return self._search('{}'.format(name), 'artist', 'artists')
+        return self._search(name, 'artist', 'artists')
 
     def _get_link_album(self, artist_name: str, title: str) -> str | None:
-        return self._search('{} {}'.format(artist_name, title), 'album', 'albums')
+        return self._search(f'{artist_name} {title}', 'album', 'albums')
 
     def _get_link_song(self, artist_name: str, title: str) -> str | None:
-        return self._search('{} {}'.format(artist_name, title), 'track', 'tracks')
+        return self._search(f'{artist_name} {title}', 'track', 'tracks')
 
     def get_link(self, type: Type, artist_name: str, title: str) -> SearchResult | None:
         res = None

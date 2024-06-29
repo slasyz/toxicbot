@@ -139,8 +139,7 @@ confidence=
 #         deprecated-sys-function,
 #         exception-escape,
 #         comprehension-escape
-disable=no-self-use,
-        broad-except,
+disable=broad-except,
         global-statement,
         line-too-long,
         missing-module-docstring,
@@ -604,5 +603,5 @@ preferred-modules=
 
 # Exceptions that will emit a warning when being caught. Defaults to
 # "BaseException, Exception".
-overgeneral-exceptions=BaseException,
-                       Exception
+overgeneral-exceptions=builtin.BaseException,
+                       builtin.Exception

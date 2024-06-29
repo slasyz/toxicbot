@@ -2,15 +2,15 @@ import re
 
 import aiogram
 
+from toxic.db import Database
 from toxic.interfaces import CommandHandler
 from toxic.messenger.message import Message
 from toxic.messenger.messenger import Messenger
-from toxic.repositories.chats import ChatsRepository
 
 
 class SendCommand(CommandHandler):
-    def __init__(self, chats_repository: ChatsRepository, messenger: Messenger):
-        self.chats_repository = chats_repository
+    def __init__(self, database: Database, messenger: Messenger):
+        self.database = database
         self.messenger = messenger
 
     @staticmethod
@@ -26,7 +26,8 @@ class SendCommand(CommandHandler):
         except ValueError:
             return f'Нужно писать так: /{args[0]} CHAT_ID MESSAGE'
 
-        if not await self.chats_repository.is_existing(chat_id):
+        not_exist = (await self.database.query_row('SELECT tg_id FROM chats WHERE tg_id=$1', (chat_id,))) is None
+        if not_exist:
             return f'Не могу найти такой чат ({chat_id}).'
 
         prefix_regexp = re.compile(r'^/' + args[0] + r'\s+' + args[1] + r'\s+')

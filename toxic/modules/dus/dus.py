@@ -122,7 +122,7 @@ class DatabaseUpdateSaver:
             logger.info('Ignoring update #{}.', update.update_id)
             return
 
-        logger.info('Handling update.', **update.to_python())
+        logger.info('Handling update.', **update.model_dump())
 
         message = update.message or update.edited_message
         chat_id = 0
@@ -135,7 +135,7 @@ class DatabaseUpdateSaver:
         ''', (
             update.update_id,
             chat_id,
-            update.as_json(),
+            update.model_dump_json(),
         ))
 
         if message is None:

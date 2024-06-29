@@ -20,7 +20,7 @@ class AdminSpotifyAuthCallback(CallbackHandler):
         return TextMessage(
             text='Перейди по ссылке, чтобы авторизоваться.\n\nА потом пришли /spotify URL, где URL — это то, куда перенаправила страница авторизации.',
             markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[[
-                aiogram.types.InlineKeyboardButton('👉', self.spotify.get_auth_url()),
+                aiogram.types.InlineKeyboardButton(text='👉', url=self.spotify.get_auth_url()),
             ]])
         )
 

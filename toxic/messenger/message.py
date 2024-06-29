@@ -52,7 +52,7 @@ class VoiceMessage(Message):
                                           f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
 
         return await bot.send_voice(chat_id,
-                                    voice=f,
+                                    voice=f.read(),
                                     reply_to_message_id=reply_to)
 
 
@@ -89,7 +89,7 @@ class TextMessage(Message):
             text,
             reply_to_message_id=reply_to,
             disable_web_page_preview=True,
-            parse_mode=aiogram.types.ParseMode.HTML if self.is_html else None,
+            parse_mode=aiogram.enums.ParseMode.HTML if self.is_html else None,
             reply_markup=self.markup,
         )
         if self.send_trimmed:
@@ -98,7 +98,7 @@ class TextMessage(Message):
                     chat_id,
                     text=text,
                     disable_web_page_preview=True,
-                    parse_mode=aiogram.types.ParseMode.HTML if self.is_html else None,
+                    parse_mode=aiogram.enums.ParseMode.HTML if self.is_html else None,
                 )
         return first_message
 

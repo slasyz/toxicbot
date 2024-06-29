@@ -7,15 +7,12 @@ from dataclasses import dataclass
 
 import aiogram
 import asyncpg
+from aiogram.exceptions import TelegramNetworkError, TelegramUnauthorizedError, TelegramConflictError
 from loguru import logger
-from pymorphy2 import MorphAnalyzer
-from ruwordnet import RuWordNet
 
 from toxic.config import Config
 from toxic.db import Database
 from toxic.modules.dus.dus import DatabaseUpdateSaver
-from toxic.modules.emoji.emojifier import Russian, Emojifier
-from toxic.modules.emoji.handler import HookahCommand
 from toxic.modules.general.admin import AdminCommand, AdminChatsCallback, AdminKeyboardClearCallback
 from toxic.modules.general.chats import ChatsCommand
 from toxic.modules.general.dump import DumpCommand
@@ -51,8 +48,6 @@ from toxic.modules.taro.handlers import TaroCommand, TaroFirstCallback, TaroSeco
 from toxic.modules.voice.handlers import VoiceCommand
 from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.chats import CachedChatsRepository
-from toxic.repositories.messages import MessagesRepository
-from toxic.repositories.reminders import RemindersRepository
 from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers import WorkersManager
@@ -63,7 +58,6 @@ class BasicDependencies:
     config: Config
     database: Database
     chats_repo: CachedChatsRepository
-    messages_repo: MessagesRepository
     users_repo: UsersRepository
     messenger: Messenger
     metrics: Metrics
@@ -94,7 +88,6 @@ async def init_with_config(config: Config) -> BasicDependencies:
     )
 
     chats_repo = CachedChatsRepository(database)
-    messages_repo = MessagesRepository(database)
     users_repo = UsersRepository(database)
 
     metrics = Metrics()
@@ -104,13 +97,12 @@ async def init_with_config(config: Config) -> BasicDependencies:
     delayer_factory = DelayerFactory()
 
     bot = aiogram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, chats_repo, users_repo, dus, delayer_factory)
+    messenger = Messenger(bot, database, chats_repo, users_repo, dus, delayer_factory)
 
     return BasicDependencies(
         config,
         database,
         chats_repo,
-        messages_repo,
         users_repo,
         messenger,
         metrics,
@@ -128,12 +120,12 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
                 # TODO: add it to coroutines list
                 await handle_manager.handle_update(update)
                 update_id = update.update_id + 1
-        except aiogram.exceptions.NetworkError as ex:
+        except TelegramNetworkError as ex:
             logger.opt(exception=ex).error('Network error.')
             await asyncio.sleep(1)
-        except aiogram.exceptions.Unauthorized:  # The user has removed or blocked the bot.
+        except TelegramUnauthorizedError:  # The user has removed or blocked the bot.
             logger.info('User removed or blocked the bot.')
-        except aiogram.exceptions.ConflictError as ex:
+        except TelegramConflictError as ex:
             logger.opt(exception=ex).error('Bot is already running somewhere, stopping it.')
             sys.exit(1)
         except KeyboardInterrupt:
@@ -151,7 +143,6 @@ async def __main__():
 
     init_sentry(deps.config['sentry']['dsn'])
 
-    reminders_repo = RemindersRepository(deps.database)
     settings_repo = SettingsRepository(deps.database)
     callback_data_repo = CallbackDataRepository(deps.database)
 
@@ -169,8 +160,8 @@ async def __main__():
 
     workers_manager = WorkersManager(deps.messenger)
     workers = [
-        JokesWorker(joker, deps.chats_repo, deps.messenger),
-        ReminderWorker(reminders_repo, deps.messenger),
+        JokesWorker(joker, deps.database, deps.messenger),
+        ReminderWorker(deps.database, deps.messenger),
         SpotifyCacheWorker(settings_repo),
     ]
 
@@ -186,19 +177,14 @@ async def __main__():
 
     taro_dir = get_resource_path('taro')
 
-    wn = RuWordNet()
-    morph = MorphAnalyzer()
-    russian = Russian(wn, morph)
-    emojifier = Emojifier.new(splitter, russian, get_resource_path('emoji_df_result.csv'))
-
-    chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.chats_repo, deps.messages_repo, deps.messenger)
+    chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.database, deps.chats_repo, deps.messenger)
 
     useful_handlers = [
-        await PeopleHandler.new(deps.config['replies']['people'], deps.messenger, deps.messages_repo),
+        await PeopleHandler.new(deps.config['replies']['people'], deps.messenger, deps.database),
         MusicHandler(music_formatter),
         KeywordsHandler.new(deps.config['replies']['keywords']),
         SorryHandler.new(deps.config['replies']['sorry'], deps.messenger),
-        StatsHandler.new(deps.config['replies']['stats'], deps.chats_repo),
+        StatsHandler.new(deps.config['replies']['stats'], deps.database),
         chain_teaching_handler,
     ]
     flood_handlers = [
@@ -208,15 +194,14 @@ async def __main__():
 
     commands = [
         CommandDefinition('admin', AdminCommand(spotify, callback_data_repo, settings_repo)),
-        CommandDefinition('dump', DumpCommand(deps.messages_repo)),
-        CommandDefinition('stat', StatCommand(deps.users_repo, deps.chats_repo)),
+        CommandDefinition('dump', DumpCommand(deps.database)),
+        CommandDefinition('stat', StatCommand(deps.users_repo, deps.database)),
         CommandDefinition('joke', JokeCommand(joker)),
-        CommandDefinition('send', SendCommand(deps.chats_repo, deps.messenger)),
+        CommandDefinition('send', SendCommand(deps.database, deps.messenger)),
         CommandDefinition('chats', ChatsCommand(deps.chats_repo)),
-        CommandDefinition('voice', VoiceCommand(deps.messages_repo)),
+        CommandDefinition('voice', VoiceCommand(deps.database)),
         CommandDefinition('taro', TaroCommand(taro_dir, callback_data_repo)),
         CommandDefinition('spotify', AdminSpotifyAuthCommand(spotify)),
-        CommandDefinition('hookah', HookahCommand(emojifier)),
     ]
     callbacks = [
         CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
@@ -233,7 +218,7 @@ async def __main__():
         useful_handlers,
         flood_handlers,
         deps.users_repo,
-        callback_data_repo,
+        deps.database,
         deps.messenger,
         deps.metrics,
         rate_limiter,

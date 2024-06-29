@@ -55,7 +55,7 @@ class Taro:
         cards_data = []
 
         filename_src = os.path.join(res_dir, 'data.csv')
-        with open(filename_src, 'r') as f:
+        with open(filename_src, 'r', encoding='utf-8') as f:
             reader = csv.reader(f, delimiter=';')
             for row in reader:
                 data = convert_table_row(row)

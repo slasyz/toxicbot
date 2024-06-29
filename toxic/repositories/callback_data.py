@@ -13,10 +13,3 @@ class CallbackDataRepository:
             RETURNING uuid
         ''', (value,))
         return str(row[0])
-
-    async def get_value(self, uuid: str) -> dict | None:
-        row = await self.database.query_row('SELECT value FROM callback_data WHERE uuid=$1', (uuid,))
-        if row is None:
-            return None
-
-        return row[0]

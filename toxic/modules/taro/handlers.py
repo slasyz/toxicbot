@@ -21,7 +21,7 @@ class TaroCommand(CommandHandler):
         for goal in goals:
             buttons.append([
                 aiogram.types.InlineKeyboardButton(
-                    GOALS_EMOJI[goal] + ' ' + GOALS[goal],
+                    text=GOALS_EMOJI[goal] + ' ' + GOALS[goal],
                     callback_data=await self.callback_data_repo.insert_value({'name': '/taro/first', 'goal': goal}),
                 ),
             ])
@@ -61,8 +61,8 @@ def get_description_by_goal(card: CardData, goal: str) -> str:
 
 def get_mention(user: aiogram.types.User):
     if user.username != '':
-        return '<a href="tg://user?id={}">@{}</a>'.format(user.id, user.username)
-    return '<a href="tg://user?id={}">{}</a>'.format(user.id, user.first_name)
+        return f'<a href="tg://user?id={user.id}">@{user.username}</a>'
+    return f'<a href="tg://user?id={user.id}">{user.first_name}</a>'
 
 
 class TaroFirstCallback(CallbackHandler):
@@ -80,16 +80,16 @@ class TaroFirstCallback(CallbackHandler):
 
         await self.messenger.send(message.chat.id, PhotoMessage(
             photo=photo,
-            text='{}, выбери карту, чтобы получить {}.'.format(mention, GOALS.get(goal, 'general')),
+            text=f'{mention}, выбери карту, чтобы получить {GOALS.get(goal, "general")}.',
             is_html=True,
             markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[
                 [
-                    aiogram.types.InlineKeyboardButton('1️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    aiogram.types.InlineKeyboardButton('2️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='1️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='2️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ],
                 [
-                    aiogram.types.InlineKeyboardButton('3️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    aiogram.types.InlineKeyboardButton('4️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='3️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='4️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
                 ]
             ])
         ))

@@ -3,18 +3,25 @@ import json
 import aiogram
 from loguru import logger
 
+from toxic.db import Database
 from toxic.interfaces import CommandHandler
 from toxic.messenger.message import Message
-from toxic.repositories.messages import MessagesRepository
 
 
 class DumpCommand(CommandHandler):
-    def __init__(self, messages_repo: MessagesRepository):
-        self.messages_repo = messages_repo
+    def __init__(self, database: Database):
+        self.database = database
 
     @staticmethod
     def is_admins_only() -> bool:
         return True
+
+    async def _get_update_dump(self, update_id: int) -> str | None:
+        row = await self.database.query_row('SELECT json FROM updates WHERE tg_id=$1', (update_id,))
+        if row is None:
+            return None
+
+        return row[0]
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         if len(args) != 2:
@@ -25,7 +32,7 @@ class DumpCommand(CommandHandler):
         except ValueError:
             return f'Нужно писать так: /{args[0]} UPDATE_ID'
 
-        dump = await self.messages_repo.get_update_dump(update_id)
+        dump = await self._get_update_dump(update_id)
         if dump is None:
             return 'В базе нет такого апдейта.'
 

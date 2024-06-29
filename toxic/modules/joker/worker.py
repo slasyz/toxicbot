@@ -6,17 +6,17 @@ from datetime import datetime
 
 from loguru import logger
 
+from toxic.db import Database
 from toxic.helpers.log import print_sleep
 from toxic.interfaces import Worker
 from toxic.messenger.messenger import Messenger
 from toxic.modules.joker.content import Joker
-from toxic.repositories.chats import ChatsRepository
 
 
 class JokesWorker(Worker):
-    def __init__(self, joker: Joker, chats_repo: ChatsRepository, messenger: Messenger | None):
+    def __init__(self, joker: Joker, database: Database, messenger: Messenger | None):
         self.joker = joker
-        self.chats_repo = chats_repo
+        self.database = database
         self.messenger = messenger
 
     async def send(self, chat_id: int, joke: str):
@@ -27,8 +27,9 @@ class JokesWorker(Worker):
 
     async def step(self):
         tasks = []
+        chats = await self.database.query('SELECT tg_id, joke_period FROM chats WHERE tg_id < 0 AND joke_period > 0;')
 
-        async for chat_id, period in self.chats_repo.get_joker_chats():
+        for chat_id, period in chats:
             random_value = random.randint(1, period)
             if random_value != 1:
                 logger.info('Not sending joke to chat #{} ({}/{}).', chat_id, random_value, period)

@@ -57,9 +57,6 @@ test.detailed:  ## run all tests (you can start dependencies using ./scripts/sta
 .PHONY: deps
 deps:           ## install all dependencies from requirements.txt to virtual environment
 	poetry install
-	if [[ ! -f .venv/lib/python3.11/site-packages/ruwordnet/static/ruwordnet.db ]]; then \
-		poetry run ruwordnet download; \
-	fi;
 
 
 .PHONY: run

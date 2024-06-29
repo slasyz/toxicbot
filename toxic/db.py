@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Iterator, Any
+from typing import Any
 
 import asyncpg
 
@@ -42,7 +42,7 @@ class Database:
 
         await self.pool.execute(query, *vars)
 
-    async def query(self, query, vars=None) -> Iterator:
+    async def query(self, query, vars=None) -> list:
         if vars is None:
             vars = tuple()
 

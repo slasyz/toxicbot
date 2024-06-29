@@ -79,7 +79,7 @@ class Odesli(Infoer):
         params = {
             'url': url
         }
-        url = '{}?{}'.format(basepath, urlencode(params))
+        url = f'{basepath}?{urlencode(params)}'
 
         async with aiohttp.ClientSession() as session, session.get(url) as resp:
             try:

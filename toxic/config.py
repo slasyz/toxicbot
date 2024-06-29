@@ -11,7 +11,7 @@ class Config:
     def load(files: list[str]) -> Config:
         for file in files:
             try:
-                with open(file) as f:
+                with open(file, encoding='utf-8') as f:
                     data = json.load(f)
             except FileNotFoundError:
                 continue

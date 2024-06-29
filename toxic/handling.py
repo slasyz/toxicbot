@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import aiogram
 from loguru import logger
 
+from toxic.db import Database
 from toxic.helpers import consts_tg
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.interfaces import CommandHandler, CallbackHandler, MessageHandler
@@ -11,7 +12,6 @@ from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.modules.dus.dus import DatabaseUpdateSaver
-from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.users import UsersRepository
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
@@ -44,7 +44,7 @@ class HandlersManager:
                  flood_message_handlers: list[MessageHandler],
 
                  users_repo: UsersRepository,
-                 callback_data_repo: CallbackDataRepository,
+                 database: Database,
                  messenger: Messenger,
                  metrics: Metrics,
                  rate_limiter: RateLimiter):
@@ -55,7 +55,7 @@ class HandlersManager:
         self.flood_message_handlers = flood_message_handlers
 
         self.users_repo = users_repo
-        self.callback_data_repo = callback_data_repo
+        self.database = database
         self.messenger = messenger
         self.metrics = metrics
         self.rate_limiter = rate_limiter
@@ -63,6 +63,8 @@ class HandlersManager:
     async def _get_command_name(self, text: str, message: aiogram.types.Message) -> str:
         # Проходимся по всем сущностям, если на первом месте в сообщении есть сущность типа 'bot_command', то записываем
         # название команды.
+        if message.entities is None:
+            return ''
         for entity in message.entities:
             if entity.offset != 0:
                 continue
@@ -73,7 +75,7 @@ class HandlersManager:
             command_name = text[1:entity.length]  # trim leading slash
             if '@' in command_name:
                 command_name, command_target = command_name.split('@', 2)
-                if command_target != (await self.messenger.bot.me).username:
+                if command_target != (await self.messenger.bot.me()).username:
                     continue
 
             return command_name
@@ -103,6 +105,13 @@ class HandlersManager:
 
         return []
 
+    async def _get_callback_value(self, uuid: str) -> dict | None:
+        row = await self.database.query_row('SELECT value FROM callback_data WHERE uuid=$1', (uuid,))
+        if row is None:
+            return None
+
+        return row[0]
+
     async def handle_callback(self, callback: aiogram.types.CallbackQuery):
         message = callback.message
         if message is None:
@@ -118,7 +127,7 @@ class HandlersManager:
             return
         args_id = callback.data
 
-        args = await self.callback_data_repo.get_value(args_id)
+        args = await self._get_callback_value(args_id)
         if args is None:
             return
 
@@ -186,7 +195,7 @@ class HandlersManager:
             try:
                 replies += [Reply('command', x) for x in await self.handle_command(text, update.message)]
             except Exception as ex:
-                replies.append(TextMessage('Ошибка.'))
+                replies.append(Reply('command', TextMessage('Ошибка.')))
                 logger.opt(exception=ex).error('Caught exception when handling command.')
 
         # Useful message handlers (chain teaching, music links parser)

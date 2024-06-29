@@ -40,16 +40,6 @@ for it in other streaming services and sends them in response.
 <p align="center"><img alt="Tarot example (third step)." src="./docs/img/taro-3.png" /></p>
 
 
-### Emojification
-
-Just decorate the message with emojis in 
-[r/emojipasta](https://www.reddit.com/r/emojipasta/) style.
-
-It tries to fit emojis by their meaning, but does not make this very well.
-
-<p align="center"><img alt="Emoji example." src="./docs/img/emoji.png" /></p>
-
-
 ### Installation
 
 ```shell

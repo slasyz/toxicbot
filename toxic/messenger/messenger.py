@@ -1,8 +1,10 @@
 import asyncio
 
 import aiogram
+from aiogram.exceptions import TelegramMigrateToChat, TelegramUnauthorizedError, TelegramBadRequest
 from loguru import logger
 
+from toxic.db import Database
 from toxic.helpers import consts_tg
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
@@ -18,11 +20,13 @@ DELAY_KEEPALIVE = 5
 class Messenger:
     def __init__(self,
                  bot: aiogram.Bot,
+                 database: Database,
                  chats_repo: CachedChatsRepository,
                  users_repo: UsersRepository,
                  dus: DatabaseUpdateSaver,
                  delayer_factory: DelayerFactory):
         self.bot = bot
+        self.database = database
         self.chats_repo = chats_repo
         self.users_repo = users_repo
         self.dus = dus
@@ -48,28 +52,28 @@ class Messenger:
                 message = await msg.send(self.bot, chat_id, reply_to)
                 await self.dus.handle_message(message)
                 return
-            except aiogram.exceptions.MigrateToChat as ex:
+            except TelegramMigrateToChat as ex:
                 logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.migrate_to_chat_id)
-                await self.chats_repo.update_next_id(chat_id, ex.migrate_to_chat_id)
-                await self.chats_repo.disable_joke(chat_id)
+                await self.database.exec('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (ex.migrate_to_chat_id, chat_id))
+                await self.database.exec('UPDATE chats SET joke_period=0 WHERE tg_id=$1', (chat_id,))
                 chat_id = ex.migrate_to_chat_id
                 continue
-            except aiogram.exceptions.Unauthorized as ex:
+            except TelegramUnauthorizedError as ex:
                 logger.opt(exception=ex).info('Unauthorized.', chat_id=chat_id)
-                await self.chats_repo.disable_joke(chat_id)
+                await self.database.exec('UPDATE chats SET joke_period=0 WHERE tg_id=$1', (chat_id,))
             break
         else:
-            raise Exception('Too much ChatMigrated errors (chat_id = {}).'.format(chat_id))
+            raise Exception(f'Too much ChatMigrated errors (chat_id = {chat_id}).')
 
     async def send_to_admins(self, msg: str | Message):
-        async for id in self.users_repo.get_admins():
+        for (id,) in await self.database.query('SELECT tg_id FROM users WHERE admin'):
             await self.send(id, msg)
 
     async def delete_message(self, chat_id: int, message_id: int, ignore_not_found: bool = True):
         try:
             await self.bot.delete_message(chat_id, message_id)
-        except aiogram.exceptions.BadRequest as ex:
-            if ignore_not_found and ex.text == 'Message to delete not found':
+        except TelegramBadRequest as ex:
+            if ignore_not_found and ex.label == 'Message to delete not found':
                 return
             raise
 
@@ -80,6 +84,9 @@ class Messenger:
             return True
 
         if message.text is None:
+            return False
+
+        if message.entities is None:
             return False
 
         for entity in message.entities:

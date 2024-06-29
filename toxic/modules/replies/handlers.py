@@ -6,11 +6,11 @@ import re
 import aiogram
 from loguru import logger
 
+from toxic.db import Database
 from toxic.helpers import decorators
 from toxic.interfaces import MessageHandler
 from toxic.messenger.message import Message
 from toxic.messenger.messenger import Messenger
-from toxic.repositories.messages import MessagesRepository
 from toxic.repositories.users import UsersRepository
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
@@ -54,7 +54,7 @@ class PeopleHandler(MessageHandler):
         self.mirror_phrases = mirror_phrases
 
     @staticmethod
-    async def new(users_raw: dict[str, dict[str, str | list[str]]], messenger: Messenger, messages_repo: MessagesRepository) -> PeopleHandler:
+    async def new(users_raw: dict[str, dict[str, str | list[str]]], messenger: Messenger, database: Database) -> PeopleHandler:
         users = {}
         mirror_phrases: dict[tuple[int, int], list[str]] = {}
 
@@ -63,7 +63,19 @@ class PeopleHandler(MessageHandler):
                 val = [val]
             users[int(key)] = val
 
-            async for chat_id, text in messages_repo.get_all_user_replies(int(key), messenger.bot.id):
+            user_replies = await database.query('''
+                SELECT m.chat_id, m.text
+                FROM messages m
+                    JOIN updates u on m.update_id = u.tg_id
+                WHERE
+                    m.chat_id < 0 AND
+                    user_id = $1 AND
+                    text IS NOT NULL AND text != '' AND
+                    (u.json->'message'->'reply_to_message'->'from'->'id')::bigint = $2
+                ORDER BY m.tg_id
+            ''', (int(key), messenger.bot.id))
+
+            for chat_id, text in user_replies:
                 if (chat_id, int(key)) not in mirror_phrases:
                     mirror_phrases[(chat_id, int(key))] = []
                 mirror_phrases[(chat_id, int(key))].append(text)

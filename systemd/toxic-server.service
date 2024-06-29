@@ -7,7 +7,7 @@ StartLimitIntervalSec=20s
 [Service]
 Type=simple
 WorkingDirectory={{ project_dir }}
-ExecStart=/bin/sh -c "make server"
+ExecStart=/bin/sh -c "export PATH=$HOME/.local/bin:$PATH && make server"
 Restart=always
 StandardOutput=append:{{ logs_prefix }}-server.log
 StandardError=append:{{ logs_prefix }}-server.log

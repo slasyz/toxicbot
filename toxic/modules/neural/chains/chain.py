@@ -65,7 +65,7 @@ class MarkovChain(Chain):
         try:
             stat = self.data[current]
         except KeyError:
-            print('not found {} in data'.format(current))
+            print(f'not found {current} in data')
             return None
 
         word = self.pick(stat)

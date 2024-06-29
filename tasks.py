@@ -9,7 +9,7 @@ def deploy(c, t='user@server', project_dir="~/deployments/toxic", logs_prefix="~
     # Sources
     c.run(f'rsync -avuz ./toxic/ {t}:{project_dir}/toxic/')
     c.run(f'rsync -avuz ./resources/ {t}:{project_dir}/resources/')
-    c.run(f'scp ./main.py ./config.json ./pyproject.toml {t}:{project_dir}')
+    c.run(f'scp ./main.py ./config.json ./pyproject.toml Makefile {t}:{project_dir}')
 
     # Systemd service files
     c.run(f'scp ./systemd/toxic-*.service {t}:~/.config/systemd/user/')

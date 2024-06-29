@@ -34,7 +34,7 @@ class MusicMessageGenerator:
 
         buttons = []
         for i, service in enumerate(content.buttons):
-            button = aiogram.types.InlineKeyboardButton(service.name, url=service.link)
+            button = aiogram.types.InlineKeyboardButton(text=service.name, url=service.link)
             if i % 2 == 0:
                 buttons.append([button])
             else:
@@ -42,10 +42,10 @@ class MusicMessageGenerator:
 
         if include_plaintext_links:
             links = [f'<a href="{service.link}">{service.name}</a>' for service in content.buttons]
-            content.text = '{}\n\n{}'.format(content.text, ' | '.join(links))
+            content.text = f'{content.text}\n\n{" | ".join(links)}'
         else:
             buttons.append([aiogram.types.InlineKeyboardButton(
-                '📝 Пришли обычные ссылки',
+                text='📝 Пришли обычные ссылки',
                 callback_data=await self.callback_data_repo.insert_value({
                     'name': '/music/plaintext',
                     'link': source_link,
