@@ -35,12 +35,11 @@ def __main__():
     config = Config.load(config_files)
 
     app = FastAPI()
+    app.add_middleware(PrometheusMiddleware)
 
     async def server_init():
         deps = await init_with_config(config)
         init_sentry(deps.config['sentry']['dsn'])
-
-        app.add_middleware(PrometheusMiddleware)
 
         html_dir = get_resource_path('html')
         templates = Jinja2Templates(directory=html_dir)

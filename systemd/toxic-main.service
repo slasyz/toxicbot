@@ -2,7 +2,7 @@
 Description=Toxic telegram bot (main worker)
 After=network.target
 StartLimitBurst=5
-StartLimitIntervalSec=20s
+StartLimitIntervalSec=60s
 
 [Service]
 Type=simple
