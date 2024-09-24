@@ -90,7 +90,7 @@ class Messenger:
             return False
 
         for entity in message.entities:
-            if entity.type == consts_tg.MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + (await self.bot.me).username:
+            if entity.type == consts_tg.MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + (await self.bot.me()).username:
                 return True
 
         return False
