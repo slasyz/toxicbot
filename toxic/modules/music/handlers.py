@@ -24,9 +24,9 @@ class MusicPlaintextCallback(CallbackHandler):
             return CallbackReply(self.error_reply)
 
         if message.photo is not None:  # TODO: validate this
-            self.messenger.edit_caption(message.chat.id, message.message_id, music_message.text, music_message.buttons, is_html=True)
+            await self.messenger.edit_caption(message.chat.id, message.message_id, music_message.text, music_message.buttons, is_html=True)
         else:
-            self.messenger.edit_text(message.chat.id, message.message_id, music_message.text, music_message.buttons, is_html=True)
+            await self.messenger.edit_text(message.chat.id, message.message_id, music_message.text, music_message.buttons, is_html=True)
 
         return None
 

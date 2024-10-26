@@ -12,8 +12,8 @@ class DatabaseUpdateSaver:
 
     async def handle_user(self, user: aiogram.types.User):
         row = await self.database.query_row('''
-            SELECT first_name, last_name, username 
-            FROM users 
+            SELECT first_name, last_name, username
+            FROM users
             WHERE tg_id=$1
         ''', (user.id,))
 
@@ -94,7 +94,7 @@ class DatabaseUpdateSaver:
         await self.database.exec('''
             INSERT INTO messages(chat_id, tg_id, user_id, update_id, text, date, sticker)
             VALUES($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (chat_id, json_id, tg_id) DO UPDATE SET 
+            ON CONFLICT (chat_id, json_id, tg_id) DO UPDATE SET
                 update_id = $8,
                 text = $9,
                 date = $10,
@@ -113,7 +113,7 @@ class DatabaseUpdateSaver:
             sticker
         ))
 
-        row = await self.database.query_row('''SELECT count(*) FROM messages''')
+        row = await self.database.query_row_must('''SELECT count(*) FROM messages''')
         self.metrics.messages.set(row[0])
 
     async def handle(self, update: aiogram.types.Update):

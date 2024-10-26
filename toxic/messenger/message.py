@@ -25,7 +25,7 @@ class Message:
     def get_length(self) -> int:
         raise NotImplementedError()
 
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int = None) -> aiogram.types.Message:
+    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | None:
         raise NotImplementedError()
 
     def get_with_delay(self) -> bool:
@@ -43,7 +43,7 @@ class VoiceMessage(Message):
     def get_length(self) -> int:
         return len(self.text)
 
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int = None) -> aiogram.types.Message:
+    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | none:
         try:
             f = await self.service.load(self.text)
         except Exception as ex:
@@ -78,12 +78,14 @@ class TextMessage(Message):
     def get_with_delay(self) -> bool:
         return self.with_delay
 
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int = None) -> aiogram.types.Message:
+    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | None:
         text, trimmed = split_into_chunks(
             self.text,
             consts_tg.MAX_MESSAGE_LENGTH,
             consts_tg.MAX_MESSAGE_LENGTH,
         )
+        if text is None:
+            return None
         first_message = await bot.send_message(
             chat_id,
             text,
@@ -106,11 +108,11 @@ class TextMessage(Message):
 class PhotoMessage(Message):
     def __init__(self,
                  photo: bytes | str,
-                 text: str = None,
+                 text: str | None = None,
                  is_html: bool = False,
                  markup: aiogram.types.InlineKeyboardMarkup | aiogram.types.ReplyKeyboardMarkup | aiogram.types.ReplyKeyboardRemove | aiogram.types.ForceReply | None = None,
                  send_trimmed: bool = True):
-        self.photo = photo
+        self.photo = str(photo)
         self.text = text
         self.is_html = is_html
         self.markup = markup
@@ -122,12 +124,14 @@ class PhotoMessage(Message):
     def get_chat_action(self) -> str:
         return consts_tg.CHATACTION_TYPING
 
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int = None) -> aiogram.types.Message:
+    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | None:
         text, trimmed = split_into_chunks(
             self.text,
             consts_tg.MAX_CAPTION_LENGTH,
             consts_tg.MAX_MESSAGE_LENGTH,
         )
+        if self.photo is None:
+            return None
         first_message = await bot.send_photo(
             chat_id,
             photo=self.photo,

@@ -10,7 +10,7 @@ class SpotifyCacheWorker:
 
     def __init__(self, settings_repo: SettingsRepository):
         self.settings_repo = settings_repo
-        self.queue = Queue(maxsize=-1)
+        self.queue: Queue = Queue(maxsize=-1)
 
     def put(self, token: str):
         self.queue.put_nowait(token)

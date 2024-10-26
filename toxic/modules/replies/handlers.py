@@ -80,8 +80,8 @@ class PeopleHandler(MessageHandler):
                     mirror_phrases[(chat_id, int(key))] = []
                 mirror_phrases[(chat_id, int(key))].append(text)
 
-        for key, val in mirror_phrases.items():
-            logger.info(f'Mirror phrases: chat = {key[0]}, user = {key[1]}, loaded {len(val)} mirror phrases')
+        for key1, val1 in mirror_phrases.items():
+            logger.info(f'Mirror phrases: chat = {key1[0]}, user = {key1[1]}, loaded {len(val1)} mirror phrases')
 
         return PeopleHandler(users, mirror_phrases, messenger)
 
@@ -92,7 +92,7 @@ class PeopleHandler(MessageHandler):
         if not await self.messenger.is_reply_or_mention(message):
             return None
 
-        if message.from_user.id not in self.users:
+        if message.from_user is None or message.from_user.id not in self.users:
             return None
 
         if message.reply_to_message is not None and \

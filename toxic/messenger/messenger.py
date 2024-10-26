@@ -32,7 +32,7 @@ class Messenger:
         self.dus = dus
         self.delayer_factory = delayer_factory
 
-    async def send(self, chat_id: int, msg: str | Message, reply_to: int = None):
+    async def send(self, chat_id: int, msg: str | Message, reply_to: int | None = None):
         if isinstance(msg, str):
             msg = TextMessage(msg)
 
@@ -90,15 +90,15 @@ class Messenger:
             return False
 
         for entity in message.entities:
-            if entity.type == consts_tg.MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + (await self.bot.me()).username:
+            if entity.type == consts_tg.MESSAGEENTITY_MENTION and message.text[entity.offset:entity.offset + entity.length] == '@' + ((await self.bot.me()).username or ''):
                 return True
 
         return False
 
-    def edit_text(self, chat_id: int, message_id: int, text: str, markup: aiogram.types.InlineKeyboardMarkup, is_html: bool = False):
+    async def edit_text(self, chat_id: int, message_id: int, text: str, markup: aiogram.types.InlineKeyboardMarkup, is_html: bool = False):
         if len(text) > consts_tg.MAX_MESSAGE_LENGTH:
             text = text[:consts_tg.MAX_MESSAGE_LENGTH]
-        self.bot.edit_message_text(
+        await self.bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
             text=text,
@@ -106,10 +106,10 @@ class Messenger:
             parse_mode=consts_tg.PARSEMODE_HTML if is_html else None
         )
 
-    def edit_caption(self, chat_id: int, message_id: int, text: str, markup: aiogram.types.InlineKeyboardMarkup, is_html: bool = False):
+    async def edit_caption(self, chat_id: int, message_id: int, text: str, markup: aiogram.types.InlineKeyboardMarkup, is_html: bool = False):
         if len(text) > consts_tg.MAX_CAPTION_LENGTH:
             text = text[:consts_tg.MAX_CAPTION_LENGTH]
-        self.bot.edit_message_caption(
+        await self.bot.edit_message_caption(
             chat_id=chat_id,
             message_id=message_id,
             caption=text,

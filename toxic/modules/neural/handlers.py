@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
+from typing import TypeVar
 
 import aiogram
 from loguru import logger
@@ -60,11 +61,11 @@ class ChainFloodHandler(MessageHandler):
                 with_delay=True,
             )]
 
-        if message.date.timestamp() < datetime.utcnow().timestamp() - 60:
+        if message.date.timestamp() < datetime.utcnow().timestamp() - 60 or message.text is None:
             return None
 
-        count = (await self.database.query_row('SELECT count(tg_id) FROM messages WHERE chat_id = $1', (message.chat.id,)))[0]
-        period = (await self.database.query_row('SELECT chain_period FROM chats WHERE tg_id = $1', (message.chat.id,)))[0]
+        count = (await self.database.query_row_must('SELECT count(tg_id) FROM messages WHERE chat_id = $1', (message.chat.id,)))[0]
+        period = (await self.database.query_row_must('SELECT chain_period FROM chats WHERE tg_id = $1', (message.chat.id,)))[0]
         if count % period == 0:
             chain = self.chats[message.chat.id]
             return [TextMessage(
@@ -83,9 +84,9 @@ async def new(chain_factory: ChainFactory, textizer: Textizer, database: Databas
     logger.info('Starting teaching messages.')
     start = datetime.now()
     texts = await database.query('''
-        SELECT chat_id, text 
-        FROM messages 
-        WHERE chat_id < 0 AND update_id IS NOT NULL 
+        SELECT chat_id, text
+        FROM messages
+        WHERE chat_id < 0 AND update_id IS NOT NULL
         ORDER BY tg_id
     ''')
     for chat_id, text in texts:

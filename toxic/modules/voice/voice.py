@@ -50,9 +50,10 @@ class NextUpService(VoiceService):
                     'Referer': 'https://nextup.com/ivona/russian.html',
                 }
             )
-            with req:
-                if not consts.LINK_REGEXP.match(req.text):
-                    result = req.text[:min(len(await req.text()), MAX_ERROR_LENGTH)]
+            async with req:
+                text = await req.text()
+                if not consts.LINK_REGEXP.match(text):
+                    result = text[:min(len(text), MAX_ERROR_LENGTH)]
                     raise InvalidLinkException(result)
 
                 return req.text

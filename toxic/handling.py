@@ -114,7 +114,7 @@ class HandlersManager:
 
     async def handle_callback(self, callback: aiogram.types.CallbackQuery):
         message = callback.message
-        if message is None:
+        if message is None or not isinstance(message, aiogram.types.Message):
             return
 
         log_extra = {

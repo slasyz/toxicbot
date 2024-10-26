@@ -53,3 +53,9 @@ class Database:
             vars = tuple()
 
         return await self.pool.fetchrow(query, *vars)
+
+    async def query_row_must(self, query, vars=None) -> Any:
+        res = self.query_row(query, vars)
+        if res is None:
+            raise Exception('row not found')
+        return res

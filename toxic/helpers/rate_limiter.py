@@ -20,6 +20,8 @@ class RateLimiter:
         self.buckets: dict[tuple[int, int], Bucket] = {}
 
     def handle(self, message: aiogram.types.Message) -> str | None:
+        if message.from_user is None:
+            return None
         if self.discard(message.chat.id, message.from_user.id):
             return self.reply
 

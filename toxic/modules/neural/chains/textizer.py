@@ -72,7 +72,7 @@ class Textizer:
 
         return ''
 
-    def _predict_not_empty_inner(self, chain: Chain, message: str = None):
+    def _predict_not_empty_inner(self, chain: Chain, message: str | None = None):
         # TODO: исправить этот костыль, или для начала добавить метрики на плохие предсказания
         for _ in range(10):
             res = self.predict(chain, message)
@@ -86,6 +86,6 @@ class Textizer:
 
         return 'Не могу сказать ничего дельного.'
 
-    def predict_not_empty(self, chain: Chain, message: str = None) -> str:
+    def predict_not_empty(self, chain: Chain, message: str | None = None) -> str:
         with self.metrics.chain_predict.time():  # TODO: do with decorator
             return self._predict_not_empty_inner(chain, message)

@@ -15,7 +15,7 @@ class ChatsRepository:
         self.database = database
 
     async def get_latest_chat_id(self, chat_id: int) -> int:
-        row = await self.database.query_row('''
+        row = await self.database.query_row_must('''
             WITH RECURSIVE r AS (
                 SELECT tg_id, next_tg_id
                 FROM chats
