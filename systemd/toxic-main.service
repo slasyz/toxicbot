@@ -11,3 +11,6 @@ ExecStart=/bin/sh -c "export PATH=$HOME/.local/bin:$PATH && make run"
 Restart=always
 StandardOutput=append:{{ logs_prefix }}-main.log
 StandardError=append:{{ logs_prefix }}-main.log
+
+[Install]
+WantedBy=default.target
