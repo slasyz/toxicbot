@@ -43,7 +43,7 @@ class VoiceMessage(Message):
     def get_length(self) -> int:
         return len(self.text)
 
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | none:
+    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | None:
         try:
             f = await self.service.load(self.text)
         except Exception as ex:

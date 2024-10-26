@@ -2,7 +2,6 @@ import aiogram
 from loguru import logger
 
 from toxic.messenger.message import PhotoMessage, TextMessage
-from toxic.helpers import decorators
 from toxic.modules.music.generator.links import get_hostname, extract_music_links
 from toxic.modules.music.generator.generator import MusicMessageGenerator
 from toxic.interfaces import CallbackHandler, MessageHandler
@@ -35,10 +34,10 @@ class MusicHandler(MessageHandler):
     def __init__(self, music_formatter: MusicMessageGenerator):
         self.music_formatter = music_formatter
 
-    @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
-        # pylint: disable=W0221
-        # Because of the decorator
+        if text == '':
+            return None
+
         links = extract_music_links(text)
         if not links:
             return None

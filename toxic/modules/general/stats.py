@@ -7,7 +7,6 @@ from loguru import logger
 
 from toxic.db import Database
 from toxic.interfaces import CommandHandler, MessageHandler
-from toxic.helpers import decorators
 from toxic.messenger.message import Message
 from toxic.repositories.users import UsersRepository
 
@@ -92,10 +91,10 @@ class StatsHandler(MessageHandler):
 
         return StatsHandler(replies_regexes, database)
 
-    @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
-        # pylint: disable=W0221
-        # Because of the decorator
+        if text == '':
+            return None
+
         for key, value in self.replies.items():
             if key.search(text.lower()) is None:
                 continue

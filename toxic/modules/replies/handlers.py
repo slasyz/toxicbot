@@ -7,7 +7,6 @@ import aiogram
 from loguru import logger
 
 from toxic.db import Database
-from toxic.helpers import decorators
 from toxic.interfaces import MessageHandler
 from toxic.messenger.message import Message
 from toxic.messenger.messenger import Messenger
@@ -32,10 +31,10 @@ class KeywordsHandler(MessageHandler):
 
         return KeywordsHandler(map)
 
-    @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
-        # pylint: disable=W0221
-        # Because of the decorator
+        if text == '':
+            return None
+
         for key, val in self.map.items():
             if isinstance(key, str) and key not in text.lower():
                 continue
@@ -85,10 +84,9 @@ class PeopleHandler(MessageHandler):
 
         return PeopleHandler(users, mirror_phrases, messenger)
 
-    @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
-        # pylint: disable=W0221
-        # Because of the decorator
+        if text == '':
+            return None
         if not await self.messenger.is_reply_or_mention(message):
             return None
 
@@ -143,10 +141,10 @@ class SorryHandler(MessageHandler):
     def new(config: dict[str, str], messenger: Messenger) -> SorryHandler:
         return SorryHandler(config['sorry'], config['not_sorry'], messenger)
 
-    @decorators.non_empty
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
-        # pylint: disable=W0221
-        # Because of the decorator
+        if text == '':
+            return None
+
         reply = self.reply_sorry
         if message.chat.id > 0:
             reply = self.reply_not_sorry

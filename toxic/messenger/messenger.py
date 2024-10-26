@@ -50,7 +50,8 @@ class Messenger:
         for _ in range(10):
             try:
                 message = await msg.send(self.bot, chat_id, reply_to)
-                await self.dus.handle_message(message)
+                if message is not None:
+                    await self.dus.handle_message(message)
                 return
             except TelegramMigrateToChat as ex:
                 logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.migrate_to_chat_id)
