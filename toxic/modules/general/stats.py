@@ -8,7 +8,7 @@ from loguru import logger
 from toxic.db import Database
 from toxic.interfaces import CommandHandler, MessageHandler
 from toxic.messenger.message import Message
-from toxic.repositories.users import UsersRepository
+from toxic.repository import Repository
 
 
 async def get_stat(chat_id: int, database: Database) -> str:
@@ -29,8 +29,8 @@ async def get_stat(chat_id: int, database: Database) -> str:
 
 
 class StatCommand(CommandHandler):
-    def __init__(self, users_repo: UsersRepository, database: Database):
-        self.users_repo = users_repo
+    def __init__(self, repo: Repository, database: Database):
+        self.repo = repo
         self.database = database
 
     async def _get_response(self, chat_id) -> str:
@@ -58,7 +58,7 @@ class StatCommand(CommandHandler):
             logger.error('Empty from_user in /stat command.', message_id=message.message_id, chat_id=message.chat.id)
             return 'Что-то не то.'
 
-        if not await self.users_repo.is_admin(message.from_user.id):
+        if not await self.repo.is_admin(message.from_user.id):
             return 'Это нужно делать в общем чате.'
 
         if len(args) != 2:

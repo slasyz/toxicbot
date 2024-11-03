@@ -46,10 +46,7 @@ from toxic.modules.spotify.handlers import AdminSpotifyAuthCommand, AdminSpotify
 from toxic.modules.spotify.worker import SpotifyCacheWorker
 from toxic.modules.taro.content import Taro
 from toxic.modules.taro.handlers import TaroCommand, TaroFirstCallback, TaroSecondCallback
-from toxic.repositories.callback_data import CallbackDataRepository
-from toxic.repositories.chats import ChatsRepository
-from toxic.repositories.settings import SettingsRepository
-from toxic.repositories.users import UsersRepository
+from toxic.repository import Repository
 from toxic.workers import WorkersManager
 
 
@@ -57,8 +54,7 @@ from toxic.workers import WorkersManager
 class BasicDependencies:
     config: Config
     database: Database
-    chats_repo: ChatsRepository
-    users_repo: UsersRepository
+    repo: Repository
     messenger: Messenger
     metrics: Metrics
     dus: DatabaseUpdateSaver
@@ -87,8 +83,7 @@ async def init_with_config(config: Config) -> BasicDependencies:
         config['database']['pass'],
     )
 
-    chats_repo = ChatsRepository(database)
-    users_repo = UsersRepository(database)
+    repo = Repository(database)
 
     metrics = Metrics()
 
@@ -97,13 +92,12 @@ async def init_with_config(config: Config) -> BasicDependencies:
     delayer_factory = DelayerFactory()
 
     bot = aiogram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, database, users_repo, dus, delayer_factory)
+    messenger = Messenger(bot, database, dus, delayer_factory)
 
     return BasicDependencies(
         config,
         database,
-        chats_repo,
-        users_repo,
+        repo,
         messenger,
         metrics,
         dus,
@@ -143,26 +137,25 @@ async def __main__():
 
     init_sentry(deps.config['sentry']['dsn'])
 
-    settings_repo = SettingsRepository(deps.database)
-    callback_data_repo = CallbackDataRepository(deps.database)
+    repo = Repository(deps.database)
 
     joker = Joker(deps.config['replies']['joker']['error'])
 
-    spotify_cache_worker = SpotifyCacheWorker(settings_repo)
-    spotify = await Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], settings_repo, spotify_cache_worker)
+    spotify_cache_worker = SpotifyCacheWorker(repo)
+    spotify = await Spotify.new(deps.config['spotify']['client_id'], deps.config['spotify']['client_secret'], repo, spotify_cache_worker)
     spotify_searcher = spotify.create_searcher()
 
     music_info_collector = MusicInfoCollector(
         infoers=[Odesli(), Boom()],
         searchers=[spotify_searcher]
     )
-    music_formatter = MusicMessageGenerator(music_info_collector, settings_repo, callback_data_repo)
+    music_formatter = MusicMessageGenerator(music_info_collector, repo)
 
     workers_manager = WorkersManager(deps.messenger)
     workers = [
         JokesWorker(joker, deps.database, deps.messenger),
         ReminderWorker(deps.database, deps.messenger),
-        SpotifyCacheWorker(settings_repo),
+        SpotifyCacheWorker(repo),
     ]
 
     splitter = SpaceAdjoinSplitter()
@@ -195,17 +188,17 @@ async def __main__():
     ]
 
     commands = [
-        CommandDefinition('admin', AdminCommand(spotify, callback_data_repo, settings_repo)),
+        CommandDefinition('admin', AdminCommand(spotify, repo)),
         CommandDefinition('dump', DumpCommand(deps.database)),
         CommandDefinition('stat', StatCommand(deps.users_repo, deps.database)),
         CommandDefinition('joke', JokeCommand(joker)),
         CommandDefinition('send', SendCommand(deps.database, deps.messenger)),
         CommandDefinition('chats', ChatsCommand(deps.chats_repo)),
-        CommandDefinition('taro', TaroCommand(taro_dir, callback_data_repo)),
+        CommandDefinition('taro', TaroCommand(taro_dir, repo)),
         CommandDefinition('spotify', AdminSpotifyAuthCommand(spotify)),
     ]
     callbacks = [
-        CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, callback_data_repo)),
+        CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, repo)),
         CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
         CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo)),
         CallbackDefinition('/admin/keyboard/clear', AdminKeyboardClearCallback()),

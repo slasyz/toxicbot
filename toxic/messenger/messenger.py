@@ -10,7 +10,6 @@ from toxic.helpers import consts_tg
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
 from toxic.modules.dus.dus import DatabaseUpdateSaver
-from toxic.repositories.users import UsersRepository
 
 SYMBOLS_PER_SECOND = 20
 MAX_DELAY = 4
@@ -21,13 +20,11 @@ class Messenger:
     def __init__(self,
                  bot: aiogram.Bot,
                  database: Database,
-                 users_repo: UsersRepository,
                  dus: DatabaseUpdateSaver,
                  delayer_factory: DelayerFactory):
         self.bot = bot
         self.database = database
         self.chain_migrate: Callable[[int, int], None] | None = None
-        self.users_repo = users_repo
         self.dus = dus
         self.delayer_factory = delayer_factory
 

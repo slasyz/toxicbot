@@ -1,6 +1,6 @@
 from asyncio.queues import Queue
 
-from toxic.repositories.settings import SettingsRepository
+from toxic.repository import Repository
 
 
 class SpotifyCacheWorker:
@@ -8,8 +8,8 @@ class SpotifyCacheWorker:
     This class saves token to database, see spotify.Cache documentation for details.
     """
 
-    def __init__(self, settings_repo: SettingsRepository):
-        self.settings_repo = settings_repo
+    def __init__(self, repo: Repository):
+        self.repo = repo
         self.queue: Queue = Queue(maxsize=-1)
 
     def put(self, token: dict):
@@ -20,4 +20,4 @@ class SpotifyCacheWorker:
             token = await self.queue.get()
             if not isinstance(token, dict):
                 continue
-            await self.settings_repo.spotify_set_token(token)
+            await self.repo.spotify_token_set(token)

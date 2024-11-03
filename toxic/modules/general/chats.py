@@ -2,12 +2,12 @@ import aiogram
 
 from toxic.interfaces import CommandHandler
 from toxic.messenger.message import Message
-from toxic.repositories.chats import ChatsRepository
+from toxic.repository import Repository
 
 
 class ChatsCommand(CommandHandler):
-    def __init__(self, chats_repo: ChatsRepository):
-        self.chats_repo = chats_repo
+    def __init__(self, repo: Repository):
+        self.repo = repo
 
     @staticmethod
     def is_admins_only() -> bool:
@@ -15,7 +15,7 @@ class ChatsCommand(CommandHandler):
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         response = []
-        async for id, title in self.chats_repo.list():
+        async for id, title in self.repo.list_chats():
             response.append(f'{title} — #{id}')
 
         return '\n'.join(response)

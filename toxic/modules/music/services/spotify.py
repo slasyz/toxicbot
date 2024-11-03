@@ -9,7 +9,7 @@ from spotipy import SpotifyOAuth, CacheHandler, SpotifyException
 
 from toxic.modules.music.services.structs import Searcher, Type, Service, SearchResult
 from toxic.modules.spotify.worker import SpotifyCacheWorker
-from toxic.repositories.settings import SettingsRepository
+from toxic.repository import Repository
 
 SCOPES = [
     'user-read-playback-state',
@@ -61,8 +61,8 @@ class Spotify:
         self.client = client
 
     @staticmethod
-    async def new(client_id: str, client_secret: str, settings_repo: SettingsRepository, worker: SpotifyCacheWorker) -> Spotify:
-        cache_handler = Cache(await settings_repo.spotify_get_token(), worker)
+    async def new(client_id: str, client_secret: str, repo: Repository, worker: SpotifyCacheWorker) -> Spotify:
+        cache_handler = Cache(await repo.spotify_token_get(), worker)
 
         auth_manager = SpotifyOAuth(
             client_id=client_id,

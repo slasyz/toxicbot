@@ -10,7 +10,7 @@ from toxic.db import Database
 from toxic.interfaces import MessageHandler
 from toxic.messenger.message import Message
 from toxic.messenger.messenger import Messenger
-from toxic.repositories.users import UsersRepository
+from toxic.repository import Repository
 
 SORRY_REGEXP = re.compile(r'бот,\s+извинись')
 
@@ -117,15 +117,15 @@ class PeopleHandler(MessageHandler):
 
 
 class PrivateHandler(MessageHandler):
-    def __init__(self, replies: list[str], users_repo: UsersRepository):
+    def __init__(self, replies: list[str], repo: Repository):
         self.replies = replies
-        self.users_repo = users_repo
+        self.repo = repo
 
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
         if message.chat.id < 0:
             return None
 
-        if await self.users_repo.is_admin(message.chat.id):
+        if await self.repo.is_admin(message.chat.id):
             return 'Я запущен'
 
         return random.choice(self.replies)

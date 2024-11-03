@@ -1,5 +1,5 @@
 import aiogram
-from spotipy import SpotifyOauthError
+from spotipy import SpotifyOauthError # type: ignore
 
 from toxic.interfaces import CallbackHandler, CommandHandler
 from toxic.modules.music.services.spotify import Spotify

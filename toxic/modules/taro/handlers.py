@@ -7,13 +7,13 @@ from toxic.interfaces import CommandHandler, CallbackHandler
 from toxic.modules.taro.content import Taro, CardData
 from toxic.messenger.message import TextMessage, PhotoMessage, Message, CallbackReply
 from toxic.messenger.messenger import Messenger
-from toxic.repositories.callback_data import CallbackDataRepository
+from toxic.repository import Repository
 
 
 class TaroCommand(CommandHandler):
-    def __init__(self, res_dir: str, callback_data_repo: CallbackDataRepository):
+    def __init__(self, res_dir: str, repo: Repository):
         self.res_dir = res_dir
-        self.callback_data_repo = callback_data_repo
+        self.repo = repo
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         goals = ['general', 'love', 'question', 'daily', 'advice']
@@ -22,7 +22,7 @@ class TaroCommand(CommandHandler):
             buttons.append([
                 aiogram.types.InlineKeyboardButton(
                     text=GOALS_EMOJI[goal] + ' ' + GOALS[goal],
-                    callback_data=await self.callback_data_repo.insert_value({'name': '/taro/first', 'goal': goal}),
+                    callback_data=await self.repo.insert_callback_value({'name': '/taro/first', 'goal': goal}),
                 ),
             ])
         return [TextMessage(
@@ -66,10 +66,10 @@ def get_mention(user: aiogram.types.User):
 
 
 class TaroFirstCallback(CallbackHandler):
-    def __init__(self, res_dir: str, messenger: Messenger, callback_data_repo: CallbackDataRepository):
+    def __init__(self, res_dir: str, messenger: Messenger, repo: Repository):
         self.res_dir = res_dir
         self.messenger = messenger
-        self.callback_data_repo = callback_data_repo
+        self.repo = repo
 
     async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         with open(os.path.join(self.res_dir, 'back.jpg'), 'rb') as f:
@@ -84,12 +84,12 @@ class TaroFirstCallback(CallbackHandler):
             is_html=True,
             markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[
                 [
-                    aiogram.types.InlineKeyboardButton(text='1️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    aiogram.types.InlineKeyboardButton(text='2️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='1️⃣', callback_data=await self.repo.insert_callback_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='2️⃣', callback_data=await self.repo.insert_callback_value({'name': '/taro/second', 'goal': goal})),
                 ],
                 [
-                    aiogram.types.InlineKeyboardButton(text='3️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
-                    aiogram.types.InlineKeyboardButton(text='4️⃣', callback_data=await self.callback_data_repo.insert_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='3️⃣', callback_data=await self.repo.insert_callback_value({'name': '/taro/second', 'goal': goal})),
+                    aiogram.types.InlineKeyboardButton(text='4️⃣', callback_data=await self.repo.insert_callback_value({'name': '/taro/second', 'goal': goal})),
                 ]
             ])
         ))

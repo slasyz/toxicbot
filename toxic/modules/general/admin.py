@@ -1,19 +1,16 @@
 import aiogram
-from spotipy import SpotifyOauthError
+from spotipy import SpotifyOauthError # type: ignore
 
 from toxic.modules.music.services.spotify import Spotify
 from toxic.interfaces import CallbackHandler, CommandHandler
 from toxic.messenger.message import TextMessage, Message, CallbackReply
-from toxic.repositories.callback_data import CallbackDataRepository
-from toxic.repositories.chats import ChatsRepository
-from toxic.repositories.settings import SettingsRepository
+from toxic.repository import Repository
 
 
 class AdminCommand(CommandHandler):
-    def __init__(self, spotify: Spotify | None, callback_data_repo: CallbackDataRepository, settings_repo: SettingsRepository):
+    def __init__(self, spotify: Spotify | None, repo: Repository):
         self.spotify = spotify
-        self.callback_data_repo = callback_data_repo
-        self.settings_repo = settings_repo
+        self.repo = repo
 
     @staticmethod
     def is_admins_only() -> bool:
@@ -21,8 +18,8 @@ class AdminCommand(CommandHandler):
 
     async def handle(self, text: str, message: aiogram.types.Message, args: list[str]) -> str | list[Message] | None:
         buttons = [
-            [aiogram.types.InlineKeyboardButton(text='📄 Список чатов', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
-            [aiogram.types.InlineKeyboardButton(text='⌨️ Убрать клавиатуру', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/keyboard/clear'}))],
+            [aiogram.types.InlineKeyboardButton(text='📄 Список чатов', callback_data=await self.repo.insert_callback_value({'name': '/admin/chats'}))],
+            [aiogram.types.InlineKeyboardButton(text='⌨️ Убрать клавиатуру', callback_data=await self.repo.insert_callback_value({'name': '/admin/keyboard/clear'}))],
         ]
         if self.spotify:
             spotify_authenticated = False
@@ -33,7 +30,7 @@ class AdminCommand(CommandHandler):
 
             if not spotify_authenticated:
                 buttons.append(
-                    [aiogram.types.InlineKeyboardButton(text='🎶 Spotify 🔑 Authenticate', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
+                    [aiogram.types.InlineKeyboardButton(text='🎶 Spotify 🔑 Authenticate', callback_data=await self.repo.insert_callback_value({'name': '/admin/spotify/auth'}))],
                 )
 
         return [TextMessage(
@@ -43,8 +40,8 @@ class AdminCommand(CommandHandler):
 
 
 class AdminChatsCallback(CallbackHandler):
-    def __init__(self, chats_repo: ChatsRepository):
-        self.chats_repo = chats_repo
+    def __init__(self, repo: Repository):
+        self.repo = repo
 
     @staticmethod
     def is_admins_only() -> bool:
@@ -52,7 +49,7 @@ class AdminChatsCallback(CallbackHandler):
 
     async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
         response = []
-        async for id, title in self.chats_repo.list():
+        async for id, title in self.repo.list_chats():
             response.append(f'{title} — #{id}')
 
         return TextMessage('\n'.join(response))

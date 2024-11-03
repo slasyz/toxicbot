@@ -12,7 +12,7 @@ from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
 from toxic.modules.dus.dus import DatabaseUpdateSaver
-from toxic.repositories.users import UsersRepository
+from toxic.repository import Repository
 
 ARGS_SPLIT_REGEXP = re.compile(r'\s+')
 
@@ -43,7 +43,7 @@ class HandlersManager:
                  useful_message_handlers: list[MessageHandler],
                  flood_message_handlers: list[MessageHandler],
 
-                 users_repo: UsersRepository,
+                 repo: Repository,
                  database: Database,
                  messenger: Messenger,
                  metrics: Metrics,
@@ -54,7 +54,7 @@ class HandlersManager:
         self.useful_message_handlers = useful_message_handlers
         self.flood_message_handlers = flood_message_handlers
 
-        self.users_repo = users_repo
+        self.repo = repo
         self.database = database
         self.messenger = messenger
         self.metrics = metrics
@@ -94,7 +94,7 @@ class HandlersManager:
 
             if message.from_user is None:
                 break
-            if command.handler.is_admins_only() and not await self.users_repo.is_admin(message.from_user.id):
+            if command.handler.is_admins_only() and not await self.repo.is_admin(message.from_user.id):
                 break
 
             replies = self.rate_limiter.handle(message)
@@ -141,7 +141,7 @@ class HandlersManager:
             if callback_definition.name != name:
                 continue
 
-            if callback_definition.handler.is_admins_only() and not await self.users_repo.is_admin(callback.from_user.id):
+            if callback_definition.handler.is_admins_only() and not await self.repo.is_admin(callback.from_user.id):
                 await self.messenger.answer_callback(callback.id, 'Где ваши документы?', True)
                 logger.error('Regular user sent admin-only callback.',
                              user=callback.from_user.id,

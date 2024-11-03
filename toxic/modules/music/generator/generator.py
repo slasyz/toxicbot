@@ -4,8 +4,7 @@ import aiogram
 
 from toxic.modules.music.generator.content import get_content
 from toxic.modules.music.services.collector import MusicInfoCollector
-from toxic.repositories.callback_data import CallbackDataRepository
-from toxic.repositories.settings import SettingsRepository
+from toxic.repository import Repository
 
 
 @dataclass
@@ -16,10 +15,9 @@ class MusicMessage:
 
 
 class MusicMessageGenerator:
-    def __init__(self, collector: MusicInfoCollector, settings_repo: SettingsRepository, callback_data_repo: CallbackDataRepository):
+    def __init__(self, collector: MusicInfoCollector, repo: Repository):
         self.collector = collector
-        self.settings_repo = settings_repo
-        self.callback_data_repo = callback_data_repo
+        self.repo = repo
 
     async def get_message(
             self,
@@ -46,7 +44,7 @@ class MusicMessageGenerator:
         else:
             buttons.append([aiogram.types.InlineKeyboardButton(
                 text='📝 Пришли обычные ссылки',
-                callback_data=await self.callback_data_repo.insert_value({
+                callback_data=await self.repo.insert_callback_value({
                     'name': '/music/plaintext',
                     'link': source_link,
                 })
