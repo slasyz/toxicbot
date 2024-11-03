@@ -64,7 +64,7 @@ async def __main__():
     deps = await main.init(['../../config.json'])
 
     jkr = Joker('ошибка')
-    worker = JokesWorker(jkr, deps.chats_repo, None)
+    worker = JokesWorker(jkr, deps.database, None)
 
     start = datetime.now()
     await worker.step()

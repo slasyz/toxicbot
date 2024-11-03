@@ -40,8 +40,8 @@ from toxic.helpers.log import init_sentry
 from toxic.helpers.rate_limiter import RateLimiter
 from toxic.messenger.messenger import Messenger
 from toxic.metrics import Metrics
-from toxic.modules.reminder.worker import ReminderWorker
-from toxic.modules.replies.handlers import KeywordsHandler, SorryHandler, PrivateHandler, PeopleHandler
+from toxic.modules.general.reminder import ReminderWorker
+from toxic.modules.general.replies import KeywordsHandler, SorryHandler, PrivateHandler, PeopleHandler
 from toxic.modules.spotify.handlers import AdminSpotifyAuthCommand, AdminSpotifyAuthCallback
 from toxic.modules.spotify.worker import SpotifyCacheWorker
 from toxic.modules.taro.content import Taro
