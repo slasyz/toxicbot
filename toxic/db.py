@@ -7,7 +7,7 @@ import asyncpg
 
 
 class Database:
-    def __init__(self, pool: asyncpg.Pool):
+    def __init__(self, pool: asyncpg.Pool[asyncpg.Record]):
         self.pool = pool
 
     @staticmethod
@@ -33,6 +33,8 @@ class Database:
 
             init=cls._conn_init,
         )
+        if pool is None:
+            raise Exception('Failed to connect to database')
 
         return Database(pool)
 
@@ -55,7 +57,7 @@ class Database:
         return await self.pool.fetchrow(query, *vars)
 
     async def query_row_must(self, query, vars=None) -> Any:
-        res = self.query_row(query, vars)
+        res = await self.query_row(query, vars)
         if res is None:
             raise Exception('row not found')
         return res

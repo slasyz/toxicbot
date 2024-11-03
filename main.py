@@ -226,7 +226,7 @@ async def __main__():
 
     await deps.messenger.send_to_admins('Я запустился.')
 
-    messages_total_row = await deps.database.query_row('''SELECT count(*) FROM messages''')
+    messages_total_row = await deps.database.query_row_must('''SELECT count(*) FROM messages''')
     deps.metrics.messages.set(messages_total_row[0])
 
     await asyncio.gather(

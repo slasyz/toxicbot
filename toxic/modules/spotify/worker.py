@@ -12,10 +12,12 @@ class SpotifyCacheWorker:
         self.settings_repo = settings_repo
         self.queue: Queue = Queue(maxsize=-1)
 
-    def put(self, token: str):
+    def put(self, token: dict):
         self.queue.put_nowait(token)
 
     async def work(self):
         while True:
             token = await self.queue.get()
+            if not isinstance(token, dict):
+                continue
             await self.settings_repo.spotify_set_token(token)

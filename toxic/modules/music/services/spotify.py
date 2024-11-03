@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-import spotipy
+import spotipy # type: ignore
 from loguru import logger
 from spotipy import SpotifyOAuth, CacheHandler, SpotifyException
 
@@ -42,7 +42,7 @@ class Cache(CacheHandler):
     yet.
     """
 
-    def __init__(self, value: str | None, worker: SpotifyCacheWorker):
+    def __init__(self, value: dict | None, worker: SpotifyCacheWorker):
         self.value = value
         self.worker = worker
 
@@ -53,7 +53,7 @@ class Cache(CacheHandler):
     def get_cached_token(self):
         return self.value
 
-    def save_token_to_cache(self, token_info):
+    def save_token_to_cache(self, token_info: dict):
         self.value = token_info
         self.worker.put(token_info)
 

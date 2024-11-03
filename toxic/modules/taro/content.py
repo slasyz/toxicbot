@@ -42,10 +42,6 @@ def convert_table_row(row: list) -> CardData:
 
 
 class Taro:
-    """
-    This was made only to laugh at this, obviously I don't believe in that.
-    """
-
     def __init__(self, res_dir: str, cards_data: list[CardData]):
         self.res_dir = res_dir
         self.cards_data = cards_data

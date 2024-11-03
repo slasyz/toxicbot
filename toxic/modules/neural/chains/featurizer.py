@@ -6,10 +6,10 @@ class Featurizer:
     Featurizer class maps a string with its unique ID.
 
     None value can be passed instead of a string.  It can be used to encode something outside of set of all possible
-    words.  For example, in case of chat bot it's the end of the message.
+    words.  For example, in case of chatbot it's the end of the message.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.features: dict[str, int] = {}
         self.values: dict[int, str] = {}
 
