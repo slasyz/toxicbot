@@ -46,7 +46,6 @@ from toxic.modules.spotify.handlers import AdminSpotifyAuthCommand, AdminSpotify
 from toxic.modules.spotify.worker import SpotifyCacheWorker
 from toxic.modules.taro.content import Taro
 from toxic.modules.taro.handlers import TaroCommand, TaroFirstCallback, TaroSecondCallback
-from toxic.modules.voice.handlers import VoiceCommand
 from toxic.repositories.callback_data import CallbackDataRepository
 from toxic.repositories.chats import ChatsRepository
 from toxic.repositories.settings import SettingsRepository
@@ -202,7 +201,6 @@ async def __main__():
         CommandDefinition('joke', JokeCommand(joker)),
         CommandDefinition('send', SendCommand(deps.database, deps.messenger)),
         CommandDefinition('chats', ChatsCommand(deps.chats_repo)),
-        CommandDefinition('voice', VoiceCommand(deps.database)),
         CommandDefinition('taro', TaroCommand(taro_dir, callback_data_repo)),
         CommandDefinition('spotify', AdminSpotifyAuthCommand(spotify)),
     ]

@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 
 import aiogram.types
-from loguru import logger
 
 from toxic.helpers import consts_tg
-from toxic.modules.voice.voice import NextUpService
 
 
 # TODO: fix problems with HTML tags
@@ -30,30 +28,6 @@ class Message:
 
     def get_with_delay(self) -> bool:
         return False
-
-
-class VoiceMessage(Message):
-    def __init__(self, text, service=None):
-        self.text = text
-        self.service = service or NextUpService()
-
-    def get_chat_action(self) -> str:
-        return consts_tg.CHATACTION_RECORD_VOICE
-
-    def get_length(self) -> int:
-        return len(self.text)
-
-    async def send(self, bot: aiogram.Bot, chat_id: int, reply_to: int | None = None) -> aiogram.types.Message | None:
-        try:
-            f = await self.service.load(self.text)
-        except Exception as ex:
-            logger.opt(exception=ex).error('Error sending voice message.')
-            return await bot.send_message(chat_id,
-                                          f'(Хотел записать голосовуху, не получилось)\n\n{self.text}')
-
-        return await bot.send_voice(chat_id,
-                                    voice=f.read(),
-                                    reply_to_message_id=reply_to)
 
 
 class TextMessage(Message):
