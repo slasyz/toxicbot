@@ -1,4 +1,5 @@
 import aiogram
+from spotipy import SpotifyOauthError
 
 from toxic.interfaces import CallbackHandler, CommandHandler
 from toxic.modules.music.services.spotify import Spotify
@@ -14,8 +15,11 @@ class AdminSpotifyAuthCallback(CallbackHandler):
         return True
 
     async def handle(self, callback: aiogram.types.CallbackQuery, message: aiogram.types.Message, args: dict) -> Message | CallbackReply | None:
-        if self.spotify.is_authenticated():
-            return CallbackReply('Уже авторизован.', show_alert=True)
+        try:
+            if self.spotify.is_authenticated():
+                return CallbackReply('Уже авторизован.', show_alert=True)
+        except SpotifyOauthError:
+            pass
 
         return TextMessage(
             text='Перейди по ссылке, чтобы авторизоваться.\n\nА потом пришли /spotify URL, где URL — это то, куда перенаправила страница авторизации.',

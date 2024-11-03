@@ -1,4 +1,5 @@
 import aiogram
+from spotipy import SpotifyOauthError
 
 from toxic.modules.music.services.spotify import Spotify
 from toxic.interfaces import CallbackHandler, CommandHandler
@@ -23,10 +24,17 @@ class AdminCommand(CommandHandler):
             [aiogram.types.InlineKeyboardButton(text='📄 Список чатов', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/chats'}))],
             [aiogram.types.InlineKeyboardButton(text='⌨️ Убрать клавиатуру', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/keyboard/clear'}))],
         ]
-        if self.spotify and not self.spotify.is_authenticated():
-            buttons.append(
-                [aiogram.types.InlineKeyboardButton(text='🎶 Spotify 🔑 Authenticate', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
-            )
+        if self.spotify:
+            spotify_authenticated = False
+            try:
+                spotify_authenticated = self.spotify.is_authenticated()
+            except SpotifyOauthError:
+                pass
+
+            if not spotify_authenticated:
+                buttons.append(
+                    [aiogram.types.InlineKeyboardButton(text='🎶 Spotify 🔑 Authenticate', callback_data=await self.callback_data_repo.insert_value({'name': '/admin/spotify/auth'}))],
+                )
 
         return [TextMessage(
             text='Доступные команды',

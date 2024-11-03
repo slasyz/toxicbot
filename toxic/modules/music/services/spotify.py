@@ -46,10 +46,6 @@ class Cache(CacheHandler):
         self.value = value
         self.worker = worker
 
-    @staticmethod
-    async def create(settings_repo: SettingsRepository, worker: SpotifyCacheWorker):
-        return Cache(await settings_repo.spotify_get_token(), worker)
-
     def get_cached_token(self):
         return self.value
 
@@ -66,12 +62,12 @@ class Spotify:
 
     @staticmethod
     async def new(client_id: str, client_secret: str, settings_repo: SettingsRepository, worker: SpotifyCacheWorker) -> Spotify:
-        cache_handler = await Cache.create(settings_repo, worker)
+        cache_handler = Cache(await settings_repo.spotify_get_token(), worker)
 
         auth_manager = SpotifyOAuth(
             client_id=client_id,
             client_secret=client_secret,
-            redirect_uri='https://slasyz.ru/',
+            redirect_uri='https://syrovats.ky/',
             scope=' '.join(SCOPES),
             open_browser=False,
             cache_handler=cache_handler,
@@ -91,6 +87,8 @@ class Spotify:
 
     def authenticate(self, redirect_url: str):
         code = self.auth_manager.parse_response_code(redirect_url)
+        # For some reason the next line throws an exception "Refresh token revoked".  Restart helps.
+        # TODO: fix this
         return self.auth_manager.get_access_token(code=code)
 
     def is_authenticated(self) -> bool:
@@ -112,11 +110,8 @@ class SpotifySearcher(Searcher):
         self.auth = auth
         self.client = client
 
-    def clean(self, query: str) -> str:
-        return CLEAN_REGEXP.sub('', query)
-
     def _search(self, query: str, type: str, key: str) -> str | None:
-        query = self.clean(query)
+        query = CLEAN_REGEXP.sub('', query)
 
         try:
             res = self.client.search(query, type=type)
