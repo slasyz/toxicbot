@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime
-from typing import TypeVar
 
 import aiogram
 from loguru import logger
@@ -15,14 +14,12 @@ from toxic.modules.neural.chains.chain import Chain, ChainFactory
 from toxic.modules.neural.chains.splitters import SpaceAdjoinSplitter
 from toxic.messenger.message import Message, TextMessage
 from toxic.messenger.messenger import Messenger
-from toxic.repositories.chats import CachedChatsRepository
 
 
 class ChainTeachingHandler(MessageHandler):
-    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, chats_repo: CachedChatsRepository, chats: dict[int, Chain]):
+    def __init__(self, chain_factory: ChainFactory, textizer: Textizer, chats: dict[int, Chain]):
         self.chain_factory = chain_factory
         self.textizer = textizer
-        self.chats_repo = chats_repo
         self.chats = chats
 
     async def handle(self, text: str, message: aiogram.types.Message) -> str | list[Message] | None:
@@ -32,8 +29,15 @@ class ChainTeachingHandler(MessageHandler):
         await self.teach(message.chat.id, text)
         return None
 
+    def migrate_chat(self, old_chat_id: int, new_chat_id: int):
+        try:
+            chain = self.chats.pop(old_chat_id)
+        except KeyError:
+            return
+
+        self.chats[new_chat_id] = chain
+
     async def teach(self, chat_id: int, text: str):
-        chat_id = await self.chats_repo.get_latest_chat_id(chat_id)
         try:
             chain = self.chats[chat_id]
         except KeyError:
@@ -76,9 +80,9 @@ class ChainFloodHandler(MessageHandler):
         return None
 
 
-async def new(chain_factory: ChainFactory, textizer: Textizer, database: Database, chats_repo: CachedChatsRepository, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
+async def new(chain_factory: ChainFactory, textizer: Textizer, database: Database, messenger: Messenger) -> tuple[ChainTeachingHandler, ChainFloodHandler]:
     chats: dict[int, Chain] = {}
-    chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats_repo, chats)
+    chain_teaching_handler = ChainTeachingHandler(chain_factory, textizer, chats)
     chain_flood_handler = ChainFloodHandler(textizer, database, messenger, chats)
 
     logger.info('Starting teaching messages.')
@@ -107,7 +111,7 @@ async def __main__():
     splitter = SpaceAdjoinSplitter()
     textizer = Textizer(Featurizer(), splitter, deps.metrics)
     chain_factory = ChainFactory(window=2)
-    teaching_handler, _ = await new(chain_factory, textizer, deps.database, deps.chats_repo, deps.messenger)
+    teaching_handler, _ = await new(chain_factory, textizer, deps.database, deps.messenger)
 
     print(splitter.split("Hello, I'm a string!!! слово ещё,,, а-за-за"))
     # print(handler.chats[-362750796].data)

@@ -1,4 +1,5 @@
 import asyncio
+from typing import Callable
 
 import aiogram
 from aiogram.exceptions import TelegramMigrateToChat, TelegramUnauthorizedError, TelegramBadRequest
@@ -9,7 +10,6 @@ from toxic.helpers import consts_tg
 from toxic.helpers.delayer import DelayerFactory
 from toxic.messenger.message import TextMessage, Message
 from toxic.modules.dus.dus import DatabaseUpdateSaver
-from toxic.repositories.chats import CachedChatsRepository
 from toxic.repositories.users import UsersRepository
 
 SYMBOLS_PER_SECOND = 20
@@ -21,16 +21,18 @@ class Messenger:
     def __init__(self,
                  bot: aiogram.Bot,
                  database: Database,
-                 chats_repo: CachedChatsRepository,
                  users_repo: UsersRepository,
                  dus: DatabaseUpdateSaver,
                  delayer_factory: DelayerFactory):
         self.bot = bot
         self.database = database
-        self.chats_repo = chats_repo
+        self.chain_migrate: Callable[[int, int], None] | None = None
         self.users_repo = users_repo
         self.dus = dus
         self.delayer_factory = delayer_factory
+
+    def set_chain_migrate(self, chain_migrate: Callable[[int, int], None]):
+        self.chain_migrate = chain_migrate
 
     async def send(self, chat_id: int, msg: str | Message, reply_to: int | None = None):
         if isinstance(msg, str):
@@ -45,8 +47,7 @@ class Messenger:
                 await self.bot.send_chat_action(chat_id, msg.get_chat_action())
                 await asyncio.sleep(interval)
 
-        chat_id = await self.chats_repo.get_latest_chat_id(chat_id)
-
+        # Let's make several attempts to send the message
         for _ in range(10):
             try:
                 message = await msg.send(self.bot, chat_id, reply_to)
@@ -54,15 +55,16 @@ class Messenger:
                     await self.dus.handle_message(message)
                 return
             except TelegramMigrateToChat as ex:
-                logger.info('Chat migrated.', chat_id=chat_id, new_chat_id=ex.migrate_to_chat_id)
-                await self.database.exec('UPDATE chats SET next_tg_id = $1 WHERE tg_id=$2', (ex.migrate_to_chat_id, chat_id))
-                await self.database.exec('UPDATE chats SET joke_period=0 WHERE tg_id=$1', (chat_id,))
+                # We already migrated everything to the new chat
+                # Let's just send the message (try again) to the new chat
                 chat_id = ex.migrate_to_chat_id
                 continue
             except TelegramUnauthorizedError as ex:
+                # User has removed or blocked the bot.
                 logger.opt(exception=ex).info('Unauthorized.', chat_id=chat_id)
                 await self.database.exec('UPDATE chats SET joke_period=0 WHERE tg_id=$1', (chat_id,))
-            break
+                # Don't try to send the message again
+                break
         else:
             raise Exception(f'Too much ChatMigrated errors (chat_id = {chat_id}).')
 

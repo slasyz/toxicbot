@@ -17,7 +17,6 @@ CREATE TABLE chats (
     tg_id          bigint PRIMARY KEY,
     title          text,
     chain_period   int  DEFAULT 30,
-    next_tg_id     bigint,
     joke_period    int  DEFAULT 7
 );
 

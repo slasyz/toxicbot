@@ -14,18 +14,10 @@ from toxic.repositories.users import UsersRepository
 async def get_stat(chat_id: int, database: Database) -> str:
     response = ''
     rows = await database.query('''
-        WITH RECURSIVE ch(id) AS (
-            SELECT $1::bigint
-            UNION
-            SELECT c.tg_id
-            FROM chats c
-                JOIN ch ON c.next_tg_id=ch.id OR
-                           (c.tg_id=ch.id AND c.next_tg_id IS NOT NULL)
-        )
         SELECT btrim(concat(u.first_name, ' ', u.last_name)), count(m.*) as c
         FROM messages m
             JOIN users u ON m.user_id = u.tg_id
-            JOIN ch ON chat_id=ch.id
+        WHERE m.chat_id=$1
         GROUP BY user_id, u.first_name, u.last_name
         ORDER BY c DESC
         LIMIT 10;

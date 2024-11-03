@@ -16,6 +16,7 @@ from toxic.modules.dus.dus import DatabaseUpdateSaver
 from toxic.modules.general.admin import AdminCommand, AdminChatsCallback, AdminKeyboardClearCallback
 from toxic.modules.general.chats import ChatsCommand
 from toxic.modules.general.dump import DumpCommand
+from toxic.modules.general.migrate import MigrateHandler
 from toxic.modules.general.stats import StatsHandler, StatCommand
 from toxic.modules.joker.content import Joker
 from toxic.modules.joker.handler import JokeCommand
@@ -47,7 +48,7 @@ from toxic.modules.taro.content import Taro
 from toxic.modules.taro.handlers import TaroCommand, TaroFirstCallback, TaroSecondCallback
 from toxic.modules.voice.handlers import VoiceCommand
 from toxic.repositories.callback_data import CallbackDataRepository
-from toxic.repositories.chats import CachedChatsRepository
+from toxic.repositories.chats import ChatsRepository
 from toxic.repositories.settings import SettingsRepository
 from toxic.repositories.users import UsersRepository
 from toxic.workers import WorkersManager
@@ -57,7 +58,7 @@ from toxic.workers import WorkersManager
 class BasicDependencies:
     config: Config
     database: Database
-    chats_repo: CachedChatsRepository
+    chats_repo: ChatsRepository
     users_repo: UsersRepository
     messenger: Messenger
     metrics: Metrics
@@ -87,7 +88,7 @@ async def init_with_config(config: Config) -> BasicDependencies:
         config['database']['pass'],
     )
 
-    chats_repo = CachedChatsRepository(database)
+    chats_repo = ChatsRepository(database)
     users_repo = UsersRepository(database)
 
     metrics = Metrics()
@@ -97,7 +98,7 @@ async def init_with_config(config: Config) -> BasicDependencies:
     delayer_factory = DelayerFactory()
 
     bot = aiogram.Bot(config['telegram']['token'])
-    messenger = Messenger(bot, database, chats_repo, users_repo, dus, delayer_factory)
+    messenger = Messenger(bot, database, users_repo, dus, delayer_factory)
 
     return BasicDependencies(
         config,
@@ -177,9 +178,11 @@ async def __main__():
 
     taro_dir = get_resource_path('taro')
 
-    chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.database, deps.chats_repo, deps.messenger)
+    chain_teaching_handler, chain_flood_handler = await handlers.new(chain_factory, textizer, deps.database, deps.messenger)
+    deps.messenger.set_chain_migrate(chain_teaching_handler.migrate_chat)
 
     useful_handlers = [
+        MigrateHandler(deps.database, chain_teaching_handler),
         await PeopleHandler.new(deps.config['replies']['people'], deps.messenger, deps.database),
         MusicHandler(music_formatter),
         KeywordsHandler.new(deps.config['replies']['keywords']),
