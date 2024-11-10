@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import aiogram
 import asyncpg
-from aiogram.exceptions import TelegramNetworkError, TelegramUnauthorizedError, TelegramConflictError
+from aiogram.exceptions import TelegramNetworkError, TelegramUnauthorizedError, TelegramConflictError, TelegramForbiddenError
 from loguru import logger
 
 from toxic.config import Config
@@ -117,8 +117,8 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
         except TelegramNetworkError as ex:
             logger.opt(exception=ex).error('Network error.')
             await asyncio.sleep(1)
-        except TelegramUnauthorizedError:  # The user has removed or blocked the bot.
-            logger.info('User removed or blocked the bot.')
+        except TelegramForbiddenError as ex:  # The user has removed or blocked the bot.
+            logger.opt(exception=ex).info('User removed or blocked the bot.')
         except TelegramConflictError as ex:
             logger.opt(exception=ex).error('Bot is already running somewhere, stopping it.')
             sys.exit(1)
@@ -126,6 +126,9 @@ async def loop(deps: BasicDependencies, handle_manager: HandlersManager):
             sys.exit(0)
         except asyncpg.InterfaceError as ex:
             logger.opt(exception=ex).error('Get asyncpg.InterfaceError, stopping.')
+            sys.exit(1)
+        except TelegramUnauthorizedError as ex:
+            logger.opt(exception=ex).error('Unauthorized error.')
             sys.exit(1)
         except Exception as ex:
             logger.opt(exception=ex).error('Caught an exception while handling an update.')
@@ -184,23 +187,23 @@ async def __main__():
     ]
     flood_handlers = [
         chain_flood_handler,
-        PrivateHandler(deps.config['replies']['private'], deps.users_repo),
+        PrivateHandler(deps.config['replies']['private'], deps.repo),
     ]
 
     commands = [
         CommandDefinition('admin', AdminCommand(spotify, repo)),
         CommandDefinition('dump', DumpCommand(deps.database)),
-        CommandDefinition('stat', StatCommand(deps.users_repo, deps.database)),
+        CommandDefinition('stat', StatCommand(deps.repo, deps.database)),
         CommandDefinition('joke', JokeCommand(joker)),
         CommandDefinition('send', SendCommand(deps.database, deps.messenger)),
-        CommandDefinition('chats', ChatsCommand(deps.chats_repo)),
+        CommandDefinition('chats', ChatsCommand(deps.repo)),
         CommandDefinition('taro', TaroCommand(taro_dir, repo)),
         CommandDefinition('spotify', AdminSpotifyAuthCommand(spotify)),
     ]
     callbacks = [
         CallbackDefinition('/taro/first', TaroFirstCallback(taro_dir, deps.messenger, repo)),
         CallbackDefinition('/taro/second', TaroSecondCallback(Taro.new(taro_dir), deps.messenger)),
-        CallbackDefinition('/admin/chats', AdminChatsCallback(deps.chats_repo)),
+        CallbackDefinition('/admin/chats', AdminChatsCallback(deps.repo)),
         CallbackDefinition('/admin/keyboard/clear', AdminKeyboardClearCallback()),
         CallbackDefinition('/admin/spotify/auth', AdminSpotifyAuthCallback(spotify)),
         CallbackDefinition('/music/plaintext', MusicPlaintextCallback(music_formatter, deps.messenger, deps.config['replies']['music']['error']))
@@ -211,7 +214,7 @@ async def __main__():
         commands,
         useful_handlers,
         flood_handlers,
-        deps.users_repo,
+        deps.repo,
         deps.database,
         deps.messenger,
         deps.metrics,
